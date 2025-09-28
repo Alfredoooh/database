@@ -1,0 +1,35 @@
+[
+  {
+    "id": "a1",
+    "name": "TradePro",
+    "description": "Plataforma de trading avançada",
+    "rating": 4.6,
+    "users": 12000,
+    "icon_url": "https://picsum.photos/seed/tradepro/80/80",
+    "link": "https://example.com/tradepro",
+    "color": "teal",
+    "theme": "dark"
+  },
+  {
+    "id": "a2",
+    "name": "ChartView",
+    "description": "Gráficos em tempo real",
+    "rating": 4.4,
+    "users": 8500,
+    "icon_url": "https://picsum.photos/seed/chartview/80/80",
+    "link": "https://example.com/chartview",
+    "color": "blue",
+    "theme": "light"
+  },
+  {
+    "id": "a3",
+    "name": "SignalsHub",
+    "description": "Sinais e stories para traders",
+    "rating": 4.2,
+    "users": 4200,
+    "icon_url": "https://picsum.photos/seed/signalshub/80/80",
+    "link": "https://example.com/signals",
+    "color": "red",
+    "theme": "dark"
+  }
+]
