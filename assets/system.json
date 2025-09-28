@@ -1,0 +1,17 @@
+{
+  "admin_email": "admin@moneyland.example",
+  "help_email": "help@moneyland.example",
+  "privacy_email": "privacy@moneyland.example",
+  "terms_url": "https://moneyland.example/terms",
+  "privacy_url": "https://moneyland.example/privacy",
+  "no_time_message": {
+    "pt": {
+      "title": "Tempo insuficiente",
+      "message": "Não tem tempo suficiente. Por favor solicite mais tempo."
+    },
+    "en": {
+      "title": "Not enough time",
+      "message": "You don't have enough time left. Please request more time."
+    }
+  }
+}
