@@ -1,0 +1,82 @@
+[
+  {
+    "id": "u1001",
+    "name": "alberto",
+    "full_name": "Alberto Pucuta",
+    "birthdate": "1990-05-21",
+    "phone_number": "+244912345678",
+    "email": "alberto@example.com",
+    "password": "123456",
+    "user_key": "KEY-ABC-123",
+    "access": true,
+    "expiration_date": "2025-09-29T14:28:52",
+    "redirect_url": "/main",
+    "credit_code": "CREDIT-2026",
+    "credit_code_issued_at": "2025-09-28T14:28:52",
+    "credit_view_code": "VIEW-ALB-001",
+    "credit_balance": 120.5,
+    "notifications": [
+      {
+        "enabled": true,
+        "message": "Bem-vindo ao Moneyland!",
+        "notification_link": "https://example.com/welcome",
+        "right_now": true,
+        "until": null
+      },
+      {
+        "enabled": true,
+        "message": "Oferta futura",
+        "notification_link": "https://example.com/offer",
+        "right_now": false,
+        "until": "2025-09-28T14:30:52"
+      }
+    ],
+    "image_url": "https://picsum.photos/seed/alberto/200/200"
+  },
+  {
+    "id": "u2002",
+    "name": "maria",
+    "full_name": "Maria Silva",
+    "birthdate": "1995-02-10",
+    "phone_number": "+244923333333",
+    "email": "maria@example.com",
+    "password": "password",
+    "user_key": "KEY-XYZ-999",
+    "access": false,
+    "expiration_date": "2024-08-24T14:28:52",
+    "redirect_url": "/main",
+    "credit_code": "CODE-EXTEND",
+    "credit_code_issued_at": "2025-09-27T14:28:52",
+    "credit_view_code": "VIEW-MAR-002",
+    "credit_balance": 0.0,
+    "notifications": [],
+    "image_url": "https://picsum.photos/seed/maria/200/200"
+  },
+  {
+    "id": "u3003",
+    "name": "joao",
+    "full_name": "João Pereira",
+    "birthdate": "1988-11-05",
+    "phone_number": "+244935555555",
+    "email": "joao@example.com",
+    "password": "joaopass",
+    "user_key": "KEY-JO-3003",
+    "access": true,
+    "expiration_date": "2025-09-28T16:28:52",
+    "redirect_url": "/main",
+    "credit_code": "CREDIT-JO-30",
+    "credit_code_issued_at": "2025-09-28T13:28:52",
+    "credit_view_code": "VIEW-JO-003",
+    "credit_balance": 50.0,
+    "notifications": [
+      {
+        "enabled": true,
+        "message": "Crédito aprovado",
+        "notification_link": "https://example.com/credit",
+        "right_now": true,
+        "until": null
+      }
+    ],
+    "image_url": "https://picsum.photos/seed/joao/200/200"
+  }
+]
