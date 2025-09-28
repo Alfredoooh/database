@@ -1,0 +1,10 @@
+{
+  "pt": {
+    "title": "Conta Expirada",
+    "message": "A sua conta expirou."
+  },
+  "en": {
+    "title": "Account expired",
+    "message": "Your account expired."
+  }
+}
