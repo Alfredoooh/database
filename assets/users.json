@@ -36,7 +36,7 @@
       "user_key": "USR-2024-ABC123",
       "notification_message": "Olá João! Lembre-se de atualizar seu perfil regularmente.",
       "created_at": "2024-03-10T09:15:30",
-      "profile_image": "",
+      "profile_image": "https://ibb.co/sdgBZwsw",
       "role": "user",
       "blocked": false,
       "failed_attempts": 0,
