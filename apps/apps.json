@@ -1,0 +1,163 @@
+[
+  {
+    "id": "app001",
+    "name": "Instagram",
+    "description": "Compartilhe fotos e vídeos com amigos",
+    "longDescription": "O Instagram é uma plataforma de compartilhamento de fotos e vídeos que permite aos usuários capturar, editar e compartilhar momentos com seus amigos e seguidores. Com filtros poderosos, Stories, Reels e muito mais, você pode expressar sua criatividade de maneiras únicas.",
+    "category": "Redes Sociais",
+    "developer": "Instagram, Inc.",
+    "version": "302.0.0",
+    "size": "156 MB",
+    "rating": 4.5,
+    "reviewCount": 12500000,
+    "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/1200px-Instagram_logo_2016.svg.png",
+    "screenshots": [
+      "https://example.com/screenshot1.jpg",
+      "https://example.com/screenshot2.jpg"
+    ],
+    "webviewUrl": "https://www.instagram.com",
+    "favicon": "https://www.instagram.com/static/images/ico/favicon.ico",
+    "features": [
+      "Compartilhe fotos e vídeos",
+      "Stories que desaparecem em 24 horas",
+      "Reels para vídeos curtos e criativos",
+      "Direct para mensagens privadas",
+      "Filtros e efeitos de edição"
+    ],
+    "ageRating": "12+",
+    "releaseDate": "2010-10-06T00:00:00Z",
+    "lastUpdate": "2024-01-15T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês", "Espanhol", "Francês"],
+    "whatsNew": "Novos filtros adicionados\nMelhorias de desempenho\nCorreção de bugs"
+  },
+  {
+    "id": "app002",
+    "name": "WhatsApp",
+    "description": "Mensagens e chamadas simples e seguras",
+    "longDescription": "O WhatsApp é um aplicativo de mensagens gratuito disponível para Android e outros smartphones. O WhatsApp usa a conexão de internet do seu celular (4G/3G/2G/EDGE ou Wi-Fi, conforme disponível) para que você possa enviar mensagens e fazer chamadas para seus amigos e familiares.",
+    "category": "Comunicação",
+    "developer": "WhatsApp LLC",
+    "version": "2.24.1.78",
+    "size": "68 MB",
+    "rating": 4.3,
+    "reviewCount": 95000000,
+    "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/1200px-WhatsApp.svg.png",
+    "screenshots": [
+      "https://example.com/whatsapp1.jpg",
+      "https://example.com/whatsapp2.jpg"
+    ],
+    "webviewUrl": "https://web.whatsapp.com",
+    "favicon": "https://web.whatsapp.com/favicon.ico",
+    "features": [
+      "Mensagens de texto ilimitadas",
+      "Chamadas de voz e vídeo gratuitas",
+      "Grupos com até 256 participantes",
+      "Compartilhe fotos, vídeos e documentos",
+      "Criptografia de ponta a ponta"
+    ],
+    "ageRating": "4+",
+    "releaseDate": "2009-05-03T00:00:00Z",
+    "lastUpdate": "2024-01-20T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês", "Espanhol", "Alemão", "Francês"],
+    "whatsNew": "Melhorias na qualidade das chamadas\nNovos recursos para grupos\nCorreções de segurança"
+  },
+  {
+    "id": "app003",
+    "name": "Spotify",
+    "description": "Música e podcasts",
+    "longDescription": "O Spotify é um serviço de streaming de música digital que dá acesso instantâneo a milhões de músicas. Descubra novos artistas, crie playlists personalizadas, ouça podcasts exclusivos e muito mais.",
+    "category": "Música",
+    "developer": "Spotify AB",
+    "version": "8.8.96.488",
+    "size": "98 MB",
+    "rating": 4.6,
+    "reviewCount": 48000000,
+    "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/2048px-Spotify_logo_without_text.svg.png",
+    "screenshots": [
+      "https://example.com/spotify1.jpg",
+      "https://example.com/spotify2.jpg"
+    ],
+    "webviewUrl": "https://open.spotify.com",
+    "favicon": "https://open.spotify.com/favicon.ico",
+    "features": [
+      "Acesso a milhões de músicas",
+      "Playlists personalizadas",
+      "Podcasts exclusivos",
+      "Download para ouvir offline",
+      "Qualidade de áudio superior"
+    ],
+    "ageRating": "12+",
+    "releaseDate": "2008-10-07T00:00:00Z",
+    "lastUpdate": "2024-01-18T00:00:00Z",
+    "isFree": true,
+    "price": 21.90,
+    "languages": ["Português", "Inglês", "Espanhol"],
+    "whatsNew": "Nova interface de usuário\nMelhor desempenho\nNovos recursos para podcasts"
+  },
+  {
+    "id": "app004",
+    "name": "YouTube",
+    "description": "Assista, crie e compartilhe vídeos",
+    "longDescription": "Obtenha o aplicativo oficial do YouTube em smartphones e tablets Android. Veja o que o mundo está assistindo, desde os vídeos musicais mais populares até o conteúdo em alta sobre jogos, entretenimento, notícias e muito mais.",
+    "category": "Entretenimento",
+    "developer": "Google LLC",
+    "version": "19.01.35",
+    "size": "142 MB",
+    "rating": 4.4,
+    "reviewCount": 180000000,
+    "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/2560px-YouTube_full-color_icon_%282017%29.svg.png",
+    "screenshots": [
+      "https://example.com/youtube1.jpg",
+      "https://example.com/youtube2.jpg"
+    ],
+    "webviewUrl": "https://www.youtube.com",
+    "favicon": "https://www.youtube.com/favicon.ico",
+    "features": [
+      "Milhões de vídeos para assistir",
+      "Inscreva-se em canais favoritos",
+      "Crie e compartilhe seus vídeos",
+      "YouTube Premium disponível",
+      "Transmissões ao vivo"
+    ],
+    "ageRating": "12+",
+    "releaseDate": "2005-12-15T00:00:00Z",
+    "lastUpdate": "2024-01-22T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês", "Espanhol", "Francês", "Alemão"],
+    "whatsNew": "Interface aprimorada\nMelhor sistema de recomendações\nCorreções de bugs"
+  },
+  {
+    "id": "app005",
+    "name": "TikTok",
+    "description": "Vídeos curtos e criativos",
+    "longDescription": "O TikTok é o destino líder para vídeos móveis de formato curto. Nossa missão é capturar e apresentar a criatividade, o conhecimento e os momentos do mundo que importam na vida cotidiana.",
+    "category": "Entretenimento",
+    "developer": "ByteDance Ltd.",
+    "version": "33.1.4",
+    "size": "189 MB",
+    "rating": 4.5,
+    "reviewCount": 72000000,
+    "iconUrl": "https://sf16-website-login.neutral.ttwstatic.com/obj/tiktok_web_login_static/tiktok/webapp/main/webapp-desktop/8152caf0c8e8bc67ae0d.png",
+    "screenshots": [
+      "https://example.com/tiktok1.jpg",
+      "https://example.com/tiktok2.jpg"
+    ],
+    "webviewUrl": "https://www.tiktok.com",
+    "favicon": "https://www.tiktok.com/favicon.ico",
+    "features": [
+      "Crie vídeos curtos com música",
+      "Efeitos e filtros incríveis",
+      "Descubra tendências virais",
+      "Interaja com criadores",
+      "Transmissões ao vivo"
+    ],
+    "ageRating": "12+",
+    "releaseDate": "2016-09-01T00:00:00Z",
+    "lastUpdate": "2024-01-19T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês", "Espanhol", "Chinês"],
+    "whatsNew": "Novos efeitos adicionados\nMelhorias no editor de vídeo\nOtimizações de desempenho"
+  }
+]
