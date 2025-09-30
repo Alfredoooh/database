@@ -1,9 +1,329 @@
 [
   {
     "id": "app001",
+    "name": "Binance",
+    "description": "Trading de criptomoedas e investimentos",
+    "longDescription": "Binance é a maior exchange de criptomoedas do mundo. Compre, venda e negocie Bitcoin, Ethereum e centenas de outras criptomoedas com segurança e facilidade.",
+    "category": "Trading",
+    "developer": "Binance Inc.",
+    "version": "2.68.0",
+    "size": "145 MB",
+    "rating": 4.6,
+    "reviewCount": 8500000,
+    "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Binance_Logo.svg/1200px-Binance_Logo.svg.png",
+    "bannerUrl": "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=800&h=400&fit=crop",
+    "screenshots": [
+      "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=800&h=600&fit=crop"
+    ],
+    "webviewUrl": "https://www.binance.com",
+    "favicon": "https://www.binance.com/favicon.ico",
+    "features": [
+      "Trading de criptomoedas 24/7",
+      "Carteira segura integrada",
+      "Gráficos em tempo real",
+      "Staking e rendimentos",
+      "Baixas taxas de transação"
+    ],
+    "ageRating": "18+",
+    "releaseDate": "2017-07-14T00:00:00Z",
+    "lastUpdate": "2024-01-25T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês", "Espanhol", "Chinês"],
+    "whatsNew": "Novos pares de trading\nMelhorias na segurança\nInterface otimizada"
+  },
+  {
+    "id": "app002",
+    "name": "Coinbase",
+    "description": "Compre e venda criptomoedas facilmente",
+    "longDescription": "Coinbase é uma plataforma confiável para comprar, vender, transferir e armazenar criptomoedas digitais. Interface intuitiva para iniciantes e avançados.",
+    "category": "Carteira",
+    "developer": "Coinbase, Inc.",
+    "version": "10.24.1",
+    "size": "128 MB",
+    "rating": 4.5,
+    "reviewCount": 6200000,
+    "iconUrl": "https://images.unsplash.com/photo-1622630998477-20aa696ecb05?w=200&h=200&fit=crop",
+    "bannerUrl": "https://images.unsplash.com/photo-1640826514546-7d2d285f6353?w=800&h=400&fit=crop",
+    "screenshots": [
+      "https://images.unsplash.com/photo-1640826514546-7d2d285f6353?w=800&h=600&fit=crop"
+    ],
+    "webviewUrl": "https://www.coinbase.com",
+    "favicon": "https://www.coinbase.com/favicon.ico",
+    "features": [
+      "Compra instantânea de cripto",
+      "Carteira segura multi-moeda",
+      "Autenticação de dois fatores",
+      "Transferências gratuitas",
+      "Suporte 24/7"
+    ],
+    "ageRating": "18+",
+    "releaseDate": "2012-06-01T00:00:00Z",
+    "lastUpdate": "2024-01-22T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês", "Espanhol", "Francês"],
+    "whatsNew": "Nova interface de usuário\nMais criptomoedas disponíveis\nMelhorias de segurança"
+  },
+  {
+    "id": "app003",
+    "name": "MetaTrader 5",
+    "description": "Plataforma de trading Forex e ações",
+    "longDescription": "MetaTrader 5 é uma plataforma multi-ativo para trading de Forex, ações e futuros. Oferece ferramentas avançadas de análise técnica e trading algorítmico.",
+    "category": "Trading",
+    "developer": "MetaQuotes Software Corp.",
+    "version": "4.2900",
+    "size": "95 MB",
+    "rating": 4.7,
+    "reviewCount": 3800000,
+    "iconUrl": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=200&h=200&fit=crop",
+    "bannerUrl": "https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=800&h=400&fit=crop",
+    "screenshots": [
+      "https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=800&h=600&fit=crop"
+    ],
+    "webviewUrl": "https://www.metatrader5.com",
+    "favicon": "https://www.metatrader5.com/favicon.ico",
+    "features": [
+      "38 indicadores técnicos",
+      "Trading algorítmico",
+      "Gráficos avançados",
+      "Notícias financeiras em tempo real",
+      "Copy trading"
+    ],
+    "ageRating": "18+",
+    "releaseDate": "2010-06-01T00:00:00Z",
+    "lastUpdate": "2024-01-20T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês", "Espanhol", "Russo"],
+    "whatsNew": "Novos indicadores adicionados\nOtimização de performance\nCorreção de bugs"
+  },
+  {
+    "id": "app004",
+    "name": "Bet365",
+    "description": "Apostas esportivas e cassino online",
+    "longDescription": "Bet365 é uma das maiores plataformas de apostas esportivas do mundo. Aposte em futebol, basquete, tênis e muito mais com transmissão ao vivo.",
+    "category": "Aposta",
+    "developer": "Bet365 Group Ltd",
+    "version": "8.15.0",
+    "size": "112 MB",
+    "rating": 4.4,
+    "reviewCount": 12000000,
+    "iconUrl": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=200&h=200&fit=crop",
+    "bannerUrl": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&h=400&fit=crop",
+    "screenshots": [
+      "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&h=600&fit=crop"
+    ],
+    "webviewUrl": "https://www.bet365.com",
+    "favicon": "https://www.bet365.com/favicon.ico",
+    "features": [
+      "Apostas ao vivo",
+      "Transmissão de eventos",
+      "Cash out disponível",
+      "Apostas em múltiplos esportes",
+      "Bônus e promoções"
+    ],
+    "ageRating": "18+",
+    "releaseDate": "2000-03-01T00:00:00Z",
+    "lastUpdate": "2024-01-24T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês", "Espanhol", "Alemão"],
+    "whatsNew": "Novos mercados de apostas\nMelhor experiência de streaming\nInterface aprimorada"
+  },
+  {
+    "id": "app005",
+    "name": "Trust Wallet",
+    "description": "Carteira cripto segura e descentralizada",
+    "longDescription": "Trust Wallet é uma carteira de criptomoedas segura e fácil de usar. Armazene, envie e receba Bitcoin, Ethereum, e milhares de tokens com total controle.",
+    "category": "Carteira",
+    "developer": "DApps Platform, Inc.",
+    "version": "8.2.1",
+    "size": "87 MB",
+    "rating": 4.6,
+    "reviewCount": 4500000,
+    "iconUrl": "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=200&h=200&fit=crop",
+    "bannerUrl": "https://images.unsplash.com/photo-1622630998477-20aa696ecb05?w=800&h=400&fit=crop",
+    "screenshots": [
+      "https://images.unsplash.com/photo-1622630998477-20aa696ecb05?w=800&h=600&fit=crop"
+    ],
+    "webviewUrl": "https://trustwallet.com",
+    "favicon": "https://trustwallet.com/favicon.ico",
+    "features": [
+      "Suporte a milhares de tokens",
+      "DApps integradas",
+      "Staking de criptomoedas",
+      "Backup seguro",
+      "Sem custódia"
+    ],
+    "ageRating": "18+",
+    "releaseDate": "2017-11-01T00:00:00Z",
+    "lastUpdate": "2024-01-23T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês", "Espanhol", "Francês"],
+    "whatsNew": "Novos tokens suportados\nMelhorias de segurança\nOtimização de gas fees"
+  },
+  {
+    "id": "app006",
+    "name": "eToro",
+    "description": "Investimento social e copy trading",
+    "longDescription": "eToro é uma plataforma de investimento social que permite copiar traders bem-sucedidos. Invista em ações, criptomoedas, ETFs e commodities.",
+    "category": "Trading",
+    "developer": "eToro Group Ltd.",
+    "version": "395.0.0",
+    "size": "134 MB",
+    "rating": 4.5,
+    "reviewCount": 5800000,
+    "iconUrl": "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?w=200&h=200&fit=crop",
+    "bannerUrl": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=400&fit=crop",
+    "screenshots": [
+      "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=600&fit=crop"
+    ],
+    "webviewUrl": "https://www.etoro.com",
+    "favicon": "https://www.etoro.com/favicon.ico",
+    "features": [
+      "Copy trading automático",
+      "Portfólio diversificado",
+      "Trading sem comissões",
+      "Rede social de traders",
+      "Conta demo gratuita"
+    ],
+    "ageRating": "18+",
+    "releaseDate": "2007-01-01T00:00:00Z",
+    "lastUpdate": "2024-01-21T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês", "Espanhol", "Alemão"],
+    "whatsNew": "Novos instrumentos de trading\nMelhorias no copy trading\nInterface redesenhada"
+  },
+  {
+    "id": "app007",
+    "name": "Honeygain",
+    "description": "Ganhe dinheiro compartilhando internet",
+    "longDescription": "Honeygain permite que você ganhe renda passiva compartilhando sua conexão de internet não utilizada. Simples, seguro e eficiente.",
+    "category": "Fonte de Renda",
+    "developer": "Honeygain",
+    "version": "0.9.15",
+    "size": "42 MB",
+    "rating": 4.3,
+    "reviewCount": 850000,
+    "iconUrl": "https://images.unsplash.com/photo-1580519542036-c47de6196ba5?w=200&h=200&fit=crop",
+    "bannerUrl": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=400&fit=crop",
+    "screenshots": [
+      "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=600&fit=crop"
+    ],
+    "webviewUrl": "https://www.honeygain.com",
+    "favicon": "https://www.honeygain.com/favicon.ico",
+    "features": [
+      "Renda passiva automática",
+      "Pagamentos via PayPal",
+      "Uso mínimo de recursos",
+      "Totalmente seguro",
+      "Bônus de indicação"
+    ],
+    "ageRating": "18+",
+    "releaseDate": "2019-04-01T00:00:00Z",
+    "lastUpdate": "2024-01-19T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês", "Espanhol"],
+    "whatsNew": "Aumento nos ganhos\nMelhorias de estabilidade\nNovo sistema de bônus"
+  },
+  {
+    "id": "app008",
+    "name": "Mercado Bitcoin",
+    "description": "Exchange brasileira de criptomoedas",
+    "longDescription": "Mercado Bitcoin é a maior exchange de criptomoedas da América Latina. Compre e venda Bitcoin, Ethereum e outras criptos com segurança e em reais.",
+    "category": "Trading",
+    "developer": "Mercado Bitcoin",
+    "version": "4.28.0",
+    "size": "98 MB",
+    "rating": 4.4,
+    "reviewCount": 2100000,
+    "iconUrl": "https://images.unsplash.com/photo-1621504450181-5d356f61d307?w=200&h=200&fit=crop",
+    "bannerUrl": "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=800&h=400&fit=crop",
+    "screenshots": [
+      "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=800&h=600&fit=crop"
+    ],
+    "webviewUrl": "https://www.mercadobitcoin.com.br",
+    "favicon": "https://www.mercadobitcoin.com.br/favicon.ico",
+    "features": [
+      "Depósito e saque em reais",
+      "Trading em tempo real",
+      "Carteira integrada",
+      "Suporte em português",
+      "Regulamentado no Brasil"
+    ],
+    "ageRating": "18+",
+    "releaseDate": "2013-06-20T00:00:00Z",
+    "lastUpdate": "2024-01-26T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês"],
+    "whatsNew": "Novas criptomoedas listadas\nMelhorias na velocidade\nNovo programa de cashback"
+  },
+  {
+    "id": "app009",
+    "name": "Kwai",
+    "description": "Vídeos curtos e ganhe dinheiro",
+    "longDescription": "Kwai é uma plataforma de vídeos curtos onde você pode assistir conteúdo divertido e ainda ganhar dinheiro através do programa de recompensas.",
+    "category": "Fonte de Renda",
+    "developer": "Kwai Inc.",
+    "version": "10.2.30",
+    "size": "156 MB",
+    "rating": 4.2,
+    "reviewCount": 28000000,
+    "iconUrl": "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=200&h=200&fit=crop",
+    "bannerUrl": "https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=800&h=400&fit=crop",
+    "screenshots": [
+      "https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=800&h=600&fit=crop"
+    ],
+    "webviewUrl": "https://www.kwai.com",
+    "favicon": "https://www.kwai.com/favicon.ico",
+    "features": [
+      "Assista e ganhe moedas",
+      "Crie vídeos criativos",
+      "Programa de indicações",
+      "Saque via PIX",
+      "Lives ao vivo"
+    ],
+    "ageRating": "12+",
+    "releaseDate": "2011-01-01T00:00:00Z",
+    "lastUpdate": "2024-01-25T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês", "Espanhol"],
+    "whatsNew": "Mais formas de ganhar\nNovos efeitos de vídeo\nMelhorias de performance"
+  },
+  {
+    "id": "app010",
+    "name": "Betano",
+    "description": "Apostas esportivas com odds altas",
+    "longDescription": "Betano oferece as melhores odds em apostas esportivas. Aposte em futebol brasileiro, internacional e diversos outros esportes com bônus exclusivos.",
+    "category": "Aposta",
+    "developer": "Kaizen Gaming",
+    "version": "5.12.0",
+    "size": "105 MB",
+    "rating": 4.5,
+    "reviewCount": 4200000,
+    "iconUrl": "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=200&h=200&fit=crop",
+    "bannerUrl": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&h=400&fit=crop",
+    "screenshots": [
+      "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&h=600&fit=crop"
+    ],
+    "webviewUrl": "https://www.betano.com",
+    "favicon": "https://www.betano.com/favicon.ico",
+    "features": [
+      "Apostas ao vivo",
+      "Streaming de jogos",
+      "Cash out parcial",
+      "Apostas múltiplas",
+      "Bônus de boas-vindas"
+    ],
+    "ageRating": "18+",
+    "releaseDate": "2018-09-01T00:00:00Z",
+    "lastUpdate": "2024-01-24T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês", "Espanhol"],
+    "whatsNew": "Novas opções de apostas\nMelhoria no streaming\nMais métodos de pagamento"
+  },
+  {
+    "id": "app011",
     "name": "Instagram",
     "description": "Compartilhe fotos e vídeos com amigos",
-    "longDescription": "O Instagram é uma plataforma de compartilhamento de fotos e vídeos que permite aos usuários capturar, editar e compartilhar momentos com seus amigos e seguidores. Com filtros poderosos, Stories, Reels e muito mais, você pode expressar sua criatividade de maneiras únicas.",
+    "longDescription": "O Instagram é uma plataforma de compartilhamento de fotos e vídeos que permite aos usuários capturar, editar e compartilhar momentos com seus amigos e seguidores.",
     "category": "Redes Sociais",
     "developer": "Instagram, Inc.",
     "version": "302.0.0",
@@ -11,18 +331,18 @@
     "rating": 4.5,
     "reviewCount": 12500000,
     "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Instagram_logo_2016.svg/1200px-Instagram_logo_2016.svg.png",
+    "bannerUrl": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=400&fit=crop",
     "screenshots": [
-      "https://example.com/screenshot1.jpg",
-      "https://example.com/screenshot2.jpg"
+      "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=600&fit=crop"
     ],
     "webviewUrl": "https://www.instagram.com",
     "favicon": "https://www.instagram.com/static/images/ico/favicon.ico",
     "features": [
       "Compartilhe fotos e vídeos",
-      "Stories que desaparecem em 24 horas",
-      "Reels para vídeos curtos e criativos",
-      "Direct para mensagens privadas",
-      "Filtros e efeitos de edição"
+      "Stories 24 horas",
+      "Reels criativos",
+      "Direct messages",
+      "Filtros e efeitos"
     ],
     "ageRating": "12+",
     "releaseDate": "2010-10-06T00:00:00Z",
@@ -32,42 +352,10 @@
     "whatsNew": "Novos filtros adicionados\nMelhorias de desempenho\nCorreção de bugs"
   },
   {
-    "id": "app002",
-    "name": "WhatsApp",
-    "description": "Mensagens e chamadas simples e seguras",
-    "longDescription": "O WhatsApp é um aplicativo de mensagens gratuito disponível para Android e outros smartphones. O WhatsApp usa a conexão de internet do seu celular (4G/3G/2G/EDGE ou Wi-Fi, conforme disponível) para que você possa enviar mensagens e fazer chamadas para seus amigos e familiares.",
-    "category": "Comunicação",
-    "developer": "WhatsApp LLC",
-    "version": "2.24.1.78",
-    "size": "68 MB",
-    "rating": 4.3,
-    "reviewCount": 95000000,
-    "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/1200px-WhatsApp.svg.png",
-    "screenshots": [
-      "https://example.com/whatsapp1.jpg",
-      "https://example.com/whatsapp2.jpg"
-    ],
-    "webviewUrl": "https://web.whatsapp.com",
-    "favicon": "https://web.whatsapp.com/favicon.ico",
-    "features": [
-      "Mensagens de texto ilimitadas",
-      "Chamadas de voz e vídeo gratuitas",
-      "Grupos com até 256 participantes",
-      "Compartilhe fotos, vídeos e documentos",
-      "Criptografia de ponta a ponta"
-    ],
-    "ageRating": "4+",
-    "releaseDate": "2009-05-03T00:00:00Z",
-    "lastUpdate": "2024-01-20T00:00:00Z",
-    "isFree": true,
-    "languages": ["Português", "Inglês", "Espanhol", "Alemão", "Francês"],
-    "whatsNew": "Melhorias na qualidade das chamadas\nNovos recursos para grupos\nCorreções de segurança"
-  },
-  {
-    "id": "app003",
+    "id": "app012",
     "name": "Spotify",
-    "description": "Música e podcasts",
-    "longDescription": "O Spotify é um serviço de streaming de música digital que dá acesso instantâneo a milhões de músicas. Descubra novos artistas, crie playlists personalizadas, ouça podcasts exclusivos e muito mais.",
+    "description": "Música e podcasts ilimitados",
+    "longDescription": "O Spotify é um serviço de streaming de música digital que dá acesso instantâneo a milhões de músicas e podcasts.",
     "category": "Música",
     "developer": "Spotify AB",
     "version": "8.8.96.488",
@@ -75,18 +363,18 @@
     "rating": 4.6,
     "reviewCount": 48000000,
     "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Spotify_logo_without_text.svg/2048px-Spotify_logo_without_text.svg.png",
+    "bannerUrl": "https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=800&h=400&fit=crop",
     "screenshots": [
-      "https://example.com/spotify1.jpg",
-      "https://example.com/spotify2.jpg"
+      "https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=800&h=600&fit=crop"
     ],
     "webviewUrl": "https://open.spotify.com",
     "favicon": "https://open.spotify.com/favicon.ico",
     "features": [
-      "Acesso a milhões de músicas",
+      "Milhões de músicas",
       "Playlists personalizadas",
       "Podcasts exclusivos",
-      "Download para ouvir offline",
-      "Qualidade de áudio superior"
+      "Download offline",
+      "Qualidade premium"
     ],
     "ageRating": "12+",
     "releaseDate": "2008-10-07T00:00:00Z",
@@ -94,70 +382,102 @@
     "isFree": true,
     "price": 21.90,
     "languages": ["Português", "Inglês", "Espanhol"],
-    "whatsNew": "Nova interface de usuário\nMelhor desempenho\nNovos recursos para podcasts"
+    "whatsNew": "Nova interface\nMelhor desempenho\nNovos recursos de podcasts"
   },
   {
-    "id": "app004",
-    "name": "YouTube",
-    "description": "Assista, crie e compartilhe vídeos",
-    "longDescription": "Obtenha o aplicativo oficial do YouTube em smartphones e tablets Android. Veja o que o mundo está assistindo, desde os vídeos musicais mais populares até o conteúdo em alta sobre jogos, entretenimento, notícias e muito mais.",
-    "category": "Entretenimento",
-    "developer": "Google LLC",
-    "version": "19.01.35",
-    "size": "142 MB",
+    "id": "app013",
+    "name": "Ledger Live",
+    "description": "Gerencie suas criptomoedas com segurança",
+    "longDescription": "Ledger Live é o aplicativo oficial para gerenciar suas criptomoedas em carteiras de hardware Ledger. Máxima segurança para seus ativos digitais.",
+    "category": "Carteira",
+    "developer": "Ledger SAS",
+    "version": "3.42.0",
+    "size": "165 MB",
+    "rating": 4.7,
+    "reviewCount": 1200000,
+    "iconUrl": "https://images.unsplash.com/photo-1639322537504-6427a16b0a28?w=200&h=200&fit=crop",
+    "bannerUrl": "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&h=400&fit=crop",
+    "screenshots": [
+      "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&h=600&fit=crop"
+    ],
+    "webviewUrl": "https://www.ledger.com",
+    "favicon": "https://www.ledger.com/favicon.ico",
+    "features": [
+      "Suporte a 5500+ moedas",
+      "Staking integrado",
+      "Compra de cripto no app",
+      "Portfolio tracking",
+      "Máxima segurança"
+    ],
+    "ageRating": "18+",
+    "releaseDate": "2018-07-01T00:00:00Z",
+    "lastUpdate": "2024-01-27T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês", "Espanhol", "Francês"],
+    "whatsNew": "Novas moedas suportadas\nMelhorias no staking\nInterface atualizada"
+  },
+  {
+    "id": "app014",
+    "name": "1xBet",
+    "description": "Apostas esportivas e cassino",
+    "longDescription": "1xBet oferece uma ampla variedade de apostas esportivas e jogos de cassino. Odds competitivas e milhares de eventos diários.",
+    "category": "Aposta",
+    "developer": "1xBet",
+    "version": "1140",
+    "size": "118 MB",
+    "rating": 4.3,
+    "reviewCount": 9500000,
+    "iconUrl": "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=200&h=200&fit=crop",
+    "bannerUrl": "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&h=400&fit=crop",
+    "screenshots": [
+      "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&h=600&fit=crop"
+    ],
+    "webviewUrl": "https://www.1xbet.com",
+    "favicon": "https://www.1xbet.com/favicon.ico",
+    "features": [
+      "Apostas ao vivo 24/7",
+      "Cassino online",
+      "Streaming gratuito",
+      "Aplicativo mobile",
+      "Múltiplos métodos de pagamento"
+    ],
+    "ageRating": "18+",
+    "releaseDate": "2007-01-01T00:00:00Z",
+    "lastUpdate": "2024-01-23T00:00:00Z",
+    "isFree": true,
+    "languages": ["Português", "Inglês", "Espanhol", "Russo"],
+    "whatsNew": "Mais esportes disponíveis\nNovos jogos de cassino\nMelhorias de performance"
+  },
+  {
+    "id": "app015",
+    "name": "Swagbucks",
+    "description": "Ganhe dinheiro respondendo pesquisas",
+    "longDescription": "Swagbucks permite que você ganhe dinheiro respondendo pesquisas, assistindo vídeos, fazendo compras online e muito mais.",
+    "category": "Fonte de Renda",
+    "developer": "Prodege, LLC",
+    "version": "10.15.0",
+    "size": "68 MB",
     "rating": 4.4,
-    "reviewCount": 180000000,
-    "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/2560px-YouTube_full-color_icon_%282017%29.svg.png",
+    "reviewCount": 3200000,
+    "iconUrl": "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?w=200&h=200&fit=crop",
+    "bannerUrl": "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=400&fit=crop",
     "screenshots": [
-      "https://example.com/youtube1.jpg",
-      "https://example.com/youtube2.jpg"
+      "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=600&fit=crop"
     ],
-    "webviewUrl": "https://www.youtube.com",
-    "favicon": "https://www.youtube.com/favicon.ico",
+    "webviewUrl": "https://www.swagbucks.com",
+    "favicon": "https://www.swagbucks.com/favicon.ico",
     "features": [
-      "Milhões de vídeos para assistir",
-      "Inscreva-se em canais favoritos",
-      "Crie e compartilhe seus vídeos",
-      "YouTube Premium disponível",
-      "Transmissões ao vivo"
+      "Pesquisas remuneradas",
+      "Cashback em compras",
+      "Vídeos para assistir",
+      "Jogos e ofertas",
+      "Pagamento via PayPal"
     ],
-    "ageRating": "12+",
-    "releaseDate": "2005-12-15T00:00:00Z",
-    "lastUpdate": "2024-01-22T00:00:00Z",
+    "ageRating": "13+",
+    "releaseDate": "2008-02-01T00:00:00Z",
+    "lastUpdate": "2024-01-20T00:00:00Z",
     "isFree": true,
-    "languages": ["Português", "Inglês", "Espanhol", "Francês", "Alemão"],
-    "whatsNew": "Interface aprimorada\nMelhor sistema de recomendações\nCorreções de bugs"
-  },
-  {
-    "id": "app005",
-    "name": "TikTok",
-    "description": "Vídeos curtos e criativos",
-    "longDescription": "O TikTok é o destino líder para vídeos móveis de formato curto. Nossa missão é capturar e apresentar a criatividade, o conhecimento e os momentos do mundo que importam na vida cotidiana.",
-    "category": "Entretenimento",
-    "developer": "ByteDance Ltd.",
-    "version": "33.1.4",
-    "size": "189 MB",
-    "rating": 4.5,
-    "reviewCount": 72000000,
-    "iconUrl": "https://sf16-website-login.neutral.ttwstatic.com/obj/tiktok_web_login_static/tiktok/webapp/main/webapp-desktop/8152caf0c8e8bc67ae0d.png",
-    "screenshots": [
-      "https://example.com/tiktok1.jpg",
-      "https://example.com/tiktok2.jpg"
-    ],
-    "webviewUrl": "https://www.tiktok.com",
-    "favicon": "https://www.tiktok.com/favicon.ico",
-    "features": [
-      "Crie vídeos curtos com música",
-      "Efeitos e filtros incríveis",
-      "Descubra tendências virais",
-      "Interaja com criadores",
-      "Transmissões ao vivo"
-    ],
-    "ageRating": "12+",
-    "releaseDate": "2016-09-01T00:00:00Z",
-    "lastUpdate": "2024-01-19T00:00:00Z",
-    "isFree": true,
-    "languages": ["Português", "Inglês", "Espanhol", "Chinês"],
-    "whatsNew": "Novos efeitos adicionados\nMelhorias no editor de vídeo\nOtimizações de desempenho"
+    "languages": ["Português", "Inglês", "Espanhol"],
+    "whatsNew": "Mais pesquisas disponíveis\nNovos parceiros de cashback\nInterface renovada"
   }
 ]
