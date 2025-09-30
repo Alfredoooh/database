@@ -11,7 +11,7 @@
       "access": true,
       "expiration_date": "2026-09-29T12:30:00",
       "two_factor_auth": true,
-      "two_factor_code": "ADM123",
+      "two_factor_code": "1230",
       "user_key": "ADM-2024-XYZ789",
       "notification_message": "Bem-vindo sr Alfredo !",
       "created_at": "2025-09-29T12:35:00",
