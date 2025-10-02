@@ -1,0 +1,27 @@
+{
+  "provider": "emailjs",
+  "description": "Configuração usada pelo app Flutter para enviar e-mails via EmailJS",
+  "service_id": "Service_avyr0og",
+  "template_id": "template_oa8b7iz",
+  "user_id": "EUFE-qVsBF34lD4QZ",
+  "admin": {
+    "name": "Alfredo",
+    "email": "alfredopjonas@gmail.com"
+  },
+  "defaults": {
+    "cc": "",
+    "bcc": ""
+  },
+  "template_mapping": {
+    "to_name": "admin.name",
+    "to_email": "admin.email",
+    "from_name": "from_name",
+    "from_email": "from_email",
+    "message": "message",
+    "cc": "cc",
+    "bcc": "bcc"
+  },
+  "subject_template": "New message from {{from_name}} ({{from_email}})",
+  "reply_to_field": "from_email",
+  "notes": "Substitua valores se quiser. Não inclua segredos privados."
+}
