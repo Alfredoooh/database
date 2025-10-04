@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Chat Firebase</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+    /* === SEU ESTILO ORIGINAL (preservado) === */
+    :root{
+      --bg:#000000; --card:#1C1C1E; --accent:#007AFF; --muted:#8E8E93; --text:#FFFFFF; --card-light:#2C2C2E;
+    }
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+      -webkit-touch-callout:none;
+      -webkit-user-select:none;
+      -moz-user-select:none;
+      -ms-user-select:none;
+      user-select:none;
+    }
+    input,textarea{
+      -webkit-user-select:text;
+      -moz-user-select:text;
+      -ms-user-select:text;
+      user-select:text;
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      padding:0;
+      font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      overflow:hidden;
+      position:fixed;
+      width:100%;
+      -webkit-font-smoothing:antialiased;
+    }
+    .app {
+      display:flex;
+      flex-direction:column;
+      height:100vh;
+      height:100dvh;
+      width:100%;
+      overflow:hidden;
+    }
+    header{
+      padding:12px 16px;
+      background:var(--card);
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-shrink:0;
+      min-height:60px;
+    }
+    .brand{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex:1;
+      min-width:0;
+    }
+    .logo{
+      width:40px;
+      height:40px;
+      border-radius:12px;
+      background:linear-gradient(135deg,var(--accent),#5AC8FA);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+    }
+    .logo .material-icons-round{
+      font-size:24px;
+      color:#fff;
+    }
+    .title{
+      font-size:16px;
+      font-weight:600;
+      letter-spacing:-0.3px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .user-info{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      padding:4px 10px;
+      background:var(--card-light);
+      border-radius:20px;
+      flex-shrink:0;
+    }
+    .avatar{
+      width:28px;
+      height:28px;
+      border-radius:50%;
+      background:var(--card-light);
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:600;
+      font-size:12px;
+      flex-shrink:0;
+    }
+    .avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    .user-name{
+      font-size:12px;
+      font-weight:500;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:80px;
+    }
+    .icon-btn{
+      width:40px;
+      height:40px;
+      border-radius:10px;
+      background:var(--card-light);
+      border:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      flex-shrink:0;
+    }
+    .icon-btn .material-icons-round{
+      font-size:20px;
+      color:var(--text);
+    }
+    .icon-btn:active{
+      opacity:0.6;
+    }
+    .icon-btn.primary{
+      background:var(--accent);
+    }
+    .icon-btn.primary .material-icons-round{
+      color:#fff;
+    }
+    main.chat {
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+      background:var(--bg);
+      overflow:hidden;
+    }
+    .messages {
+      flex:1;
+      overflow-y:auto;
+      overflow-x:hidden;
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      -webkit-overflow-scrolling:touch;
+    }
+    .messages::-webkit-scrollbar{
+      display:none;
+    }
+    .message {
+      max-width:80%;
+      padding:10px 14px;
+      border-radius:18px;
+      background:var(--card);
+      color:var(--text);
+      align-self:flex-start;
+      box-shadow:0 2px 6px rgba(0,0,0,0.3);
+      word-wrap:break-word;
+    }
+    .message.mine {
+      align-self:flex-end;
+      background:var(--accent);
+      color:#fff;
+      border-radius:18px 18px 4px 18px;
+    }
+    .message:not(.mine){
+      border-radius:18px 18px 18px 4px;
+    }
+    .meta{
+      display:flex;
+      gap:6px;
+      align-items:center;
+      font-size:11px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+    .message.mine .meta{
+      color:rgba(255,255,255,0.7);
+    }
+    .name{
+      font-weight:600;
+      font-size:11px;
+    }
+    .text{
+      white-space:pre-wrap;
+      word-break:break-word;
+      line-height:1.4;
+      font-size:15px;
+    }
+    .msg-img{
+      max-width:100%;
+      max-height:300px;
+      border-radius:10px;
+      margin-top:6px;
+      display:block;
+    }
+    .time{
+      font-size:10px;
+      opacity:0.7;
+    }
+    footer.composer {
+      padding:12px 16px;
+      padding-bottom:calc(12px + env(safe-area-inset-bottom));
+      background:var(--card);
+      border-top:1px solid rgba(255,255,255,0.06);
+      display:flex;
+      gap:10px;
+      align-items:flex-end;
+      flex-shrink:0;
+    }
+    .input-wrapper{
+      flex:1;
+      min-width:0;
+    }
+    input[type="text"]{
+      width:100%;
+      padding:10px 14px;
+      border-radius:20px;
+      border:none;
+      background:var(--card-light);
+      color:var(--text);
+      outline:none;
+      font-size:15px;
+      font-family:inherit;
+    }
+    input[type="text"]::placeholder{
+      color:var(--muted);
+    }
+    input[type="file"]{
+      display:none;
+    }
+    .image-preview-wrapper{
+      padding:8px 0;
+    }
+    .image-preview{
+      max-width:60px;
+      height:60px;
+      border-radius:8px;
+      object-fit:cover;
+      border:2px solid var(--accent);
+    }
+    .progress{
+      height:3px;
+      border-radius:3px;
+      background:var(--card-light);
+      overflow:hidden;
+      width:100%;
+      margin-top:4px;
+    }
+    .progress > i{
+      display:block;
+      height:100%;
+      width:0%;
+      background:var(--accent);
+      transition:width 0.2s;
+    }
+    .status{
+      font-size:11px;
+      color:var(--muted);
+      padding:4px 0;
+    }
+    .online-list{
+      display:flex;
+      gap:4px;
+      align-items:center;
+      padding:4px 8px;
+      background:var(--card-light);
+      border-radius:12px;
+      flex-shrink:0;
+    }
+    .online-avatar{
+      width:24px;
+      height:24px;
+      border-radius:50%;
+      background:var(--card);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:10px;
+      font-weight:600;
+      border:2px solid var(--bg);
+      overflow:hidden;
+    }
+    .online-avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    .online-count{
+      font-size:11px;
+      color:var(--muted);
+      margin-left:2px;
+    }
+    .welcome{
+      padding:10px 12px;
+      border-radius:10px;
+      background:var(--card);
+      text-align:center;
+      margin:0 16px 12px;
+      font-size:12px;
+      color:var(--muted);
+      border:1px solid rgba(255,255,255,0.04);
+    }
+    .auth-modal{
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      bottom:0;
+      background:rgba(0,0,0,0.8);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:1000;
+      padding:20px;
+    }
+    .auth-modal.show{
+      display:flex;
+    }
+    .auth-content{
+      background:var(--card);
+      border-radius:20px;
+      padding:24px;
+      max-width:320px;
+      width:100%;
+    }
+    .auth-title{
+      font-size:20px;
+      font-weight:600;
+      text-align:center;
+      margin-bottom:20px;
+    }
+    .auth-btn{
+      width:100%;
+      padding:14px;
+      border-radius:12px;
+      border:none;
+      font-size:15px;
+      font-weight:600;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      margin-bottom:12px;
+    }
+    .auth-btn.google{
+      background:#fff;
+      color:#000;
+    }
+    .auth-btn.anon{
+      background:var(--card-light);
+      color:var(--text);
+    }
+    .auth-btn .material-icons-round{
+      font-size:20px;
+    }
+    @media (min-width:768px){
+      .app{
+        max-width:600px;
+        margin:0 auto;
+        border-left:1px solid rgba(255,255,255,0.06);
+        border-right:1px solid rgba(255,255,255,0.06);
+      }
+    }
+
+    /* === ADICIONAL: caixa de status fixa (debug) === */
+    .debug-status {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: calc(12px + env(safe-area-inset-bottom));
+      max-height: 26vh;
+      overflow:auto;
+      background: rgba(10,10,10,0.6);
+      border:1px solid rgba(255,255,255,0.04);
+      padding:8px;
+      border-radius:12px;
+      font-size:13px;
+      color: #9fd;
+      z-index: 1200;
+      backdrop-filter: blur(6px);
+    }
+    .debug-status .time { color: #8eecff; font-weight:600; margin-right:6px; }
+    .debug-status .err { color:#ff8a8a; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">
+          <span class="material-icons-round">forum</span>
+        </div>
+        <div class="title">Chat Firebase</div>
+      </div>
+
+      <div class="online-list" id="online">
+        <span class="online-count">-</span>
+      </div>
+
+      <div class="user-info" id="user-info">
+        <div class="avatar" id="avatar">?</div>
+        <div class="user-name" id="user-name">Guest</div>
+      </div>
+
+      <button class="icon-btn" id="menu-btn" title="Menu / Auth">
+        <span class="material-icons-round">more_vert</span>
+      </button>
+    </header>
+
+    <main class="chat">
+      <div class="welcome">Mensagens em tempo real</div>
+      <div id="messages" class="messages" aria-live="polite" role="log"></div>
+
+      <footer class="composer" role="contentinfo">
+        <button class="icon-btn" id="image-btn" title="Selecionar imagem">
+          <span class="material-icons-round">add_photo_alternate</span>
+          <input type="file" id="fileInput" accept="image/*" aria-label="Selecionar imagem">
+        </button>
+
+        <div class="input-wrapper">
+          <div id="preview-area" class="image-preview-wrapper" style="display:none">
+            <img id="imgPreview" class="image-preview" alt="preview">
+          </div>
+          <div class="progress" id="progress-bar" style="display:none">
+            <i id="progressFill"></i>
+          </div>
+          <div class="status" id="statusText" aria-live="assertive"></div>
+          <input id="textInput" type="text" placeholder="Mensagem..." autocomplete="off" />
+        </div>
+
+        <button class="icon-btn primary" id="sendBtn" title="Enviar">
+          <span class="material-icons-round">send</span>
+        </button>
+      </footer>
+    </main>
+  </div>
+
+  <div class="auth-modal" id="authModal" aria-hidden="true">
+    <div class="auth-content" role="dialog" aria-modal="true">
+      <div class="auth-title">Entrar no Chat</div>
+      <button class="auth-btn google" id="sign-in-google" aria-label="Entrar com Google">
+        <span class="material-icons-round">account_circle</span>
+        Entrar com Google
+      </button>
+      <button class="auth-btn anon" id="sign-in-anon" aria-label="Entrar como convidado">
+        <span class="material-icons-round">person_outline</span>
+        Entrar como Convidado
+      </button>
+    </div>
+  </div>
+
+  <div id="debugStatus" class="debug-status" aria-hidden="false">
+    <div><span class="time">Status</span> <span id="debugText">A iniciar…</span></div>
+  </div>
+
+  <script type="module">
+    // === CONFIG (storageBucket corrigido) ===
+    const firebaseConfig = {
+      apiKey: "AIzaSyAXZM8kj9S7OKmyotiPHApbh9q6GdawFy8",
+      authDomain: "chat00-26b92.firebaseapp.com",
+      projectId: "chat00-26b92",
+      storageBucket: "chat00-26b92.appspot.com",
+      messagingSenderId: "403804311969",
+      appId: "1:403804311969:web:409a01d79bf9e386497be0",
+      measurementId: "G-H9VPNYPRMB"
+    };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getAuth, GoogleAuthProvider, signInWithPopup, signInAnonymously, signOut, onAuthStateChanged, updateProfile
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import {
+      getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
+    import {
+      getDatabase, ref as rdbRef, set as rdbSet, onValue as rdbOnValue, onDisconnect as rdbOnDisconnect
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    // === INIT ===
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    let rtdb;
+    try { rtdb = getDatabase(app); } catch(e){ console.warn('RTDB indisponível', e); }
+
+    // === UI refs ===
+    const authModal = document.getElementById('authModal');
+    const signInGoogleBtn = document.getElementById('sign-in-google');
+    const signInAnonBtn = document.getElementById('sign-in-anon');
+    const menuBtn = document.getElementById('menu-btn');
+    const userNameEl = document.getElementById('user-name');
+    const avatarEl = document.getElementById('avatar');
+    const messagesEl = document.getElementById('messages');
+    const textInput = document.getElementById('textInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const imageBtn = document.getElementById('image-btn');
+    const fileInput = document.getElementById('fileInput');
+    const imgPreview = document.getElementById('imgPreview');
+    const previewArea = document.getElementById('preview-area');
+    const progressBar = document.getElementById('progress-bar');
+    const progressFill = document.getElementById('progressFill');
+    const statusText = document.getElementById('statusText');
+    const onlineEl = document.getElementById('online');
+    const debugStatus = document.getElementById('debugStatus');
+    const debugText = document.getElementById('debugText');
+
+    // === state ===
+    let currentUser = null;
+    let presenceInterval = null;
+
+    // === debug helper ===
+    function pushDebug(msg, isErr=false){
+      const t = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.innerHTML = `<span class="time">${t}</span> <span class="${isErr? 'err':''}">${msg}</span>`;
+      debugText.prepend ? debugText.prepend(entry) : debugText.appendChild(entry);
+      // also update visible small status
+      statusText.textContent = (isErr ? 'Erro: ' : '') + msg;
+      console.log(msg);
+    }
+
+    // === auth flow ===
+    menuBtn.addEventListener('click', () => {
+      if (currentUser) {
+        if (confirm('Sair do chat?')) signOut(auth).catch(e=>pushDebug('Erro signOut: '+(e.message||e), true));
+      } else {
+        authModal.classList.add('show'); authModal.setAttribute('aria-hidden','false');
+      }
+    });
+
+    authModal.addEventListener('click', (e) => {
+      if (e.target === authModal) { authModal.classList.remove('show'); authModal.setAttribute('aria-hidden','true'); }
+    });
+
+    signInGoogleBtn.addEventListener('click', async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+        pushDebug('Tentando Google Sign-In...');
+        await signInWithPopup(auth, provider);
+        authModal.classList.remove('show'); authModal.setAttribute('aria-hidden','true');
+        pushDebug('Google sign-in OK');
+      } catch (e) {
+        pushDebug('Google falhou: ' + (e.message || e) + ' → fallback anónimo', true);
+        // fallback to anonymous
+        try {
+          const res = await signInAnonymously(auth);
+          await updateProfile(res.user, { displayName: 'Guest_' + res.user.uid.slice(0,4) });
+          authModal.classList.remove('show'); authModal.setAttribute('aria-hidden','true');
+          pushDebug('Entrou anónimo depois de falha Google');
+        } catch(err){
+          pushDebug('Erro anónimo fallback: '+(err.message||err), true);
+        }
+      }
+    });
+
+    signInAnonBtn.addEventListener('click', async () => {
+      try {
+        const res = await signInAnonymously(auth);
+        await updateProfile(res.user, { displayName: 'Guest_' + res.user.uid.slice(0,4) });
+        authModal.classList.remove('show'); authModal.setAttribute('aria-hidden','true');
+        pushDebug('Entrou como convidado');
+      } catch(e){
+        pushDebug('Erro login anon: ' + (e.message || e), true);
+      }
+    });
+
+    onAuthStateChanged(auth, user => {
+      currentUser = user;
+      if (user) {
+        userNameEl.textContent = user.displayName || 'User';
+        avatarEl.innerHTML = user.photoURL ? `<img src="${user.photoURL}" alt="avatar">` : (user.displayName ? user.displayName[0].toUpperCase() : 'U');
+        pushDebug('Autenticado: ' + user.uid);
+        if (rtdb) initPresence(user);
+        // hide modal if open
+        authModal.classList.remove('show'); authModal.setAttribute('aria-hidden','true');
+      } else {
+        userNameEl.textContent = 'Guest';
+        avatarEl.textContent = '?';
+        pushDebug('Não autenticado — iniciando anónimo...');
+        // auto sign anonymous to allow testing without HTTPS
+        (async () => {
+          try {
+            const r = await signInAnonymously(auth);
+            await updateProfile(r.user, { displayName: 'Guest_' + r.user.uid.slice(0,4) });
+            pushDebug('Auto-anónimo OK: ' + r.user.uid);
+          } catch(err) {
+            pushDebug('Auto-anónimo falhou: ' + (err.message || err), true);
+          }
+        })();
+      }
+    });
+
+    // === presence (RTDB) ===
+    function initPresence(user) {
+      try {
+        const presRef = rdbRef(rtdb, 'presence/' + user.uid);
+        rdbSet(presRef, { name: user.displayName || 'User', photoURL: user.photoURL || null, lastSeen: Date.now() }).catch(()=>{});
+        const onDisc = rdbOnDisconnect(presRef);
+        onDisc.remove().catch(()=>{});
+        if (presenceInterval) clearInterval(presenceInterval);
+        presenceInterval = setInterval(() => {
+          rdbSet(presRef, { name: user.displayName || 'User', lastSeen: Date.now() }).catch(()=>{});
+        }, 25000);
+        pushDebug('Presença inicializada (RTDB)');
+      } catch(e){
+        pushDebug('Presença falhou: ' + (e.message || e), true);
+      }
+    }
+
+    if (rtdb) {
+      const listRef = rdbRef(rtdb, 'presence');
+      rdbOnValue(listRef, snapshot => {
+        const data = snapshot.val() || {};
+        renderOnline(Object.values(data));
+      }, err => {
+        pushDebug('Erro presence.onValue: ' + (err.message || err), true);
+      });
+    } else {
+      pushDebug('RTDB não ativada (presença off)');
+    }
+
+    function renderOnline(list) {
+      if (!list || list.length === 0) {
+        onlineEl.innerHTML = '<span class="online-count">0</span>';
+        return;
+      }
+      onlineEl.innerHTML = '';
+      const limited = list.slice(0,4);
+      limited.forEach(u => {
+        const a = document.createElement('div');
+        a.className='online-avatar';
+        if (u.photoURL) a.innerHTML = `<img src="${u.photoURL}">`;
+        else a.textContent = (u.name || 'U')[0].toUpperCase();
+        onlineEl.appendChild(a);
+      });
+      if (list.length > 4) {
+        const more = document.createElement('span');
+        more.className='online-count';
+        more.textContent = '+' + (list.length - 4);
+        onlineEl.appendChild(more);
+      }
+    }
+
+    // === Firestore messages ===
+    const messagesCol = collection(db, 'messages');
+    const messagesQuery = query(messagesCol, orderBy('createdAt', 'desc'), limit(200));
+    onSnapshot(messagesQuery, snapshot => {
+      const docs = [];
+      snapshot.forEach(d => docs.push({ id: d.id, ...d.data() }));
+      docs.reverse();
+      const atBottom = isScrolledToBottom();
+      messagesEl.innerHTML = '';
+      docs.forEach(renderMessage);
+      if (atBottom) scrollToBottom();
+      pushDebug('Mensagens sincronizadas: ' + docs.length);
+    }, err => {
+      pushDebug('Erro ao sincronizar mensagens: ' + (err.message || err), true);
+    });
+
+    function renderMessage(msg) {
+      const my = currentUser && msg.uid === currentUser.uid;
+      const m = document.createElement('div');
+      m.className = 'message' + (my ? ' mine' : '');
+
+      const meta = document.createElement('div');
+      meta.className='meta';
+      const name = document.createElement('span'); name.className='name'; name.textContent = msg.name || 'Anon';
+      const time = document.createElement('span'); time.className='time';
+      try {
+        if (msg.createdAt && msg.createdAt.toDate) {
+          const d = msg.createdAt.toDate();
+          time.textContent = d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+        }
+      } catch (e) {}
+      meta.appendChild(name); meta.appendChild(time);
+
+      const text = document.createElement('div'); text.className = 'text';
+      if (msg.text) text.textContent = msg.text;
+
+      m.appendChild(meta);
+      if (msg.text) m.appendChild(text);
+      if (msg.imageUrl) {
+        const img = document.createElement('img');
+        img.src = msg.imageUrl;
+        img.className = 'msg-img';
+        img.alt = 'imagem';
+        m.appendChild(img);
+      }
+      messagesEl.appendChild(m);
+    }
+
+    // === Sending messages ===
+    sendBtn.addEventListener('click', sendMessage);
+    textInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+
+    imageBtn.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', () => {
+      const f = fileInput.files[0];
+      if (!f) {
+        previewArea.style.display = 'none';
+        return;
+      }
+      const url = URL.createObjectURL(f);
+      imgPreview.src = url;
+      previewArea.style.display = 'block';
+      pushDebug('Imagem seleccionada: ' + f.name);
+    });
+
+    async function sendMessage() {
+      if (!currentUser) { authModal.classList.add('show'); pushDebug('Sem auth — abrir modal', true); return; }
+      const text = textInput.value.trim();
+      const file = fileInput.files[0];
+      if (!text && !file) return;
+
+      sendBtn.disabled = true;
+      statusText.textContent = 'Enviando...';
+      progressBar.style.display = 'none';
+      progressFill.style.width = '0%';
+
+      try {
+        let imageUrl = null;
+        if (file) {
+          const path = `chat/${currentUser.uid}_${Date.now()}_${file.name.replace(/\s/g,'_')}`;
+          const sRef = storageRef(storage, path);
+          const uploadTask = uploadBytesResumable(sRef, file);
+
+          progressBar.style.display = 'block';
+          await new Promise((resolve, reject) => {
+            uploadTask.on('state_changed',
+              snapshot => {
+                const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                progressFill.style.width = pct + '%';
+                statusText.textContent = pct + '%';
+                pushDebug('Upload: ' + pct + '%');
+              },
+              error => reject(error),
+              async () => {
+                imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve();
+              }
+            );
+          });
+          fileInput.value = '';
+          previewArea.style.display = 'none';
+        }
+
+        await addDoc(messagesCol, {
+          uid: currentUser.uid,
+          name: currentUser.displayName || 'User',
+          photoURL: currentUser.photoURL || null,
+          text: text || null,
+          imageUrl: imageUrl || null,
+          createdAt: serverTimestamp()
+        });
+
+        textInput.value = '';
+        statusText.textContent = '';
+        pushDebug('Mensagem enviada');
+      } catch (e) {
+        alert('Erro: ' + (e.message || e));
+        statusText.textContent = 'Erro';
+        pushDebug('Erro enviar: ' + (e.message || e), true);
+      } finally {
+        sendBtn.disabled = false;
+        progressBar.style.display = 'none';
+        progressFill.style.width = '0%';
+      }
+    }
+
+    function scrollToBottom() { messagesEl.scrollTop = messagesEl.scrollHeight; }
+    function isScrolledToBottom() { return (messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight) < 100; }
+
+    // Final helpful note
+    pushDebug('Interface carregada — auto-anónimo ativado para testes. Para Google Sign-In usa HTTPS e adiciona o domínio em Firebase Auth → Authorized domains.');
+
+  </script>
+</body>
+</html>
