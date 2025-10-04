@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <meta name="theme-color" content="#000000" />
+  <title>Email Service</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #000000;
+      color: #FFFFFF;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      text-align: center;
+    }
+    .status {
+      font-size: 18px;
+      color: #8E8E93;
+      margin-top: 20px;
+    }
+    .success {
+      color: #34C759;
+    }
+    .error {
+      color: #FF3B30;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔒 Email Service</h1>
+    <p class="status" id="status">Aguardando requisição...</p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function () {
+      // Configurações EmailJS
+      const SERVICE_ID = 'Service_avyr0og';
+      const TEMPLATE_ID = 'template_oa8b7iz';
+      const USER_ID = 'EUFE-qVsBF34lD4QZ';
+      const DEFAULT_TO_NAME = 'Alfredo';
+      const DEFAULT_TO_EMAIL = 'alfredopjonas@gmail.com';
+
+      const statusEl = document.getElementById('status');
+
+      try {
+        emailjs.init(USER_ID);
+        console.log('EmailJS inicializado');
+      } catch (e) {
+        console.error('Erro ao inicializar EmailJS:', e);
+        statusEl.textContent = 'Erro ao inicializar serviço';
+        statusEl.className = 'status error';
+      }
+
+      // Função para enviar email
+      async function sendEmail(data) {
+        try {
+          statusEl.textContent = 'Enviando email...';
+          statusEl.className = 'status';
+
+          const templateParams = {
+            to_name: DEFAULT_TO_NAME,
+            to_email: DEFAULT_TO_EMAIL,
+            from_name: data.from_name || data.from_email.split('@')[0],
+            from_email: data.from_email,
+            message: data.message,
+            cc: data.cc || '',
+            bcc: data.bcc || ''
+          };
+
+          const response = await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams);
+          
+          console.log('Email enviado com sucesso:', response);
+          statusEl.textContent = '✓ Email enviado com sucesso!';
+          statusEl.className = 'status success';
+          
+          return { success: true, message: 'Email enviado' };
+        } catch (error) {
+          console.error('Erro ao enviar email:', error);
+          statusEl.textContent = '✕ Erro ao enviar email';
+          statusEl.className = 'status error';
+          
+          return { success: false, message: error.text || 'Erro desconhecido' };
+        }
+      }
+
+      // Manipulador de requisições POST
+      window.addEventListener('message', async (event) => {
+        // Verificar origem da mensagem por segurança (opcional)
+        // if (event.origin !== 'https://seu-dominio-permitido.com') return;
+
+        if (event.data && event.data.type === 'SEND_EMAIL') {
+          const result = await sendEmail(event.data.payload);
+          event.source.postMessage({
+            type: 'EMAIL_RESPONSE',
+            payload: result
+          }, event.origin);
+        }
+      });
+
+      // Para requisições HTTP diretas (se hospedado como API)
+      if (window.location.search.includes('data=')) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const dataParam = urlParams.get('data');
+        
+        if (dataParam) {
+          try {
+            const data = JSON.parse(decodeURIComponent(dataParam));
+            sendEmail(data);
+          } catch (e) {
+            console.error('Erro ao processar dados:', e);
+            statusEl.textContent = 'Erro ao processar dados';
+            statusEl.className = 'status error';
+          }
+        }
+      }
+
+      // API REST endpoint (simulação)
+      const originalFetch = window.fetch;
+      window.fetch = async function(...args) {
+        const [url, options] = args;
+        
+        if (url.toString().includes('email_service.html') && options?.method === 'POST') {
+          try {
+            const data = JSON.parse(options.body);
+            const result = await sendEmail(data);
+            
+            return new Response(JSON.stringify(result), {
+              status: result.success ? 200 : 500,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          } catch (e) {
+            return new Response(JSON.stringify({ success: false, message: e.message }), {
+              status: 500,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
+        }
+        
+        return originalFetch.apply(this, args);
+      };
+
+      console.log('Serviço de email pronto');
+      statusEl.textContent = '✓ Serviço pronto';
+      statusEl.className = 'status success';
+    })();
+  </script>
+</body>
+</html>
