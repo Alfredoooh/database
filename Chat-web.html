@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chat Firebase — Multiusuário</title>
+  <style>
+    :root{
+      --bg:#000000; --card:#1C1C1E; --accent:#007AFF; --muted:#8E8E93; --text:#FFFFFF; --card-light:#2C2C2E;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Arial; background:var(--bg); color:var(--text)}
+    .app {max-width:980px;margin:0 auto;padding:0;display:flex;flex-direction:column;height:100vh}
+    header{padding:16px 20px;background:var(--card);border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#5AC8FA);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:18px}
+    .title{font-size:17px;font-weight:600;letter-spacing:-0.3px}
+    .subtitle{font-size:13px;color:var(--muted);margin-top:2px}
+    .controls{display:flex;gap:8px;align-items:center}
+    button, .btn {background:var(--card-light);border:none;color:var(--text);padding:8px 16px;border-radius:10px;cursor:pointer;font-weight:600;font-size:14px;transition:all 0.2s}
+    button:hover{opacity:0.8}
+    button.primary {background:var(--accent);color:#fff}
+    button:disabled{opacity:0.4;cursor:not-allowed}
+    .user-bubble{display:flex;gap:10px;align-items:center;padding:6px 12px;background:var(--card-light);border-radius:12px}
+    .avatar{width:32px;height:32px;border-radius:50%;background:var(--card-light);overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+    main.chat {flex:1;display:flex;flex-direction:column;min-height:0;background:var(--bg)}
+    .messages {flex:1; overflow:auto; padding:16px 20px; display:flex;flex-direction:column; gap:12px}
+    .message {max-width:70%; padding:12px 14px;border-radius:18px;background:var(--card); color:var(--text); align-self:flex-start;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+    .message.mine {align-self:flex-end; background:var(--accent);color:#fff;border-radius:18px 18px 4px 18px}
+    .message:not(.mine){border-radius:18px 18px 18px 4px}
+    .meta{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);margin-bottom:6px}
+    .message.mine .meta{color:rgba(255,255,255,0.8)}
+    .name{font-weight:600;color:inherit}
+    .text{white-space:pre-wrap;word-break:break-word;line-height:1.4}
+    .msg-img{max-width:280px;border-radius:12px;margin-top:8px;display:block}
+    footer.composer {padding:12px 20px;background:var(--card);border-top:1px solid rgba(255,255,255,0.1);display:flex;gap:12px;align-items:center}
+    input[type="text"]{flex:1;padding:10px 16px;border-radius:20px;border:none;background:var(--card-light);color:var(--text);outline:none;font-size:15px}
+    input[type="text"]::placeholder{color:var(--muted)}
+    input[type="file"]{display:none}
+    .file-label{padding:8px;border-radius:10px;background:var(--card-light);cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;width:40px;height:40px;transition:all 0.2s}
+    .file-label:hover{opacity:0.8}
+    .small{font-size:13px;color:var(--muted)}
+    .time{font-size:11px;opacity:0.7}
+    .welcome{padding:12px 16px;border-radius:12px;background:var(--card);text-align:center;margin:12px 20px;border:1px solid rgba(255,255,255,0.05)}
+    .welcome code{background:var(--card-light);padding:2px 6px;border-radius:4px;font-size:12px}
+    .composer-right{display:flex;gap:10px;align-items:center}
+    .image-preview{max-width:80px;height:80px;border-radius:10px;object-fit:cover;border:2px solid var(--accent)}
+    .progress{height:4px;border-radius:4px;background:var(--card-light);overflow:hidden;width:100px}
+    .progress > i{display:block;height:100%;width:0%;background:var(--accent);transition:width 0.2s}
+    .status{font-size:12px;color:var(--muted);min-width:80px}
+    .online-list{display:flex;gap:6px;align-items:center;padding:6px 12px;background:var(--card-light);border-radius:10px}
+    .online-avatar{width:28px;height:28px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;border:2px solid var(--bg)}
+    .online-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+    .footer-note{font-size:11px;color:var(--muted);text-align:center;padding:8px 20px}
+    @media (max-width:600px){
+      header{padding:12px 16px;flex-wrap:wrap}
+      .controls{order:3;width:100%;margin-top:8px}
+      .controls button{flex:1}
+      .message{max-width:85%}
+      .composer-right{flex-direction:column;align-items:flex-end}
+      .status{min-width:auto}
+    }
+  </style>
+</head>
+<body>
+  <div class="app" role="application">
+    <header>
+      <div class="brand">
+        <div class="logo">💬</div>
+        <div>
+          <div class="title">Chat Firebase</div>
+          <div class="subtitle">Tempo real • Multiusuário</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px">
+        <div id="online" class="online-list" title="Utilizadores online"></div>
+
+        <div id="user-info" class="user-bubble">
+          <div class="avatar" id="avatar">?</div>
+          <div>
+            <div id="user-name" class="small">Não autenticado</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="sign-in-google" class="btn">Google</button>
+        <button id="sign-in-anon" class="btn">Convidado</button>
+        <button id="sign-out" class="btn" style="display:none">Sair</button>
+      </div>
+    </header>
+
+    <main class="chat" aria-live="polite">
+      <div class="welcome small">Mensagens em tempo real com Firebase. Credenciais já configuradas.</div>
+      <div id="messages" class="messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+
+      <footer class="composer" aria-label="Compor mensagem">
+        <label class="file-label" title="Enviar imagem">
+          📷
+          <input type="file" id="fileInput" accept="image/*">
+        </label>
+
+        <input id="textInput" type="text" placeholder="Mensagem..." autocomplete="off" />
+
+        <div class="composer-right">
+          <img id="imgPreview" class="image-preview" style="display:none" alt="preview">
+          <div class="progress" title="Progresso" style="display:none"><i id="progressBar"></i></div>
+          <div class="status" id="statusText"></div>
+          <button id="sendBtn" class="primary">Enviar</button>
+        </div>
+      </footer>
+    </main>
+
+    <div class="footer-note">
+      Domínio deve estar nas Authorized domains do Firebase Auth
+    </div>
+  </div>
+
+  <script type="module">
+    const firebaseConfig = {
+      apiKey: "AIzaSyAXZM8kj9S7OKmyotiPHApbh9q6GdawFy8",
+      authDomain: "chat00-26b92.firebaseapp.com",
+      projectId: "chat00-26b92",
+      storageBucket: "chat00-26b92.appspot.com",
+      messagingSenderId: "403804311969",
+      appId: "1:403804311969:web:409a01d79bf9e386497be0",
+      measurementId: "G-H9VPNYPRMB"
+    };
+
+    (function initEruda(){
+      try {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/eruda';
+        s.onload = () => { eruda.init(); };
+        document.head.appendChild(s);
+      } catch(e){}
+    })();
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getAuth, GoogleAuthProvider, signInWithPopup, signInAnonymously, signOut, onAuthStateChanged, updateProfile
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import {
+      getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import {
+      getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
+    import {
+      getDatabase, ref as rdbRef, set as rdbSet, onValue as rdbOnValue, onDisconnect as rdbOnDisconnect
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    let rtdb;
+    try { rtdb = getDatabase(app); } catch(e){}
+
+    const signInGoogleBtn = document.getElementById('sign-in-google');
+    const signInAnonBtn = document.getElementById('sign-in-anon');
+    const signOutBtn = document.getElementById('sign-out');
+    const userNameEl = document.getElementById('user-name');
+    const avatarEl = document.getElementById('avatar');
+    const messagesEl = document.getElementById('messages');
+    const textInput = document.getElementById('textInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const fileInput = document.getElementById('fileInput');
+    const imgPreview = document.getElementById('imgPreview');
+    const progressBar = document.getElementById('progressBar');
+    const progressWrap = document.querySelector('.progress');
+    const statusText = document.getElementById('statusText');
+    const onlineEl = document.getElementById('online');
+
+    let currentUser = null;
+    let presenceInterval = null;
+
+    signInGoogleBtn.addEventListener('click', async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (e) {
+        alert('Erro: ' + (e.message || e));
+      }
+    });
+
+    signInAnonBtn.addEventListener('click', async () => {
+      try {
+        const res = await signInAnonymously(auth);
+        await updateProfile(res.user, { displayName: 'Convidado_' + res.user.uid.slice(0,5) });
+      } catch (e) {
+        alert('Erro: ' + (e.message || e));
+      }
+    });
+
+    signOutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+      } catch(e){}
+    });
+
+    onAuthStateChanged(auth, user => {
+      currentUser = user;
+      if (user) {
+        userNameEl.textContent = user.displayName || ('User ' + user.uid.slice(0,6));
+        avatarEl.innerHTML = user.photoURL ? `<img src="${user.photoURL}" alt="avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%">` : (user.displayName ? user.displayName[0].toUpperCase() : 'U');
+        signInGoogleBtn.style.display='none';
+        signInAnonBtn.style.display='none';
+        signOutBtn.style.display='inline-block';
+        if (rtdb) initPresence(user);
+      } else {
+        userNameEl.textContent = 'Não autenticado';
+        avatarEl.textContent = '?';
+        signInGoogleBtn.style.display='inline-block';
+        signInAnonBtn.style.display='inline-block';
+        signOutBtn.style.display='none';
+        if (presenceInterval) { clearInterval(presenceInterval); presenceInterval = null; }
+      }
+    });
+
+    function initPresence(user) {
+      try {
+        const presRef = rdbRef(rtdb, 'presence/' + user.uid);
+        rdbSet(presRef, { name: user.displayName || ('User ' + user.uid.slice(0,6)), photoURL: user.photoURL || null, lastSeen: Date.now() })
+          .catch(()=>{});
+        const onDisc = rdbOnDisconnect(presRef);
+        onDisc.remove().catch(()=>{});
+
+        if (presenceInterval) clearInterval(presenceInterval);
+        presenceInterval = setInterval(() => {
+          rdbSet(presRef, { name: user.displayName || ('User ' + user.uid.slice(0,6)), photoURL: user.photoURL || null, lastSeen: Date.now() })
+            .catch(()=>{});
+        }, 25000);
+      } catch (err) {}
+    }
+
+    if (rtdb) {
+      const listRef = rdbRef(rtdb, 'presence');
+      rdbOnValue(listRef, snapshot => {
+        const data = snapshot.val() || {};
+        renderOnline(Object.values(data));
+      }, ()=>{});
+    } else {
+      onlineEl.innerHTML = '<span class="small">—</span>';
+    }
+
+    function renderOnline(list) {
+      if (!list || list.length === 0) {
+        onlineEl.innerHTML = '<span class="small">0 online</span>';
+        return;
+      }
+      onlineEl.innerHTML = '';
+      const limited = list.slice(0,5);
+      limited.forEach(u => {
+        const a = document.createElement('div'); a.className='online-avatar';
+        if (u.photoURL) a.innerHTML = `<img src="${u.photoURL}">`;
+        else a.textContent = (u.name || 'U')[0].toUpperCase();
+        onlineEl.appendChild(a);
+      });
+      if (list.length > 5) {
+        const more = document.createElement('div'); more.className='small'; more.style.marginLeft='4px';
+        more.textContent = '+' + (list.length - 5);
+        onlineEl.appendChild(more);
+      }
+    }
+
+    const messagesCol = collection(db, 'messages');
+    const messagesQuery = query(messagesCol, orderBy('createdAt', 'desc'), limit(200));
+    onSnapshot(messagesQuery, snapshot => {
+      const docs = [];
+      snapshot.forEach(d => docs.push({ id: d.id, ...d.data() }));
+      docs.reverse();
+      const atBottom = isScrolledToBottom();
+      messagesEl.innerHTML = '';
+      docs.forEach(renderMessage);
+      if (atBottom) scrollToBottom();
+    }, err => {
+      statusText.textContent = 'Erro ao carregar';
+    });
+
+    function renderMessage(msg) {
+      const my = currentUser && msg.uid === currentUser.uid;
+      const m = document.createElement('div');
+      m.className = 'message' + (my ? ' mine' : '');
+
+      const meta = document.createElement('div'); meta.className='meta';
+      const name = document.createElement('span'); name.className='name'; name.textContent = msg.name || 'Anon';
+      const time = document.createElement('span'); time.className='time';
+      try {
+        if (msg.createdAt && msg.createdAt.toDate) time.textContent = formatTime(msg.createdAt.toDate());
+        else time.textContent = '';
+      } catch (e) { time.textContent = ''; }
+      meta.appendChild(name); meta.appendChild(time);
+
+      const text = document.createElement('div'); text.className = 'text'; if (msg.text) text.textContent = msg.text;
+
+      m.appendChild(meta);
+      if (msg.text) m.appendChild(text);
+      if (msg.imageUrl) {
+        const img = document.createElement('img');
+        img.src = msg.imageUrl;
+        img.className = 'msg-img';
+        img.alt = 'imagem';
+        m.appendChild(img);
+      }
+      messagesEl.appendChild(m);
+    }
+
+    function formatTime(d) {
+      const h = d.getHours().toString().padStart(2,'0');
+      const m = d.getMinutes().toString().padStart(2,'0');
+      return h + ':' + m;
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    textInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+
+    fileInput.addEventListener('change', () => {
+      const f = fileInput.files[0];
+      if (!f) { imgPreview.style.display = 'none'; return; }
+      const url = URL.createObjectURL(f);
+      imgPreview.src = url;
+      imgPreview.style.display = 'block';
+    });
+
+    async function sendMessage() {
+      if (!currentUser) { alert('Faz login primeiro'); return; }
+      const text = textInput.value.trim();
+      const file = fileInput.files[0];
+      if (!text && !file) return;
+
+      sendBtn.disabled = true;
+      statusText.textContent = 'Enviando...';
+      progressWrap.style.display = 'none';
+      progressBar.style.width = '0%';
+
+      try {
+        let imageUrl = null;
+        if (file) {
+          const path = `chat_images/${currentUser.uid}_${Date.now()}_${file.name.replace(/\s/g,'_')}`;
+          const sRef = storageRef(storage, path);
+          const uploadTask = uploadBytesResumable(sRef, file);
+
+          progressWrap.style.display = 'block';
+          await new Promise((resolve, reject) => {
+            uploadTask.on('state_changed',
+              snapshot => {
+                const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                progressBar.style.width = pct + '%';
+                statusText.textContent = pct + '%';
+              },
+              error => reject(error),
+              async () => {
+                imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve();
+              }
+            );
+          });
+          fileInput.value = '';
+          imgPreview.style.display = 'none';
+        }
+
+        await addDoc(messagesCol, {
+          uid: currentUser.uid,
+          name: currentUser.displayName || ('User ' + currentUser.uid.slice(0,6)),
+          photoURL: currentUser.photoURL || null,
+          text: text || null,
+          imageUrl: imageUrl || null,
+          createdAt: serverTimestamp()
+        });
+
+        textInput.value = '';
+        statusText.textContent = '';
+      } catch (e) {
+        alert('Erro: ' + (e.message || e));
+        statusText.textContent = 'Erro';
+      } finally {
+        sendBtn.disabled = false;
+        progressWrap.style.display = 'none';
+        progressBar.style.width = '0%';
+      }
+    }
+
+    function scrollToBottom() { messagesEl.scrollTop = messagesEl.scrollHeight; }
+    function isScrolledToBottom() {
+      return (messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight) < 150;
+    }
+
+    textInput.focus();
+  </script>
+</body>
+</html>
