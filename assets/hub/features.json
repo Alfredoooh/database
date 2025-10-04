@@ -1,0 +1,127 @@
+[
+  {
+    "id": "feat_001",
+    "name": "Editor de Fotos",
+    "description": "Editor profissional de fotos com filtros avançados e ferramentas de edição completas",
+    "icon_url": "https://example.com/icons/photo-editor.png",
+    "category": "Fotografia",
+    "rating": 4.8,
+    "screenshots": [
+      "https://example.com/screenshots/photo-editor-1.jpg",
+      "https://example.com/screenshots/photo-editor-2.jpg",
+      "https://example.com/screenshots/photo-editor-3.jpg"
+    ],
+    "version": "2.5.1",
+    "developer": "PhotoPro Team",
+    "downloads": 125000
+  },
+  {
+    "id": "feat_002",
+    "name": "Assistente de Voz",
+    "description": "Comandos de voz inteligentes para controlar seu dispositivo",
+    "icon_url": "https://example.com/icons/voice-assistant.png",
+    "category": "Produtividade",
+    "rating": 4.6,
+    "screenshots": [
+      "https://example.com/screenshots/voice-1.jpg",
+      "https://example.com/screenshots/voice-2.jpg"
+    ],
+    "version": "3.0.0",
+    "developer": "VoiceTech",
+    "downloads": 89000
+  },
+  {
+    "id": "feat_003",
+    "name": "Scanner QR",
+    "description": "Leitor rápido e preciso de códigos QR e códigos de barras",
+    "icon_url": "https://example.com/icons/qr-scanner.png",
+    "category": "Utilitários",
+    "rating": 4.9,
+    "screenshots": [
+      "https://example.com/screenshots/qr-1.jpg",
+      "https://example.com/screenshots/qr-2.jpg",
+      "https://example.com/screenshots/qr-3.jpg"
+    ],
+    "version": "1.8.2",
+    "developer": "ScanTech",
+    "downloads": 250000
+  },
+  {
+    "id": "feat_004",
+    "name": "Gestor de Tarefas",
+    "description": "Organize suas tarefas diárias com lembretes inteligentes",
+    "icon_url": "https://example.com/icons/task-manager.png",
+    "category": "Produtividade",
+    "rating": 4.7,
+    "screenshots": [
+      "https://example.com/screenshots/tasks-1.jpg",
+      "https://example.com/screenshots/tasks-2.jpg"
+    ],
+    "version": "4.1.0",
+    "developer": "TaskMaster",
+    "downloads": 156000
+  },
+  {
+    "id": "feat_005",
+    "name": "Editor de Vídeo",
+    "description": "Crie vídeos incríveis com efeitos profissionais e transições suaves",
+    "icon_url": "https://example.com/icons/video-editor.png",
+    "category": "Multimídia",
+    "rating": 4.5,
+    "screenshots": [
+      "https://example.com/screenshots/video-1.jpg",
+      "https://example.com/screenshots/video-2.jpg",
+      "https://example.com/screenshots/video-3.jpg",
+      "https://example.com/screenshots/video-4.jpg"
+    ],
+    "version": "5.2.3",
+    "developer": "VideoProStudio",
+    "downloads": 98000
+  },
+  {
+    "id": "feat_006",
+    "name": "Tradutor Instantâneo",
+    "description": "Traduza texto e fala em tempo real para mais de 100 idiomas",
+    "icon_url": "https://example.com/icons/translator.png",
+    "category": "Utilitários",
+    "rating": 4.8,
+    "screenshots": [
+      "https://example.com/screenshots/translator-1.jpg",
+      "https://example.com/screenshots/translator-2.jpg"
+    ],
+    "version": "2.9.1",
+    "developer": "LinguaTech",
+    "downloads": 187000
+  },
+  {
+    "id": "feat_007",
+    "name": "Fitness Tracker",
+    "description": "Acompanhe seus exercícios, calorias e progresso fitness",
+    "icon_url": "https://example.com/icons/fitness.png",
+    "category": "Saúde",
+    "rating": 4.6,
+    "screenshots": [
+      "https://example.com/screenshots/fitness-1.jpg",
+      "https://example.com/screenshots/fitness-2.jpg",
+      "https://example.com/screenshots/fitness-3.jpg"
+    ],
+    "version": "3.4.0",
+    "developer": "FitLife",
+    "downloads": 134000
+  },
+  {
+    "id": "feat_008",
+    "name": "Notas Inteligentes",
+    "description": "Tome notas com reconhecimento de escrita e organização automática",
+    "icon_url": "https://example.com/icons/smart-notes.png",
+    "category": "Produtividade",
+    "rating": 4.9,
+    "screenshots": [
+      "https://example.com/screenshots/notes-1.jpg",
+      "https://example.com/screenshots/notes-2.jpg"
+    ],
+    "version": "6.0.2",
+    "developer": "NoteMaster",
+    "downloads": 201000
+  }
+]
