@@ -65,6 +65,30 @@
       "blocked": false,
       "failed_attempts": 0,
       "blocked_until": null
+    },
+    {
+      "id": "usr_004",
+      "username": "Yolanda",
+      "email": "940710396yolanda@gmail.com",
+      "password": "@jonas00",
+      "full_name": "Yolanda",
+      "birth_date": "",
+      "phone": "+244 940 710 396",
+      "access": true,
+      "expiration_date": "2025-10-15T23:59:59",
+      "two_factor_auth": false,
+      "two_factor_code": "",
+      "otp": "",
+      "user_key": "USR-2025-CAB940",
+      "notification_message": "Bem-vinda Yolanda! Sua conta expira em 10 dias.",
+      "created_at": "2025-10-05T00:00:00",
+      "profile_image": "",
+      "role": "user",
+      "blocked": false,
+      "failed_attempts": 0,
+      "blocked_until": null,
+      "province": "Cabinda",
+      "purpose": "Make money"
     }
   ],
   "system_settings": {
