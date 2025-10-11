@@ -1,0 +1,169 @@
+{
+  "version": "1.0",
+  "lastUpdate": "2025-10-12T14:30:00Z",
+  "totalArticles": 10,
+  "articles": [
+    {
+      "id": "custom_001",
+      "title": "Nova Tecnologia de IA Revoluciona o Mercado Brasileiro",
+      "description": "Empresas brasileiras começam a adotar inteligência artificial de última geração para otimizar processos e aumentar produtividade. A tecnologia promete transformar diversos setores da economia nacional, desde agricultura até serviços financeiros.",
+      "content": "A revolução da inteligência artificial chegou ao Brasil com força total. Empresas de todos os portes estão investindo pesadamente em soluções de IA para automatizar processos, melhorar atendimento ao cliente e tomar decisões mais assertivas baseadas em dados.",
+      "imageUrl": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800",
+      "source": "Tech News Brasil",
+      "author": "Maria Silva",
+      "category": "technology",
+      "publishedAt": "2025-10-12T10:00:00Z",
+      "url": "https://example.com/news/ia-revoluciona-mercado",
+      "tags": ["IA", "Tecnologia", "Brasil", "Inovação"]
+    },
+    {
+      "id": "custom_002",
+      "title": "Bolsa de Valores Atinge Novo Recorde Histórico",
+      "description": "Ibovespa ultrapassa marca histórica impulsionado por setor de commodities e expectativas positivas do mercado. Investidores comemoram resultados e analistas preveem continuidade da alta.",
+      "content": "O principal índice da bolsa brasileira fechou em alta recorde, impulsionado principalmente pelos setores de commodities e tecnologia. Analistas atribuem o desempenho às expectativas positivas em relação à economia global.",
+      "imageUrl": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800",
+      "source": "Economia em Foco",
+      "author": "João Santos",
+      "category": "business",
+      "publishedAt": "2025-10-12T08:30:00Z",
+      "url": "https://example.com/news/bolsa-recorde",
+      "tags": ["Economia", "Bolsa", "Investimentos", "Ibovespa"]
+    },
+    {
+      "id": "custom_003",
+      "title": "Seleção Brasileira Vence Amistoso Internacional",
+      "description": "Brasil derrota rival sul-americano por 3 a 1 em jogo preparatório para competições internacionais. Técnico elogia desempenho da equipe e destaca jovens talentos.",
+      "content": "Em partida disputada no Maracanã, a seleção brasileira mostrou bom futebol e conquistou importante vitória. Os gols foram marcados por três jogadores diferentes, demonstrando a força ofensiva da equipe.",
+      "imageUrl": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800",
+      "source": "Esporte Total",
+      "author": "Pedro Costa",
+      "category": "sports",
+      "publishedAt": "2025-10-12T06:15:00Z",
+      "url": "https://example.com/news/selecao-vence",
+      "tags": ["Futebol", "Seleção", "Esporte", "Brasil"]
+    },
+    {
+      "id": "custom_004",
+      "title": "Novo Tratamento para Diabetes Mostra Resultados Promissores",
+      "description": "Pesquisadores brasileiros desenvolvem terapia inovadora que pode revolucionar o tratamento de diabetes tipo 2. Estudos clínicos apresentam taxa de sucesso superior a 80%.",
+      "content": "Uma equipe de cientistas brasileiros apresentou resultados animadores de um novo tratamento para diabetes tipo 2. A terapia combina medicamentos inovadores com acompanhamento digital, mostrando eficácia superior aos métodos tradicionais.",
+      "imageUrl": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800",
+      "source": "Saúde & Bem-Estar",
+      "author": "Dra. Ana Paula",
+      "category": "health",
+      "publishedAt": "2025-10-12T04:00:00Z",
+      "url": "https://example.com/news/tratamento-diabetes",
+      "tags": ["Saúde", "Medicina", "Pesquisa", "Diabetes"]
+    },
+    {
+      "id": "custom_005",
+      "title": "Festival de Cinema Brasileiro Anuncia Programação Completa",
+      "description": "Maior evento cinematográfico do país revela lista de filmes participantes e homenageados. Expectativa é de público recorde nas salas de cinema.",
+      "content": "O festival contará com mais de 200 filmes de diversos gêneros, incluindo produções inéditas e clássicos restaurados. A programação também inclui debates, workshops e encontros com cineastas renomados.",
+      "imageUrl": "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=800",
+      "source": "Cultura & Arte",
+      "author": "Carlos Mendes",
+      "category": "entertainment",
+      "publishedAt": "2025-10-11T22:45:00Z",
+      "url": "https://example.com/news/festival-cinema",
+      "tags": ["Cinema", "Cultura", "Festival", "Arte"]
+    },
+    {
+      "id": "custom_006",
+      "title": "Startup Brasileira Recebe Investimento Milionário",
+      "description": "Empresa de tecnologia focada em soluções sustentáveis capta R$ 50 milhões em nova rodada de investimentos. Recursos serão usados para expansão nacional e internacional.",
+      "content": "A startup, que desenvolve tecnologias para economia circular, atraiu investidores nacionais e internacionais. A empresa planeja triplicar sua equipe e expandir operações para outros países da América Latina.",
+      "imageUrl": "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800",
+      "source": "Startups Brasil",
+      "author": "Fernanda Lima",
+      "category": "business",
+      "publishedAt": "2025-10-11T20:00:00Z",
+      "url": "https://example.com/news/startup-investimento",
+      "tags": ["Startups", "Investimento", "Tecnologia", "Sustentabilidade"]
+    },
+    {
+      "id": "custom_007",
+      "title": "Descoberta Científica Brasileira Ganha Destaque Mundial",
+      "description": "Pesquisadores da Amazônia identificam nova espécie com potencial medicinal. Descoberta é publicada em revista científica internacional de prestígio.",
+      "content": "A nova espécie descoberta na floresta amazônica apresenta compostos químicos únicos que podem ser utilizados no desenvolvimento de novos medicamentos. A descoberta reforça a importância da preservação da biodiversidade brasileira.",
+      "imageUrl": "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+      "source": "Ciência Hoje",
+      "author": "Dr. Roberto Alves",
+      "category": "science",
+      "publishedAt": "2025-10-11T18:30:00Z",
+      "url": "https://example.com/news/descoberta-cientifica",
+      "tags": ["Ciência", "Amazônia", "Pesquisa", "Biodiversidade"]
+    },
+    {
+      "id": "custom_008",
+      "title": "Aplicativo Brasileiro de Educação Alcança 10 Milhões de Usuários",
+      "description": "Plataforma de ensino digital gratuita atinge marca histórica e se torna referência em educação a distância. Ferramenta oferece cursos em diversas áreas do conhecimento.",
+      "content": "O aplicativo, desenvolvido por educadores brasileiros, oferece conteúdo gratuito de alta qualidade para estudantes de todas as idades. A plataforma utiliza inteligência artificial para personalizar o aprendizado de cada usuário.",
+      "imageUrl": "https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=800",
+      "source": "Educação Digital",
+      "author": "Luciana Ferreira",
+      "category": "technology",
+      "publishedAt": "2025-10-11T16:00:00Z",
+      "url": "https://example.com/news/app-educacao",
+      "tags": ["Educação", "Tecnologia", "Aplicativo", "Ensino"]
+    },
+    {
+      "id": "custom_009",
+      "title": "Campeonato Mundial de E-Sports Será Sediado no Brasil",
+      "description": "País foi escolhido para sediar um dos maiores torneios de jogos eletrônicos do mundo. Evento deve movimentar milhões em economia e atrair público internacional.",
+      "content": "O Brasil receberá pela primeira vez o campeonato mundial de e-sports, consolidando-se como um dos principais destinos para eventos de jogos eletrônicos. O torneio distribuirá prêmios milionários e contará com transmissão global.",
+      "imageUrl": "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800",
+      "source": "Gaming Brasil",
+      "author": "Rodrigo Gomes",
+      "category": "entertainment",
+      "publishedAt": "2025-10-11T14:20:00Z",
+      "url": "https://example.com/news/mundial-esports",
+      "tags": ["E-sports", "Games", "Campeonato", "Entretenimento"]
+    },
+    {
+      "id": "custom_010",
+      "title": "Programa de Reciclagem Inovador Reduz Lixo Urbano em 40%",
+      "description": "Cidade brasileira implementa sistema revolucionário de coleta seletiva e reciclagem. Iniciativa serve de modelo para outras regiões do país.",
+      "content": "O programa combina tecnologia, educação ambiental e incentivos econômicos para aumentar significativamente as taxas de reciclagem. Moradores recebem benefícios por participarem ativamente da coleta seletiva.",
+      "imageUrl": "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800",
+      "source": "Meio Ambiente Hoje",
+      "author": "Beatriz Oliveira",
+      "category": "science",
+      "publishedAt": "2025-10-11T12:00:00Z",
+      "url": "https://example.com/news/programa-reciclagem",
+      "tags": ["Sustentabilidade", "Reciclagem", "Meio Ambiente", "Inovação"]
+    }
+  ],
+  "categories": [
+    {
+      "id": "technology",
+      "name": "Tecnologia",
+      "description": "Notícias sobre inovação, startups e avanços tecnológicos"
+    },
+    {
+      "id": "business",
+      "name": "Negócios",
+      "description": "Economia, mercado financeiro e mundo corporativo"
+    },
+    {
+      "id": "sports",
+      "name": "Esportes",
+      "description": "Futebol, olimpíadas e competições esportivas"
+    },
+    {
+      "id": "health",
+      "name": "Saúde",
+      "description": "Medicina, bem-estar e qualidade de vida"
+    },
+    {
+      "id": "entertainment",
+      "name": "Entretenimento",
+      "description": "Cinema, música, cultura e lazer"
+    },
+    {
+      "id": "science",
+      "name": "Ciência",
+      "description": "Descobertas científicas e meio ambiente"
+    }
+  ]
+}
