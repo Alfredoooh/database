@@ -1,0 +1,56 @@
+{
+  "plans": [
+    {
+      "name": "Básico",
+      "price": "Grátis",
+      "tokens": "10",
+      "period": "por semana",
+      "color": "#6C757D",
+      "features": [
+        "10 tokens por semana",
+        "Acesso às notícias básicas",
+        "Visualização de criptomoedas",
+        "Suporte por email"
+      ],
+      "popular": false
+    },
+    {
+      "name": "Premium",
+      "price": "$9.99",
+      "tokens": "500",
+      "period": "por mês",
+      "color": "#FF444F",
+      "features": [
+        "500 tokens por mês",
+        "Acesso a todas as notícias",
+        "Análise de mercado avançada",
+        "Criar publicações ilimitadas",
+        "Suporte prioritário 24/7",
+        "Sem anúncios"
+      ],
+      "popular": true
+    },
+    {
+      "name": "Pro",
+      "price": "$29.99",
+      "tokens": "∞",
+      "period": "por mês",
+      "color": "#00D4FF",
+      "features": [
+        "Tokens ilimitados",
+        "Todas as funcionalidades Premium",
+        "Acesso a recursos exclusivos",
+        "Sinais de trading em tempo real",
+        "Consultoria personalizada",
+        "Badge PRO no perfil",
+        "Acesso antecipado a novos recursos"
+      ],
+      "popular": false
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2025-10-15T00:00:00Z",
+    "currency": "USD"
+  }
+}
