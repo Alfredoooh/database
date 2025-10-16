@@ -1,7 +1,7 @@
 {
   "upload_email": "seu-email@exemplo.com",
   "support_email": "suporte@exemplo.com",
-  "admin_email": "admin@exemplo.com",
+  "admin_email": "alfredopjonas@gmail.com",
   "info": {
     "description": "Email configurado para receber uploads de imagens de publicações",
     "instructions": "As imagens enviadas para este email devem ser processadas e hospedadas, retornando o link público",
