@@ -5,58 +5,222 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>OAuth Redirect — madeeasy</title>
   <style>
-    body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; background:#f7f7f8; color:#111; }
-    .card { text-align:center; max-width:640px; padding:24px; border-radius:12px; background:white; box-shadow:0 8px 30px rgba(0,0,0,0.08); }
-    a.small{ color:#ff444f; text-decoration:none; font-weight:600 }
-    pre { text-align:left; background:#f4f4f6; padding:12px; border-radius:8px; overflow:auto; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      min-height: 100vh; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 20px;
+    }
+    .card { 
+      text-align: center; 
+      max-width: 480px; 
+      width: 100%;
+      padding: 40px 32px; 
+      border-radius: 20px; 
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      color: #333;
+    }
+    .icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, #ff444f 0%, #ff6b6b 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    h2 { 
+      font-size: 24px; 
+      font-weight: 700; 
+      margin-bottom: 12px;
+      color: #1a1a1a;
+    }
+    p { 
+      font-size: 16px; 
+      color: #666; 
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .btn {
+      display: inline-block;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #ff444f 0%, #ff6b6b 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 68, 79, 0.3);
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 68, 79, 0.4);
+    }
+    .info {
+      margin-top: 24px;
+      padding: 16px;
+      background: #f5f5f5;
+      border-radius: 12px;
+      font-size: 13px;
+      color: #666;
+      word-break: break-all;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      margin: 20px auto;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #ff444f;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    small {
+      display: block;
+      margin-top: 24px;
+      color: #999;
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>Redirecionando para a app…</h2>
-    <p>Se o redirecionamento automático falhar, usa o botão abaixo.</p>
-    <p><a id="manual" class="small" href="#">Abrir no app</a></p>
-    <p style="color:#666;margin-top:8px;font-size:13px">Redirect HTTPS: <strong>https://alfredoooh.github.io/database/oauth-redirect/</strong></p>
-    <small style="color:#666;display:block;margin-top:8px">Feito por madeeasy</small>
+    <div class="icon">🚀</div>
+    <h2>Redirecionando...</h2>
+    <div class="spinner"></div>
+    <p>Aguarde enquanto te redirecionamos para o app.</p>
+    <p><a id="manual" class="btn" href="#">Abrir App Manualmente</a></p>
+    <div class="info">
+      <strong>URL de Redirect:</strong><br>
+      <span id="redirect-url">Processando...</span>
+    </div>
+    <small>Feito por madeeasy</small>
   </div>
 
   <script>
     (function() {
       try {
-        // Obtem string de query (ex: ?token=...) OU fragment (ex: #access_token=...)
-        var qs = window.location.search || '';
-        var hash = window.location.hash || '';
-
-        // Se tiver fragment (hash), converte para query: '#access_token=abc' -> '?access_token=abc'
-        if ((!qs || qs.length === 0) && hash && hash.length > 0) {
-          qs = '?' + hash.substring(1);
+        // Captura todos os parâmetros (query string e fragment)
+        var params = new URLSearchParams();
+        
+        // Parse query string (?token=xxx)
+        if (window.location.search) {
+          var searchParams = new URLSearchParams(window.location.search);
+          searchParams.forEach(function(value, key) {
+            params.append(key, value);
+          });
+        }
+        
+        // Parse fragment (#access_token=xxx ou #token=xxx)
+        if (window.location.hash) {
+          var hashParams = new URLSearchParams(window.location.hash.substring(1));
+          hashParams.forEach(function(value, key) {
+            params.append(key, value);
+          });
         }
 
-        // Se ambos existirem, preserva ambos (concatena com &)
-        if (window.location.search && window.location.hash) {
-          // remove leading '?' e '#' e concatena
-          var q = window.location.search.substring(1);
-          var h = window.location.hash.substring(1);
-          qs = '?' + q + (h ? ('&' + h) : '');
+        // Normaliza: se tiver 'access_token', também adiciona como 'token'
+        if (params.has('access_token') && !params.has('token')) {
+          params.append('token', params.get('access_token'));
         }
 
-        // Construir target custom-scheme mantendo parâmetros
-        var target = 'com.nexa.madeeasy://oauth' + qs;
+        // Constrói URL de destino
+        var queryString = params.toString();
+        var target = 'com.nexa.madeeasy://oauth' + (queryString ? '?' + queryString : '');
 
+        // Exibe URL de destino na interface
+        document.getElementById('redirect-url').textContent = target;
+        
         // Atualiza link manual
         var link = document.getElementById('manual');
-        if (link) link.href = target;
+        if (link) {
+          link.href = target;
+          link.onclick = function(e) {
+            e.preventDefault();
+            attemptRedirect(target);
+          };
+        }
 
-        // Redirect automático (tenta 3 formas)
+        // Função de redirecionamento com múltiplas tentativas
+        function attemptRedirect(url) {
+          // Método 1: location.replace (mais confiável)
+          try {
+            window.location.replace(url);
+          } catch (e) {
+            console.error('Method 1 failed:', e);
+          }
+
+          // Método 2: location.href (fallback)
+          setTimeout(function() {
+            try {
+              window.location.href = url;
+            } catch (e) {
+              console.error('Method 2 failed:', e);
+            }
+          }, 100);
+
+          // Método 3: window.open (último recurso)
+          setTimeout(function() {
+            try {
+              window.open(url, '_self');
+            } catch (e) {
+              console.error('Method 3 failed:', e);
+            }
+          }, 200);
+
+          // Método 4: criar link invisível e clicar (para iOS)
+          setTimeout(function() {
+            try {
+              var a = document.createElement('a');
+              a.href = url;
+              a.style.display = 'none';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+            } catch (e) {
+              console.error('Method 4 failed:', e);
+            }
+          }, 300);
+        }
+
+        // Inicia redirecionamento automático após 500ms
         setTimeout(function() {
-          // 1) location.href (mais compatível)
-          window.location.href = target;
-          // 2) fallback: open
-          setTimeout(function(){ try { window.open(target, '_self'); } catch(e){} }, 200);
-        }, 250);
+          attemptRedirect(target);
+        }, 500);
+
+        // Log para debug
+        console.log('OAuth Redirect:', {
+          search: window.location.search,
+          hash: window.location.hash,
+          params: Array.from(params.entries()),
+          target: target
+        });
 
       } catch (e) {
-        console.error('Redirect error', e);
+        console.error('Critical redirect error:', e);
+        document.querySelector('.card').innerHTML = 
+          '<div class="icon">❌</div>' +
+          '<h2>Erro no Redirecionamento</h2>' +
+          '<p>Ocorreu um erro ao processar o OAuth. Por favor, tente novamente.</p>' +
+          '<p style="color:#ff444f; font-size:13px; margin-top:20px;">' + e.message + '</p>';
       }
     })();
   </script>
