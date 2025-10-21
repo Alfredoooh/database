@@ -1,316 +1,109 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZoomTrade - Conectando...</title>
+    <title>ZoomTrade - Redirecionando...</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
             color: white;
-        }
-
-        .container {
             text-align: center;
-            padding: 40px;
-            max-width: 500px;
+            padding: 50px 20px;
         }
-
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: white;
-            border-radius: 20px;
-            margin: 0 auto 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        h1 {
-            font-size: 32px;
-            font-weight: 800;
-            margin-bottom: 15px;
-            letter-spacing: -1px;
-        }
-
-        .status {
-            font-size: 18px;
-            opacity: 0.9;
-            margin-bottom: 30px;
-        }
-
         .spinner {
-            width: 50px;
-            height: 50px;
-            margin: 0 auto;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
             border-radius: 50%;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
+            margin: 20px auto;
         }
-
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-
         .error {
-            background: rgba(255, 59, 48, 0.2);
-            border: 2px solid #ff3b30;
-            border-radius: 12px;
+            background: #ff3b30;
             padding: 20px;
-            margin-top: 30px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 400px;
             display: none;
         }
-
-        .error.show {
-            display: block;
-        }
-
-        .error-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .error-message {
-            font-size: 14px;
-            opacity: 0.9;
-            word-break: break-word;
-        }
-
-        .info {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 30px;
-            font-size: 13px;
-            opacity: 0.8;
-        }
-
-        .btn {
+        .error.show { display: block; }
+        button {
             background: white;
-            color: #667eea;
+            color: #1a1a1a;
             border: none;
             padding: 15px 30px;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 16px;
-            font-weight: 600;
             cursor: pointer;
             margin-top: 20px;
-            transition: transform 0.2s;
-        }
-
-        .btn:hover {
-            transform: scale(1.05);
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        .debug {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 20px;
-            font-size: 11px;
-            text-align: left;
-            max-height: 200px;
-            overflow-y: auto;
-            display: none;
-        }
-
-        .debug.show {
-            display: block;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">📈</div>
-        <h1>ZoomTrade</h1>
-        <p class="status" id="status">Conectando sua conta Deriv...</p>
-        <div class="spinner" id="spinner"></div>
-        
-        <div class="error" id="error">
-            <div class="error-title">Erro na Autenticação</div>
-            <div class="error-message" id="errorMessage"></div>
-        </div>
-
-        <div class="info">
-            Esta página irá redirecionar automaticamente para o aplicativo.
-        </div>
-
-        <div class="debug" id="debug"></div>
+    <h1>ZoomTrade</h1>
+    <p id="status">Redirecionando...</p>
+    <div class="spinner" id="spinner"></div>
+    
+    <div class="error" id="error">
+        <p id="errorMessage"></p>
+        <button onclick="window.close()">Fechar</button>
     </div>
 
     <script>
-        // Configuração do deep link
         const APP_SCHEME = 'com.nexa.madeeasy';
-        const CALLBACK_PATH = 'oauth';
         
-        // Log de debug
-        function debugLog(message, data) {
-            console.log(message, data);
-            const debugEl = document.getElementById('debug');
-            debugEl.classList.add('show');
-            const timestamp = new Date().toLocaleTimeString();
-            debugEl.innerHTML += `<div>[${timestamp}] ${message}: ${JSON.stringify(data)}</div>`;
-        }
-
-        // Extrai parâmetros da URL (query string e hash fragment)
-        function extractParams() {
-            const params = new URLSearchParams(window.location.search);
-            
-            // Também verifica hash fragment (alguns OAuth retornam assim)
-            if (window.location.hash) {
-                const hashParams = new URLSearchParams(window.location.hash.substring(1));
-                hashParams.forEach((value, key) => {
-                    if (!params.has(key)) {
-                        params.set(key, value);
-                    }
-                });
-            }
-            
-            return params;
-        }
-        
-        // Função para mostrar erro
-        function showError(message, details) {
-            document.getElementById('status').textContent = 'Falha na conexão';
+        function showError(message) {
+            document.getElementById('status').textContent = 'Erro';
             document.getElementById('spinner').style.display = 'none';
             document.getElementById('error').classList.add('show');
             document.getElementById('errorMessage').textContent = message;
-            
-            debugLog('ERROR', { message, details });
         }
 
-        // Função para redirecionar para o app
-        function redirectToApp(params) {
-            // Constrói a URL de deep link
-            const deepLinkUrl = `${APP_SCHEME}://${CALLBACK_PATH}?${params.toString()}`;
+        function redirect() {
+            const params = new URLSearchParams(window.location.search);
             
-            debugLog('Construído Deep Link', deepLinkUrl);
+            // Verifica hash também
+            if (window.location.hash) {
+                const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                hashParams.forEach((value, key) => {
+                    if (!params.has(key)) params.set(key, value);
+                });
+            }
             
-            // Tenta redirecionar
-            window.location.href = deepLinkUrl;
+            // Verifica erro
+            if (params.has('error')) {
+                showError(params.get('error_description') || params.get('error'));
+                return;
+            }
+
+            // Verifica se tem conta
+            if (!params.has('acct1') || !params.has('token1')) {
+                showError('Nenhuma conta autorizada');
+                return;
+            }
+
+            // Redireciona
+            const deepLink = `${APP_SCHEME}://oauth?${params.toString()}`;
+            window.location.href = deepLink;
             
-            // Fallback: se não redirecionar em 3 segundos, mostra botão manual
+            // Fallback
             setTimeout(() => {
-                document.getElementById('status').textContent = 'Abra o aplicativo ZoomTrade';
+                document.getElementById('status').textContent = 'Abra o app ZoomTrade';
                 document.getElementById('spinner').style.display = 'none';
-                
-                // Cria botão manual
                 const btn = document.createElement('button');
-                btn.className = 'btn';
-                btn.textContent = 'Abrir ZoomTrade';
-                btn.onclick = () => {
-                    window.location.href = deepLinkUrl;
-                    // Tenta novamente e se não funcionar, mostra instruções
-                    setTimeout(() => {
-                        alert('Se o app não abrir automaticamente:\n\n1. Verifique se o app está instalado\n2. Tente abrir o app manualmente\n3. Faça login novamente');
-                    }, 2000);
-                };
-                document.querySelector('.container').appendChild(btn);
-            }, 3000);
+                btn.textContent = 'Abrir App';
+                btn.onclick = () => window.location.href = deepLink;
+                document.body.appendChild(btn);
+            }, 2000);
         }
 
-        // Processa o callback OAuth
-        function processOAuthCallback() {
-            const urlParams = extractParams();
-            
-            debugLog('URL Atual', window.location.href);
-            debugLog('Parâmetros Recebidos', Object.fromEntries(urlParams));
-            
-            // Verifica se há erro na URL
-            if (urlParams.has('error')) {
-                const error = urlParams.get('error');
-                const errorDescription = urlParams.get('error_description') || 'Erro desconhecido';
-                showError(`${error}: ${errorDescription}`, { error, errorDescription });
-                return;
-            }
-
-            // Verifica se há parâmetros de conta
-            // A Deriv retorna: acct1, token1, cur1, acct2, token2, cur2, etc.
-            const hasAccount = urlParams.has('acct1');
-            const hasToken = urlParams.has('token1');
-
-            if (!hasAccount || !hasToken) {
-                showError(
-                    'Nenhuma conta foi autorizada. Tente novamente.', 
-                    { 
-                        hasAccount, 
-                        hasToken,
-                        allParams: Object.fromEntries(urlParams)
-                    }
-                );
-                return;
-            }
-
-            // Extrai todas as contas retornadas
-            const accounts = [];
-            let index = 1;
-            
-            while (urlParams.has(`acct${index}`)) {
-                const account = {
-                    id: urlParams.get(`acct${index}`),
-                    token: urlParams.get(`token${index}`),
-                    currency: urlParams.get(`cur${index}`) || 'USD'
-                };
-                accounts.push(account);
-                index++;
-            }
-
-            debugLog('Contas Encontradas', { count: accounts.length, accounts });
-
-            if (accounts.length === 0) {
-                showError('Nenhuma conta válida encontrada', { urlParams: Object.fromEntries(urlParams) });
-                return;
-            }
-
-            // Redireciona para o app com TODOS os parâmetros originais
-            // Isso mantém a compatibilidade com múltiplas contas
-            redirectToApp(urlParams);
-        }
-
-        // Executa quando a página carregar
-        window.addEventListener('DOMContentLoaded', () => {
-            try {
-                // Pequeno delay para garantir que a URL está completa
-                setTimeout(() => {
-                    processOAuthCallback();
-                }, 100);
-            } catch (error) {
-                console.error('Erro ao processar callback:', error);
-                showError('Erro ao processar autenticação', error.toString());
-            }
-        });
-
-        // Detecta se o usuário voltou para a página (app não abriu)
-        let hidden = false;
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                hidden = true;
-            } else if (hidden) {
-                // Usuário voltou para a página - provavelmente o app não abriu
-                document.getElementById('status').textContent = 'Não foi possível abrir o app automaticamente';
-                debugLog('Visibilidade mudou', 'Usuário retornou à página');
-            }
-        });
+        setTimeout(redirect, 100);
     </script>
 </body>
 </html>
