@@ -101,6 +101,17 @@
             box-shadow: 0 5px 20px rgba(255, 106, 47, 0.4);
         }
 
+        .debug {
+            display: none;
+            margin-top: 20px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 12px;
+            color: #8E8E93;
+            word-break: break-all;
+        }
+
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -128,52 +139,84 @@
             ❌ Erro ao redirecionar. Por favor, clique no botão abaixo.
         </div>
 
-        <!-- SUBSTITUA pela URL da sua aplicação web -->
         <a href="https://novasignaltest0-01.onrender.com" class="manual-link" id="manualLink" style="display: none;">
             Ir para NovaSignal
         </a>
+
+        <div class="debug" id="debug"></div>
     </div>
 
     <script>
-        // Extrair parâmetros da URL (tokens do Deriv)
+        // Extrair TODOS os parâmetros da URL
         const urlParams = new URLSearchParams(window.location.search);
+        
+        // Parâmetros comuns do Deriv OAuth
         const token1 = urlParams.get('token1');
         const acct1 = urlParams.get('acct1');
+        const code = urlParams.get('code');
+        const state = urlParams.get('state');
 
-        // URL da sua aplicação web
-        // SUBSTITUA pela URL real da sua aplicação hospedada
-        const webAppUrl = 'https://novasignaltest0-01.onrender.com'; // Exemplo: https://novasignal.web.app
+        // URL da sua aplicação web (SEM BARRA NO FINAL!)
+        const webAppUrl = 'https://novasignaltest0-01.onrender.com';
 
-        // Construir URL de callback com os parâmetros
-        let redirectUrl = `${webAppUrl}/deriv-callback`;
+        // Construir URL com FRAGMENT (#) ao invés de query (?)
+        // Isso é ESSENCIAL para Flutter Web funcionar!
+        let redirectUrl = webAppUrl;
         
-        if (token1) {
-            redirectUrl += `?token1=${encodeURIComponent(token1)}`;
-            if (acct1) {
-                redirectUrl += `&acct1=${encodeURIComponent(acct1)}`;
+        // Adicionar parâmetros como FRAGMENT
+        const params = [];
+        
+        if (token1) params.push(`token1=${encodeURIComponent(token1)}`);
+        if (acct1) params.push(`acct1=${encodeURIComponent(acct1)}`);
+        if (code) params.push(`code=${encodeURIComponent(code)}`);
+        if (state) params.push(`state=${encodeURIComponent(state)}`);
+
+        // Adicionar TODOS os outros parâmetros
+        for (const [key, value] of urlParams.entries()) {
+            if (!['token1', 'acct1', 'code', 'state'].includes(key)) {
+                params.push(`${key}=${encodeURIComponent(value)}`);
             }
         }
+
+        // Se tiver parâmetros, adicionar como FRAGMENT (#)
+        if (params.length > 0) {
+            redirectUrl += '#/deriv?' + params.join('&');
+        }
+
+        // Debug info (apenas para desenvolvimento)
+        const debugInfo = `
+            Tokens recebidos: ${token1 ? 'Sim' : 'Não'}
+            Redirect URL: ${redirectUrl}
+            Params: ${params.join(', ')}
+        `;
+        document.getElementById('debug').textContent = debugInfo;
+        document.getElementById('debug').style.display = 'block';
 
         // Atualizar link manual
         document.getElementById('manualLink').href = redirectUrl;
 
-        // Tentar redirecionar automaticamente após 1 segundo
+        // Log para debug
+        console.log('Redirecionando para:', redirectUrl);
+        console.log('Parâmetros:', Object.fromEntries(urlParams));
+
+        // Tentar redirecionar automaticamente após 1.5 segundos
         setTimeout(() => {
             try {
                 window.location.href = redirectUrl;
             } catch (e) {
-                // Se falhar, mostrar erro e botão manual
                 console.error('Erro ao redirecionar:', e);
                 document.querySelector('.spinner').style.display = 'none';
                 document.getElementById('error').style.display = 'block';
                 document.getElementById('manualLink').style.display = 'inline-block';
             }
-        }, 1000);
+        }, 1500);
 
         // Fallback: Se após 5 segundos não redirecionou, mostrar botão
         setTimeout(() => {
-            document.querySelector('.spinner').style.display = 'none';
-            document.getElementById('manualLink').style.display = 'inline-block';
+            if (window.location.href === window.location.href) {
+                document.querySelector('.spinner').style.display = 'none';
+                document.getElementById('manualLink').style.display = 'inline-block';
+            }
         }, 5000);
     </script>
 </body>
