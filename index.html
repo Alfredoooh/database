@@ -2,9 +2,7 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=1920, initial-scale=1.0">
     <title>Resume Editor</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
@@ -19,6 +17,8 @@
             --text-primary: #111111;
             --shadow: 0 4px 12px rgba(16,16,16,0.08);
             --scale: 0.9;
+            --page-bg-image: none;
+            --page-bg-color: #ffffff;
         }
 
         * {
@@ -31,6 +31,7 @@
         html, body {
             height: 100%;
             overflow-x: hidden;
+            min-width: 1200px;
         }
 
         body {
@@ -47,16 +48,20 @@
             overflow-x: hidden;
             padding: 20px 20px 120px 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
             -webkit-overflow-scrolling: touch;
-            align-items: flex-start;
         }
 
         .page {
             width: calc(210mm * var(--scale));
             height: calc(297mm * var(--scale));
-            max-width: 100%;
-            background-color: white;
+            background-color: var(--page-bg-color);
+            background-image: var(--page-bg-image);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
             margin: 0 auto;
             position: relative;
@@ -374,7 +379,7 @@
         .bottom-bar {
             pointer-events: auto;
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             background: var(--bar-bg);
             border-radius: 999px;
             padding: 8px 16px;
@@ -602,24 +607,97 @@
             background: #e2e8f0;
         }
 
-        #fileInput {
+        #fileInput, #bgFileInput {
             display: none;
         }
 
-        @media (max-width: 520px) {
-            .bottom-bar {
-                padding: 6px 12px;
-                max-width: 90%;
-                gap: 4px;
-            }
-            .center-btn {
-                padding: 12px 20px;
-                font-size: 14px;
-            }
-            .tab {
-                width: 44px;
-                height: 44px;
-            }
+        .add-page-btn {
+            width: calc(210mm * var(--scale));
+            height: 60px;
+            background: rgba(255,255,255,0.9);
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: #666;
+            font-size: 15px;
+        }
+
+        .add-page-btn:hover {
+            background: white;
+            border-color: var(--sidebar-accent);
+            color: var(--sidebar-accent);
+        }
+
+        .page-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: none;
+            gap: 5px;
+            z-index: 10;
+        }
+
+        .page:hover .page-controls {
+            display: flex;
+        }
+
+        .page-control-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s;
+        }
+
+        .page-control-btn:hover {
+            background: rgba(0,0,0,0.8);
+        }
+
+        .background-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .bg-option {
+            width: 100%;
+            height: 80px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .bg-option:hover {
+            transform: scale(1.05);
+        }
+
+        .bg-option.selected {
+            border-color: var(--sidebar-accent);
+        }
+
+        .bg-option.solid {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
         }
 
         @media print {
@@ -629,7 +707,9 @@
             }
             .bottom-bar-wrapper,
             .edit-indicator,
-            .zoom-indicator {
+            .zoom-indicator,
+            .page-controls,
+            .add-page-btn {
                 display: none !important;
             }
             .page {
@@ -656,8 +736,17 @@
         Edit mode active
     </div>
 
-    <div class="scroll-container">
-        <div class="page" id="document">
+    <div class="scroll-container" id="scrollContainer">
+        <div class="page" id="page-1" data-page-id="1">
+            <div class="page-controls">
+                <button class="page-control-btn" onclick="duplicatePage(1)" title="Duplicate page">
+                    <ion-icon name="copy-outline"></ion-icon>
+                </button>
+                <button class="page-control-btn" onclick="deletePage(1)" title="Delete page">
+                    <ion-icon name="trash-outline"></ion-icon>
+                </button>
+            </div>
+            
             <div class="sidebar" id="sidebar">
                 <div class="profile-section">
                     <div class="profile-image-wrapper" onclick="document.getElementById('fileInput').click()">
@@ -805,6 +894,11 @@
                 </div>
             </div>
         </div>
+
+        <button class="add-page-btn" onclick="addNewPage()">
+            <ion-icon name="add-circle-outline" style="font-size: 24px;"></ion-icon>
+            <span>Add New Page</span>
+        </button>
     </div>
 
     <div class="bottom-bar-wrapper">
@@ -814,6 +908,9 @@
             </button>
             <button class="tab" id="tab-edit" aria-label="Edit document">
                 <ion-icon name="create-outline"></ion-icon>
+            </button>
+            <button class="tab" id="tab-background" aria-label="Change background">
+                <ion-icon name="image-outline"></ion-icon>
             </button>
             <button class="center-btn" id="btn-download" aria-label="Download PDF">
                 <ion-icon name="download-outline"></ion-icon>
@@ -871,12 +968,51 @@
         </div>
     </div>
 
+    <div class="modal" id="backgroundModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Page Background</h3>
+            
+            <div class="modal-section">
+                <label class="modal-label">Solid Colors</label>
+                <div class="background-options">
+                    <div class="bg-option solid selected" style="background: #ffffff" data-bg-type="color" data-bg-value="#ffffff">White</div>
+                    <div class="bg-option solid" style="background: #f8f9fa" data-bg-type="color" data-bg-value="#f8f9fa">Light</div>
+                    <div class="bg-option solid" style="background: #e9ecef" data-bg-type="color" data-bg-value="#e9ecef">Gray</div>
+                    <div class="bg-option solid" style="background: #fef3c7" data-bg-type="color" data-bg-value="#fef3c7">Cream</div>
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <label class="modal-label">Upload Custom Background</label>
+                <input type="file" id="bgFileInput" accept="image/*">
+                <button class="btn btn-secondary" onclick="document.getElementById('bgFileInput').click()" style="width: 100%; margin-top: 10px;">Choose Image</button>
+            </div>
+
+            <div class="modal-section">
+                <label class="modal-label">Preset Backgrounds</label>
+                <div class="background-options">
+                    <div class="bg-option" style="background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?w=400')" data-bg-type="image" data-bg-value="url('https://images.unsplash.com/photo-1557683316-973673baf926?w=800')"></div>
+                    <div class="bg-option" style="background-image: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400')" data-bg-type="image" data-bg-value="url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800')"></div>
+                    <div class="bg-option" style="background-image: url('https://images.unsplash.com/photo-1554034483-04fda0d3507b?w=400')" data-bg-type="image" data-bg-value="url('https://images.unsplash.com/photo-1554034483-04fda0d3507b?w=800')"></div>
+                    <div class="bg-option" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400')" data-bg-type="image" data-bg-value="url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800')"></div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeBackgroundModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="applyBackground()">Apply</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let currentZoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--scale')) || 0.9;
+        let currentZoom = 0.9;
         let editMode = false;
         let currentAccentColor = '#5b9dd9';
         let currentSidebarColor = '#3d4f5d';
         let currentFileName = 'henry-madison-resume';
+        let pageCounter = 1;
+        let selectedBackground = { type: 'color', value: '#ffffff' };
 
         function updateZoomIndicator() {
             const percentage = Math.round(currentZoom * 100);
@@ -898,8 +1034,8 @@
         const tabZoomIn = document.getElementById('tab-zoom-in');
         const tabEdit = document.getElementById('tab-edit');
         const tabSettings = document.getElementById('tab-settings');
+        const tabBackground = document.getElementById('tab-background');
         const btnDownload = document.getElementById('btn-download');
-        const page = document.getElementById('document');
         const editIndicator = document.getElementById('editIndicator');
 
         function applyScale(scale) {
@@ -932,8 +1068,16 @@
             document.getElementById('settingsModal').classList.add('active');
         });
 
+        tabBackground.addEventListener('click', () => {
+            document.getElementById('backgroundModal').classList.add('active');
+        });
+
         function closeSettingsModal() {
             document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        function closeBackgroundModal() {
+            document.getElementById('backgroundModal').classList.remove('active');
         }
 
         function applySettings() {
@@ -954,6 +1098,19 @@
             closeSettingsModal();
         }
 
+        function applyBackground() {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => {
+                if (selectedBackground.type === 'color') {
+                    page.style.setProperty('--page-bg-color', selectedBackground.value);
+                    page.style.setProperty('--page-bg-image', 'none');
+                } else if (selectedBackground.type === 'image') {
+                    page.style.setProperty('--page-bg-image', selectedBackground.value);
+                }
+            });
+            closeBackgroundModal();
+        }
+
         document.querySelectorAll('.color-option[data-color]').forEach(option => {
             option.addEventListener('click', function() {
                 document.querySelectorAll('.color-option[data-color]').forEach(opt => opt.classList.remove('selected'));
@@ -968,11 +1125,109 @@
             });
         });
 
+        document.querySelectorAll('.bg-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.bg-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedBackground = {
+                    type: this.getAttribute('data-bg-type'),
+                    value: this.getAttribute('data-bg-value')
+                };
+            });
+        });
+
+        document.getElementById('bgFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    selectedBackground = {
+                        type: 'image',
+                        value: `url('${event.target.result}')`
+                    };
+                    document.querySelectorAll('.bg-option').forEach(opt => opt.classList.remove('selected'));
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
         document.getElementById('settingsModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeSettingsModal();
             }
         });
+
+        document.getElementById('backgroundModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeBackgroundModal();
+            }
+        });
+
+        function addNewPage() {
+            pageCounter++;
+            const newPage = document.createElement('div');
+            newPage.className = 'page';
+            newPage.id = `page-${pageCounter}`;
+            newPage.setAttribute('data-page-id', pageCounter);
+            newPage.style.setProperty('--page-bg-color', selectedBackground.type === 'color' ? selectedBackground.value : '#ffffff');
+            if (selectedBackground.type === 'image') {
+                newPage.style.setProperty('--page-bg-image', selectedBackground.value);
+            }
+            
+            newPage.innerHTML = `
+                <div class="page-controls">
+                    <button class="page-control-btn" onclick="duplicatePage(${pageCounter})" title="Duplicate page">
+                        <ion-icon name="copy-outline"></ion-icon>
+                    </button>
+                    <button class="page-control-btn" onclick="deletePage(${pageCounter})" title="Delete page">
+                        <ion-icon name="trash-outline"></ion-icon>
+                    </button>
+                </div>
+                <div class="sidebar"></div>
+                <div class="main-content" contenteditable="${editMode}">
+                    <h2 class="content-section-title">New Page</h2>
+                    <p class="section-description" contenteditable="true">Start typing your content here...</p>
+                </div>
+            `;
+            
+            const addButton = document.querySelector('.add-page-btn');
+            addButton.parentNode.insertBefore(newPage, addButton);
+        }
+
+        function duplicatePage(pageId) {
+            const originalPage = document.getElementById(`page-${pageId}`);
+            if (originalPage) {
+                pageCounter++;
+                const clonedPage = originalPage.cloneNode(true);
+                clonedPage.id = `page-${pageCounter}`;
+                clonedPage.setAttribute('data-page-id', pageCounter);
+                
+                const controls = clonedPage.querySelector('.page-controls');
+                controls.innerHTML = `
+                    <button class="page-control-btn" onclick="duplicatePage(${pageCounter})" title="Duplicate page">
+                        <ion-icon name="copy-outline"></ion-icon>
+                    </button>
+                    <button class="page-control-btn" onclick="deletePage(${pageCounter})" title="Delete page">
+                        <ion-icon name="trash-outline"></ion-icon>
+                    </button>
+                `;
+                
+                const addButton = document.querySelector('.add-page-btn');
+                addButton.parentNode.insertBefore(clonedPage, addButton);
+            }
+        }
+
+        function deletePage(pageId) {
+            const pages = document.querySelectorAll('.page');
+            if (pages.length > 1) {
+                const pageToDelete = document.getElementById(`page-${pageId}`);
+                if (pageToDelete) {
+                    pageToDelete.remove();
+                }
+            } else {
+                alert('Cannot delete the last page!');
+            }
+        }
 
         btnDownload.addEventListener('click', async () => {
             try {
@@ -988,44 +1243,47 @@
                 const originalScale = currentZoom;
                 document.documentElement.style.setProperty('--scale', 1);
 
-                const element = document.getElementById('document');
-                element.classList.add('pdf-rendering');
-
-                // Força renderização correta das barras de progresso
-                document.querySelectorAll('.progress-fill').forEach(fill => {
-                    const width = fill.getAttribute('data-width') + '%';
-                    fill.style.width = width;
-                    fill.style.backgroundColor = currentAccentColor;
+                const pages = document.querySelectorAll('.page');
+                const pdf = new jspdf.jsPDF({
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
                 });
 
-                // Aguarda renderização
-                await new Promise(resolve => setTimeout(resolve, 200));
+                for (let i = 0; i < pages.length; i++) {
+                    const element = pages[i];
+                    element.classList.add('pdf-rendering');
 
-                const opt = {
-                    margin: 0,
-                    filename: currentFileName + '.pdf',
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: {
+                    document.querySelectorAll('.progress-fill').forEach(fill => {
+                        const width = fill.getAttribute('data-width') + '%';
+                        fill.style.width = width;
+                        fill.style.backgroundColor = currentAccentColor;
+                    });
+
+                    await new Promise(resolve => setTimeout(resolve, 200));
+
+                    const canvas = await html2canvas(element, {
                         scale: 3,
                         useCORS: true,
                         letterRendering: true,
                         logging: false,
                         scrollY: 0,
                         scrollX: 0,
-                        backgroundColor: '#ffffff'
-                    },
-                    jsPDF: {
-                        unit: 'mm',
-                        format: 'a4',
-                        orientation: 'portrait'
-                    },
-                    pagebreak: { mode: 'avoid-all' }
-                };
+                        backgroundColor: null
+                    });
 
-                await html2pdf().set(opt).from(element).save();
+                    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+                    
+                    if (i > 0) {
+                        pdf.addPage();
+                    }
+                    
+                    pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+                    element.classList.remove('pdf-rendering');
+                }
 
-                // Restaura estado original
-                element.classList.remove('pdf-rendering');
+                pdf.save(currentFileName + '.pdf');
+
                 document.documentElement.style.setProperty('--scale', originalScale);
 
                 if (wasEditMode) {
