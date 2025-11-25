@@ -2,43 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Resume Editor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <style>
+        :root {
+            --bg: #505050;
+            --bar-bg: #ffffff;
+            --accent: #111111;
+            --text-primary: #111111;
+            --shadow: 0 4px 12px rgba(16,16,16,0.08);
+        }
+
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f8f9fa;
-            padding-bottom: 80px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg);
+            padding: 0;
+            display: flex;
+            flex-direction: column;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 20px auto;
-            background: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid #e8ecef;
+        .scroll-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px 20px 100px 20px;
+            display: flex;
+            justify-content: center;
+            -webkit-overflow-scrolling: touch;
         }
 
-        .resume-content {
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            background-color: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            margin: 0 auto 20px;
+            position: relative;
             display: grid;
             grid-template-columns: 300px 1fr;
-            min-height: 1100px;
         }
 
-        /* Left Sidebar */
         .sidebar {
             background: #2d3748;
             color: white;
             padding: 40px 30px;
-            position: relative;
         }
 
         .profile-section {
@@ -180,7 +204,6 @@
             transition: width 0.3s;
         }
 
-        /* Right Content */
         .main-content {
             padding: 40px;
         }
@@ -275,229 +298,166 @@
             color: #718096;
         }
 
-        /* Bottom Bar */
-        .bottom-bar {
+        [contenteditable="true"]:focus {
+            outline: 2px solid #5b9dd9;
+            background: rgba(91, 157, 217, 0.05);
+        }
+
+        .bottom-bar-wrapper {
             position: fixed;
-            bottom: 0;
             left: 0;
             right: 0;
-            background: white;
-            border-top: 1px solid #e8ecef;
-            padding: 12px 20px;
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
-            z-index: 1000;
+            bottom: 20px;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 999;
+            padding: 0 20px;
         }
 
-        .bottom-bar-content {
-            max-width: 900px;
-            margin: 0 auto;
+        .bottom-bar {
+            pointer-events: auto;
+            width: 100%;
+            max-width: 500px;
+            background: var(--bar-bg);
+            border-radius: 999px;
+            padding: 8px 16px;
+            box-shadow: var(--shadow);
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
             gap: 8px;
         }
 
-        .btn-primary {
-            background: #5b9dd9;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #4a8bc2;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(91, 157, 217, 0.3);
-        }
-
-        .btn-secondary {
-            background: #f1f3f5;
-            color: #2d3748;
-            border: 1px solid #e8ecef;
-        }
-
-        .btn-secondary:hover {
-            background: #e8ecef;
-        }
-
-        .btn-success {
-            background: #51cf66;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #40c057;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(81, 207, 102, 0.3);
-        }
-
-        /* Editable Elements */
-        [contenteditable="true"] {
-            outline: none;
-            transition: all 0.3s;
-            padding: 4px;
-            border-radius: 4px;
-        }
-
-        [contenteditable="true"]:hover {
-            background: rgba(91, 157, 217, 0.1);
-        }
-
-        [contenteditable="true"]:focus {
-            background: rgba(91, 157, 217, 0.15);
-            box-shadow: 0 0 0 3px rgba(91, 157, 217, 0.2);
-        }
-
-        /* Export Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 2000;
+        .tab {
+            display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            max-width: 400px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-
-        .modal-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: #2d3748;
-        }
-
-        .export-options {
-            display: grid;
-            gap: 12px;
-        }
-
-        .export-option {
-            padding: 15px;
-            border: 2px solid #e8ecef;
-            border-radius: 12px;
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            color: #5b5b5b;
+            text-decoration: none;
+            border-radius: 50%;
+            transition: all 0.2s ease;
             cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            border: none;
+            background: transparent;
+            flex-shrink: 0;
+            font-size: 24px;
         }
 
-        .export-option:hover {
-            border-color: #5b9dd9;
-            background: #f8f9fa;
+        .tab:hover {
+            background: rgba(128,128,128,0.1);
         }
 
-        .export-icon {
-            width: 40px;
-            height: 40px;
-            background: #f1f3f5;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: #5b9dd9;
-            font-size: 11px;
+        .tab:active {
+            transform: scale(0.9);
         }
 
-        .export-info {
-            flex: 1;
+        .tab.active {
+            color: var(--accent);
+            background: rgba(128,128,128,0.15);
         }
 
-        .export-name {
+        .center-btn {
+            background: var(--accent);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 999px;
+            box-shadow: 0 4px 12px rgba(17,17,17,0.2);
             font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            justify-content: center;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+            height: 48px;
         }
 
-        .export-desc {
-            font-size: 12px;
-            color: #718096;
+        .center-btn:hover {
+            opacity: 0.9;
+            box-shadow: 0 6px 16px rgba(17,17,17,0.25);
         }
 
-        .toast {
+        .center-btn:active {
+            transform: scale(0.96);
+        }
+
+        .edit-indicator {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #2d3748;
+            background: #5b9dd9;
             color: white;
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
             display: none;
-            z-index: 3000;
-            animation: slideIn 0.3s ease;
-            font-weight: 500;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
-        .toast.active {
-            display: block;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+        .edit-indicator.show {
+            display: flex;
         }
 
         #fileInput {
             display: none;
         }
 
-        @media print {
+        @media (max-width: 520px) {
             .bottom-bar {
-                display: none;
+                padding: 6px 12px;
+                max-width: 90%;
+                gap: 4px;
             }
+            .center-btn {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+            .tab {
+                width: 44px;
+                height: 44px;
+            }
+        }
+
+        @media print {
             body {
-                padding-bottom: 0;
+                background-color: white;
+                padding: 0;
             }
-            .container {
+            .bottom-bar-wrapper,
+            .edit-indicator {
+                display: none !important;
+            }
+            .page {
                 box-shadow: none;
                 margin: 0;
+                page-break-after: always;
+            }
+            [contenteditable="true"] {
+                outline: none;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="resume-content">
-            <!-- Left Sidebar -->
+    <div class="edit-indicator" id="editIndicator">
+        <ion-icon name="create-outline"></ion-icon>
+        Edit mode active
+    </div>
+
+    <div class="scroll-container">
+        <div class="page" id="document">
             <div class="sidebar">
                 <div class="profile-section">
                     <div class="profile-image-wrapper" onclick="document.getElementById('fileInput').click()">
@@ -557,7 +517,6 @@
                 </div>
             </div>
 
-            <!-- Main Content -->
             <div class="main-content">
                 <div class="content-section">
                     <h2 class="content-section-title">Profile</h2>
@@ -687,215 +646,142 @@
         </div>
     </div>
 
-    <!-- Bottom Bar -->
-    <div class="bottom-bar">
-        <div class="bottom-bar-content">
-            <div class="action-buttons">
-                <button class="btn btn-secondary" onclick="undoChanges()">
-                    Undo
-                </button>
-                <button class="btn btn-secondary" onclick="resetDocument()">
-                    Reset
-                </button>
-            </div>
-            
-            <div class="action-buttons">
-                <button class="btn btn-primary" onclick="previewDocument()">
-                    Preview
-                </button>
-                <button class="btn btn-success" onclick="openExportModal()">
-                    Download
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Export Modal -->
-    <div class="modal" id="exportModal">
-        <div class="modal-content">
-            <h3 class="modal-title">Export Document</h3>
-            <div class="export-options">
-                <div class="export-option" onclick="exportDocument('pdf')">
-                    <div class="export-icon">PDF</div>
-                    <div class="export-info">
-                        <div class="export-name">Export as PDF</div>
-                        <div class="export-desc">Best for printing and sharing</div>
-                    </div>
-                </div>
-                
-                <div class="export-option" onclick="exportDocument('docx')">
-                    <div class="export-icon">DOC</div>
-                    <div class="export-info">
-                        <div class="export-name">Export as Word</div>
-                        <div class="export-desc">Editable in Microsoft Word</div>
-                    </div>
-                </div>
-                
-                <div class="export-option" onclick="exportDocument('html')">
-                    <div class="export-icon">HTML</div>
-                    <div class="export-info">
-                        <div class="export-name">Export as HTML</div>
-                        <div class="export-desc">Web-ready format</div>
-                    </div>
-                </div>
-                
-                <div class="export-option" onclick="exportDocument('png')">
-                    <div class="export-icon">PNG</div>
-                    <div class="export-info">
-                        <div class="export-name">Export as Image</div>
-                        <div class="export-desc">High quality image format</div>
-                    </div>
-                </div>
-            </div>
-            <button class="btn btn-secondary" style="width: 100%; margin-top: 15px;" onclick="closeExportModal()">
-                Cancel
+    <div class="bottom-bar-wrapper">
+        <nav class="bottom-bar" role="navigation">
+            <button class="tab" id="tab-zoom-out" aria-label="Zoom out">
+                <ion-icon name="remove-outline"></ion-icon>
             </button>
-        </div>
+            <button class="tab" id="tab-edit" aria-label="Edit document">
+                <ion-icon name="create-outline"></ion-icon>
+            </button>
+            <button class="center-btn" id="btn-download" aria-label="Download PDF">
+                <ion-icon name="download-outline"></ion-icon>
+                <span>PDF</span>
+            </button>
+            <button class="tab" id="tab-zoom-in" aria-label="Zoom in">
+                <ion-icon name="add-outline"></ion-icon>
+            </button>
+        </nav>
     </div>
-
-    <!-- Toast Notification -->
-    <div class="toast" id="toast"></div>
 
     <script>
+        let currentZoom = 1;
+        let editMode = false;
+
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     document.getElementById('profileImage').src = e.target.result;
-                    showToast('Image updated successfully');
                 };
                 reader.readAsDataURL(file);
             }
         }
 
-        function openExportModal() {
-            document.getElementById('exportModal').classList.add('active');
-        }
+        const tabZoomOut = document.getElementById('tab-zoom-out');
+        const tabZoomIn = document.getElementById('tab-zoom-in');
+        const tabEdit = document.getElementById('tab-edit');
+        const btnDownload = document.getElementById('btn-download');
+        const page = document.getElementById('document');
+        const editIndicator = document.getElementById('editIndicator');
 
-        function closeExportModal() {
-            document.getElementById('exportModal').classList.remove('active');
-        }
-
-        function exportDocument(format) {
-            closeExportModal();
-            
-            switch(format) {
-                case 'pdf':
-                    window.print();
-                    showToast('Opening print dialog for PDF');
-                    break;
-                case 'docx':
-                    exportAsWord();
-                    break;
-                case 'html':
-                    exportAsHTML();
-                    break;
-                case 'png':
-                    exportAsImage();
-                    break;
+        tabZoomOut.addEventListener('click', () => {
+            if (currentZoom > 0.5) {
+                currentZoom -= 0.1;
+                page.style.transform = `scale(${currentZoom})`;
+                page.style.transformOrigin = 'top center';
             }
-        }
+        });
 
-        function exportAsHTML() {
-            const content = document.documentElement.outerHTML;
-            const blob = new Blob([content], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'resume.html';
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast('HTML file downloaded');
-        }
-
-        function exportAsWord() {
-            showToast('Use "Save as PDF" then convert online to DOCX');
-        }
-
-        function exportAsImage() {
-            showToast('Use browser screenshot or print to PDF for image export');
-        }
-
-        let history = [];
-        let historyIndex = -1;
-
-        function saveState() {
-            const content = document.querySelector('.resume-content').innerHTML;
-            history = history.slice(0, historyIndex + 1);
-            history.push(content);
-            historyIndex++;
-            if (history.length > 20) {
-                history.shift();
-                historyIndex--;
+        tabZoomIn.addEventListener('click', () => {
+            if (currentZoom < 1.5) {
+                currentZoom += 0.1;
+                page.style.transform = `scale(${currentZoom})`;
+                page.style.transformOrigin = 'top center';
             }
-        }
+        });
 
-        function undoChanges() {
-            if (historyIndex > 0) {
-                historyIndex--;
-                document.querySelector('.resume-content').innerHTML = history[historyIndex];
-                showToast('Changes undone');
-            } else {
-                showToast('No more changes to undo');
-            }
-        }
+        tabEdit.addEventListener('click', () => {
+            editMode = !editMode;
+            tabEdit.classList.toggle('active', editMode);
+            editIndicator.classList.toggle('show', editMode);
 
-        function resetDocument() {
-            if (confirm('Are you sure you want to reset all changes?')) {
-                location.reload();
-            }
-        }
-
-        function previewDocument() {
-            const bottomBar = document.querySelector('.bottom-bar');
-            bottomBar.style.display = 'none';
-            setTimeout(() => {
-                window.print();
-                bottomBar.style.display = 'block';
-            }, 100);
-        }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('active');
-            setTimeout(() => {
-                toast.classList.remove('active');
-            }, 3000);
-        }
-
-        window.addEventListener('load', () => {
-            saveState();
-            
-            document.querySelectorAll('[contenteditable="true"]').forEach(el => {
-                el.addEventListener('blur', saveState);
+            const editableElements = document.querySelectorAll('[contenteditable]');
+            editableElements.forEach(el => {
+                el.contentEditable = editMode;
             });
         });
 
-        document.getElementById('exportModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeExportModal();
+        btnDownload.addEventListener('click', async () => {
+            try {
+                const wasEditMode = editMode;
+                if (editMode) {
+                    editMode = false;
+                    tabEdit.classList.remove('active');
+                    editIndicator.classList.remove('show');
+                    const editableElements = document.querySelectorAll('[contenteditable]');
+                    editableElements.forEach(el => {
+                        el.contentEditable = false;
+                    });
+                }
+
+                const originalTransform = page.style.transform;
+                page.style.transform = 'scale(1)';
+
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const element = document.getElementById('document');
+                const opt = {
+                    margin: [0, 0, 0, 0],
+                    filename: 'resume.pdf',
+                    image: { 
+                        type: 'jpeg', 
+                        quality: 0.98 
+                    },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        letterRendering: true,
+                        logging: false,
+                        width: 794,
+                        height: 1123,
+                        scrollY: 0,
+                        scrollX: 0,
+                        windowWidth: 794,
+                        windowHeight: 1123
+                    },
+                    jsPDF: {
+                        unit: 'px',
+                        format: [794, 1123],
+                        orientation: 'portrait',
+                        hotfixes: ['px_scaling']
+                    },
+                    pagebreak: { mode: 'avoid-all' }
+                };
+
+                await html2pdf().set(opt).from(element).save();
+
+                page.style.transform = originalTransform;
+
+                if (wasEditMode) {
+                    editMode = true;
+                    tabEdit.classList.add('active');
+                    editIndicator.classList.add('show');
+                    const editableElements = document.querySelectorAll('[contenteditable]');
+                    editableElements.forEach(el => {
+                        el.contentEditable = true;
+                    });
+                }
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF. Please try again.');
             }
         });
 
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey || e.metaKey) {
-                switch(e.key) {
-                    case 'z':
-                        e.preventDefault();
-                        undoChanges();
-                        break;
-                    case 'p':
-                        e.preventDefault();
-                        previewDocument();
-                        break;
-                    case 's':
-                        e.preventDefault();
-                        openExportModal();
-                        break;
-                }
-            }
+        const editableElements = document.querySelectorAll('[contenteditable]');
+        editableElements.forEach(el => {
+            el.contentEditable = false;
         });
     </script>
 </body>
