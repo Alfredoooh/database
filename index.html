@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=yes">
@@ -18,6 +18,7 @@
             --sidebar-accent: #5b9dd9;
             --text-primary: #111111;
             --shadow: 0 4px 12px rgba(16,16,16,0.08);
+            --scale: 0.9;
         }
 
         * {
@@ -44,39 +45,53 @@
             flex: 1;
             overflow-y: auto;
             overflow-x: hidden;
-            padding: 20px 20px 100px 20px;
+            padding: 20px 20px 120px 20px;
             display: flex;
             justify-content: center;
             -webkit-overflow-scrolling: touch;
+            align-items: flex-start;
         }
 
         .page {
-            width: 210mm;
-            min-height: 297mm;
+            width: calc(210mm * var(--scale));
+            height: calc(297mm * var(--scale));
+            max-width: 100%;
             background-color: white;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
             margin: 0 auto;
             position: relative;
             display: grid;
-            grid-template-columns: 270px 1fr;
+            grid-template-columns: calc(270px * var(--scale)) 1fr;
+            overflow: hidden;
+            min-height: 0;
+            transition: width 150ms ease, height 150ms ease;
+            transform-origin: top center;
+        }
+
+        .sidebar,
+        .main-content {
+            min-height: 0;
+            overflow: visible;
         }
 
         .sidebar {
             background: var(--sidebar-bg);
             color: white;
-            padding: 30px 25px;
+            padding: calc(25px * var(--scale)) calc(20px * var(--scale));
+            min-height: 0;
+            overflow: visible;
         }
 
         .profile-section {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .profile-image-wrapper {
             position: relative;
-            width: 150px;
-            height: 150px;
-            margin: 0 auto 20px;
+            width: calc(130px * var(--scale));
+            height: calc(130px * var(--scale));
+            margin: 0 auto 15px;
             cursor: pointer;
             border-radius: 50%;
             overflow: hidden;
@@ -115,33 +130,33 @@
 
         .image-overlay span {
             color: white;
-            font-size: 11px;
+            font-size: 9px;
             font-weight: 600;
         }
 
         .name {
-            font-size: 26px;
+            font-size: 19px;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             line-height: 1.2;
         }
 
         .job-title {
-            font-size: 13px;
+            font-size: 10px;
             color: #b0b8c0;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .social-links {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             justify-content: center;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .social-link {
-            width: 28px;
-            height: 28px;
+            width: calc(26px * var(--scale));
+            height: calc(26px * var(--scale));
             background: rgba(255,255,255,0.1);
             border-radius: 50%;
             display: flex;
@@ -149,7 +164,7 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 11px;
+            font-size: 8px;
             font-weight: 600;
         }
 
@@ -159,42 +174,42 @@
         }
 
         .section {
-            margin-bottom: 28px;
+            margin-bottom: 22px;
         }
 
         .section-title {
-            font-size: 16px;
+            font-size: 12px;
             font-weight: 700;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
             border-bottom: 2px solid rgba(255,255,255,0.2);
         }
 
         .contact-item {
-            margin-bottom: 12px;
-            font-size: 10.5px;
-            line-height: 1.5;
+            margin-bottom: 10px;
+            font-size: 7.5px;
+            line-height: 1.4;
         }
 
         .contact-label {
             font-weight: 600;
             color: var(--sidebar-accent);
             display: block;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
 
         .language-item {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .language-name {
-            font-size: 11.5px;
-            margin-bottom: 6px;
+            font-size: 8.5px;
+            margin-bottom: 5px;
             font-weight: 500;
         }
 
         .progress-bar {
-            height: 6px;
+            height: calc(6px * var(--scale));
             background: rgba(255,255,255,0.1);
             border-radius: 3px;
             overflow: hidden;
@@ -207,33 +222,35 @@
         }
 
         .main-content {
-            padding: 30px 35px;
+            padding: calc(25px * var(--scale)) calc(30px * var(--scale));
+            min-height: 0;
+            overflow: visible;
         }
 
         .content-section {
-            margin-bottom: 28px;
+            margin-bottom: 22px;
         }
 
         .content-section-title {
-            font-size: 20px;
+            font-size: 14px;
             font-weight: 700;
             color: #2d3748;
-            margin-bottom: 6px;
-            padding-bottom: 6px;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
             border-bottom: 2.5px solid #2d3748;
             display: inline-block;
         }
 
         .section-description {
             color: #6b7280;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            font-size: 10.5px;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            font-size: 7.5px;
         }
 
         .experience-item, .education-item {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
             border-bottom: 1px solid #e5e7eb;
         }
 
@@ -245,38 +262,38 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
 
         .item-title {
-            font-size: 14px;
+            font-size: 10.5px;
             font-weight: 600;
             color: #2d3748;
         }
 
         .item-date {
-            font-size: 10px;
+            font-size: 7.5px;
             color: #9ca3af;
             font-weight: 500;
         }
 
         .item-company {
             color: var(--sidebar-accent);
-            font-size: 11px;
-            margin-bottom: 6px;
+            font-size: 8.5px;
+            margin-bottom: 5px;
             font-weight: 500;
         }
 
         .item-description {
             color: #6b7280;
-            line-height: 1.5;
-            font-size: 10px;
+            line-height: 1.4;
+            font-size: 7.5px;
         }
 
         .skills-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
+            gap: 14px;
         }
 
         .skill-item {
@@ -287,17 +304,17 @@
         .skill-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
 
         .skill-name {
             font-weight: 600;
             color: #2d3748;
-            font-size: 11px;
+            font-size: 8.5px;
         }
 
         .skill-level {
-            font-size: 9px;
+            font-size: 7px;
             color: #9ca3af;
         }
 
@@ -390,6 +407,23 @@
 
         .center-btn:active {
             transform: scale(0.96);
+        }
+
+        .zoom-indicator {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--accent);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
         .edit-indicator {
@@ -558,10 +592,13 @@
                 padding: 0;
             }
             .bottom-bar-wrapper,
-            .edit-indicator {
+            .edit-indicator,
+            .zoom-indicator {
                 display: none !important;
             }
             .page {
+                width: 210mm !important;
+                height: 297mm !important;
                 box-shadow: none;
                 margin: 0;
                 page-break-after: always;
@@ -573,6 +610,11 @@
     </style>
 </head>
 <body>
+    <div class="zoom-indicator" id="zoomIndicator">
+        <ion-icon name="expand-outline"></ion-icon>
+        <span id="zoomPercentage">90%</span>
+    </div>
+
     <div class="edit-indicator" id="editIndicator">
         <ion-icon name="create-outline"></ion-icon>
         Edit mode active
@@ -662,50 +704,11 @@
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
                         </p>
                     </div>
-
-                    <div class="experience-item">
-                        <div class="item-header">
-                            <div>
-                                <div class="item-title" contenteditable="true">Senior Designer</div>
-                                <div class="item-company" contenteditable="true">Company Name</div>
-                            </div>
-                            <div class="item-date" contenteditable="true">2000 - 2000</div>
-                        </div>
-                        <p class="item-description" contenteditable="true">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                        </p>
-                    </div>
-
-                    <div class="experience-item">
-                        <div class="item-header">
-                            <div>
-                                <div class="item-title" contenteditable="true">Senior Designer</div>
-                                <div class="item-company" contenteditable="true">Company Name</div>
-                            </div>
-                            <div class="item-date" contenteditable="true">2000 - 2000</div>
-                        </div>
-                        <p class="item-description" contenteditable="true">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                        </p>
-                    </div>
                 </div>
 
                 <div class="content-section">
                     <h2 class="content-section-title">Education</h2>
                     
-                    <div class="education-item">
-                        <div class="item-header">
-                            <div>
-                                <div class="item-title" contenteditable="true">Asian University</div>
-                                <div class="item-company" contenteditable="true">Bachelors in Science</div>
-                            </div>
-                            <div class="item-date" contenteditable="true">2005 - 2009</div>
-                        </div>
-                        <p class="item-description" contenteditable="true">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                        </p>
-                    </div>
-
                     <div class="education-item">
                         <div class="item-header">
                             <div>
@@ -833,11 +836,16 @@
     </div>
 
     <script>
-        let currentZoom = 1;
+        let currentZoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--scale')) || 0.9;
         let editMode = false;
         let currentAccentColor = '#5b9dd9';
         let currentSidebarColor = '#3d4f5d';
         let currentFileName = 'henry-madison-resume';
+
+        function updateZoomIndicator() {
+            const percentage = Math.round(currentZoom * 100);
+            document.getElementById('zoomPercentage').textContent = percentage + '%';
+        }
 
         function handleImageUpload(event) {
             const file = event.target.files[0];
@@ -858,20 +866,19 @@
         const page = document.getElementById('document');
         const editIndicator = document.getElementById('editIndicator');
 
+        function applyScale(scale) {
+            const clamped = Math.min(1.2, Math.max(0.3, scale));
+            currentZoom = Math.round(clamped * 100) / 100;
+            document.documentElement.style.setProperty('--scale', currentZoom);
+            updateZoomIndicator();
+        }
+
         tabZoomOut.addEventListener('click', () => {
-            if (currentZoom > 0.5) {
-                currentZoom -= 0.1;
-                page.style.transform = `scale(${currentZoom})`;
-                page.style.transformOrigin = 'top center';
-            }
+            applyScale(currentZoom - 0.1);
         });
 
         tabZoomIn.addEventListener('click', () => {
-            if (currentZoom < 1.5) {
-                currentZoom += 0.1;
-                page.style.transform = `scale(${currentZoom})`;
-                page.style.transformOrigin = 'top center';
-            }
+            applyScale(currentZoom + 0.1);
         });
 
         tabEdit.addEventListener('click', () => {
@@ -895,7 +902,7 @@
 
         function applySettings() {
             currentFileName = document.getElementById('fileName').value;
-            
+
             const selectedAccent = document.querySelector('.color-option[data-color].selected');
             if (selectedAccent) {
                 currentAccentColor = selectedAccent.getAttribute('data-color');
@@ -939,24 +946,19 @@
                     tabEdit.classList.remove('active');
                     editIndicator.classList.remove('show');
                     const editableElements = document.querySelectorAll('[contenteditable]');
-                    editableElements.forEach(el => {
-                        el.contentEditable = false;
-                    });
+                    editableElements.forEach(el => { el.contentEditable = false; });
                 }
 
-                const originalTransform = page.style.transform;
-                page.style.transform = 'scale(1)';
+                const originalScale = currentZoom;
+                document.documentElement.style.setProperty('--scale', 1);
 
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await new Promise(resolve => setTimeout(resolve, 120));
 
                 const element = document.getElementById('document');
                 const opt = {
                     margin: [0, 0, 0, 0],
                     filename: currentFileName + '.pdf',
-                    image: { 
-                        type: 'jpeg', 
-                        quality: 0.98 
-                    },
+                    image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
                         scale: 2,
                         useCORS: true,
@@ -980,16 +982,14 @@
 
                 await html2pdf().set(opt).from(element).save();
 
-                page.style.transform = originalTransform;
+                document.documentElement.style.setProperty('--scale', originalScale);
 
                 if (wasEditMode) {
                     editMode = true;
                     tabEdit.classList.add('active');
                     editIndicator.classList.add('show');
                     const editableElements = document.querySelectorAll('[contenteditable]');
-                    editableElements.forEach(el => {
-                        el.contentEditable = true;
-                    });
+                    editableElements.forEach(el => { el.contentEditable = true; });
                 }
             } catch (error) {
                 console.error('Error generating PDF:', error);
@@ -998,9 +998,7 @@
         });
 
         const editableElements = document.querySelectorAll('[contenteditable]');
-        editableElements.forEach(el => {
-            el.contentEditable = false;
-        });
+        editableElements.forEach(el => { el.contentEditable = false; });
 
         document.querySelectorAll('.progress-bar').forEach(bar => {
             const fill = bar.querySelector('.progress-fill');
@@ -1013,6 +1011,9 @@
                 }
             });
         });
+
+        document.documentElement.style.setProperty('--scale', currentZoom);
+        updateZoomIndicator();
     </script>
 </body>
 </html>
