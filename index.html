@@ -68,6 +68,12 @@
             transform-origin: top center;
         }
 
+        .page.pdf-rendering {
+            width: 210mm;
+            height: 297mm;
+            grid-template-columns: 270px 1fr;
+        }
+
         .sidebar,
         .main-content {
             min-height: 0;
@@ -80,6 +86,10 @@
             padding: calc(25px * var(--scale)) calc(20px * var(--scale));
             min-height: 0;
             overflow: visible;
+        }
+
+        .page.pdf-rendering .sidebar {
+            padding: 25px 20px;
         }
 
         .profile-section {
@@ -97,6 +107,11 @@
             overflow: hidden;
             border: 4px solid rgba(255,255,255,0.2);
             transition: all 0.3s ease;
+        }
+
+        .page.pdf-rendering .profile-image-wrapper {
+            width: 130px;
+            height: 130px;
         }
 
         .profile-image-wrapper:hover {
@@ -122,6 +137,10 @@
             justify-content: center;
             opacity: 0;
             transition: opacity 0.3s;
+        }
+
+        .page.pdf-rendering .image-overlay {
+            display: none;
         }
 
         .profile-image-wrapper:hover .image-overlay {
@@ -166,6 +185,11 @@
             transition: all 0.3s;
             font-size: 8px;
             font-weight: 600;
+        }
+
+        .page.pdf-rendering .social-link {
+            width: 26px;
+            height: 26px;
         }
 
         .social-link:hover {
@@ -213,18 +237,30 @@
             background: rgba(255,255,255,0.1);
             border-radius: 3px;
             overflow: hidden;
+            position: relative;
+        }
+
+        .page.pdf-rendering .progress-bar {
+            height: 6px;
         }
 
         .progress-fill {
             height: 100%;
             background: var(--sidebar-accent);
             transition: width 0.3s;
+            position: absolute;
+            left: 0;
+            top: 0;
         }
 
         .main-content {
             padding: calc(25px * var(--scale)) calc(30px * var(--scale));
             min-height: 0;
             overflow: visible;
+        }
+
+        .page.pdf-rendering .main-content {
+            padding: 25px 30px;
         }
 
         .content-section {
@@ -952,36 +988,44 @@
                 const originalScale = currentZoom;
                 document.documentElement.style.setProperty('--scale', 1);
 
-                await new Promise(resolve => setTimeout(resolve, 120));
-
                 const element = document.getElementById('document');
+                element.classList.add('pdf-rendering');
+
+                // Força renderização correta das barras de progresso
+                document.querySelectorAll('.progress-fill').forEach(fill => {
+                    const width = fill.getAttribute('data-width') + '%';
+                    fill.style.width = width;
+                    fill.style.backgroundColor = currentAccentColor;
+                });
+
+                // Aguarda renderização
+                await new Promise(resolve => setTimeout(resolve, 200));
+
                 const opt = {
-                    margin: [0, 0, 0, 0],
+                    margin: 0,
                     filename: currentFileName + '.pdf',
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
-                        scale: 2,
+                        scale: 3,
                         useCORS: true,
                         letterRendering: true,
                         logging: false,
-                        width: 794,
-                        height: 1123,
                         scrollY: 0,
                         scrollX: 0,
-                        windowWidth: 794,
-                        windowHeight: 1123
+                        backgroundColor: '#ffffff'
                     },
                     jsPDF: {
-                        unit: 'px',
-                        format: [794, 1123],
-                        orientation: 'portrait',
-                        hotfixes: ['px_scaling']
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'portrait'
                     },
                     pagebreak: { mode: 'avoid-all' }
                 };
 
                 await html2pdf().set(opt).from(element).save();
 
+                // Restaura estado original
+                element.classList.remove('pdf-rendering');
                 document.documentElement.style.setProperty('--scale', originalScale);
 
                 if (wasEditMode) {
@@ -993,7 +1037,7 @@
                 }
             } catch (error) {
                 console.error('Error generating PDF:', error);
-                alert('Error generating PDF. Please try again.');
+                alert('Erro ao gerar PDF. Por favor, tente novamente.');
             }
         });
 
