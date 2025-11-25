@@ -14,6 +14,8 @@
             --bg: #505050;
             --bar-bg: #ffffff;
             --accent: #111111;
+            --sidebar-bg: #3d4f5d;
+            --sidebar-accent: #5b9dd9;
             --text-primary: #111111;
             --shadow: 0 4px 12px rgba(16,16,16,0.08);
         }
@@ -53,28 +55,28 @@
             min-height: 297mm;
             background-color: white;
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            margin: 0 auto 20px;
+            margin: 0 auto;
             position: relative;
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 270px 1fr;
         }
 
         .sidebar {
-            background: #2d3748;
+            background: var(--sidebar-bg);
             color: white;
-            padding: 40px 30px;
+            padding: 30px 25px;
         }
 
         .profile-section {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .profile-image-wrapper {
             position: relative;
-            width: 180px;
-            height: 180px;
-            margin: 0 auto 30px;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
             cursor: pointer;
             border-radius: 50%;
             overflow: hidden;
@@ -83,7 +85,7 @@
         }
 
         .profile-image-wrapper:hover {
-            border-color: #5b9dd9;
+            border-color: var(--sidebar-accent);
             transform: scale(1.05);
         }
 
@@ -113,33 +115,33 @@
 
         .image-overlay span {
             color: white;
-            font-size: 14px;
+            font-size: 11px;
             font-weight: 600;
         }
 
         .name {
-            font-size: 32px;
+            font-size: 26px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             line-height: 1.2;
         }
 
         .job-title {
-            font-size: 16px;
-            color: #a0aec0;
-            margin-bottom: 20px;
+            font-size: 13px;
+            color: #b0b8c0;
+            margin-bottom: 15px;
         }
 
         .social-links {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             justify-content: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .social-link {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             background: rgba(255,255,255,0.1);
             border-radius: 50%;
             display: flex;
@@ -147,91 +149,92 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 14px;
+            font-size: 11px;
             font-weight: 600;
         }
 
         .social-link:hover {
-            background: #5b9dd9;
+            background: var(--sidebar-accent);
             transform: translateY(-2px);
         }
 
         .section {
-            margin-bottom: 35px;
+            margin-bottom: 28px;
         }
 
         .section-title {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 700;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
             border-bottom: 2px solid rgba(255,255,255,0.2);
         }
 
         .contact-item {
-            margin-bottom: 15px;
-            font-size: 13px;
-            line-height: 1.6;
+            margin-bottom: 12px;
+            font-size: 10.5px;
+            line-height: 1.5;
         }
 
         .contact-label {
             font-weight: 600;
-            color: #5b9dd9;
+            color: var(--sidebar-accent);
             display: block;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .language-item {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .language-name {
-            font-size: 14px;
-            margin-bottom: 8px;
+            font-size: 11.5px;
+            margin-bottom: 6px;
             font-weight: 500;
         }
 
         .progress-bar {
-            height: 8px;
+            height: 6px;
             background: rgba(255,255,255,0.1);
-            border-radius: 4px;
+            border-radius: 3px;
             overflow: hidden;
         }
 
         .progress-fill {
             height: 100%;
-            background: #5b9dd9;
+            background: var(--sidebar-accent);
             transition: width 0.3s;
         }
 
         .main-content {
-            padding: 40px;
+            padding: 30px 35px;
         }
 
         .content-section {
-            margin-bottom: 40px;
+            margin-bottom: 28px;
         }
 
         .content-section-title {
-            font-size: 26px;
+            font-size: 20px;
             font-weight: 700;
             color: #2d3748;
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 3px solid #2d3748;
+            margin-bottom: 6px;
+            padding-bottom: 6px;
+            border-bottom: 2.5px solid #2d3748;
             display: inline-block;
         }
 
         .section-description {
-            color: #4a5568;
-            line-height: 1.8;
-            margin-bottom: 25px;
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 10.5px;
         }
 
         .experience-item, .education-item {
-            margin-bottom: 25px;
-            padding-bottom: 25px;
-            border-bottom: 1px solid #e8ecef;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e5e7eb;
         }
 
         .experience-item:last-child, .education-item:last-child {
@@ -242,38 +245,38 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .item-title {
-            font-size: 18px;
+            font-size: 14px;
             font-weight: 600;
             color: #2d3748;
         }
 
         .item-date {
-            font-size: 13px;
-            color: #718096;
+            font-size: 10px;
+            color: #9ca3af;
             font-weight: 500;
         }
 
         .item-company {
-            color: #5b9dd9;
-            font-size: 14px;
-            margin-bottom: 8px;
+            color: var(--sidebar-accent);
+            font-size: 11px;
+            margin-bottom: 6px;
             font-weight: 500;
         }
 
         .item-description {
-            color: #4a5568;
-            line-height: 1.7;
-            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.5;
+            font-size: 10px;
         }
 
         .skills-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            gap: 16px;
         }
 
         .skill-item {
@@ -284,22 +287,22 @@
         .skill-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .skill-name {
             font-weight: 600;
             color: #2d3748;
-            font-size: 14px;
+            font-size: 11px;
         }
 
         .skill-level {
-            font-size: 12px;
-            color: #718096;
+            font-size: 9px;
+            color: #9ca3af;
         }
 
         [contenteditable="true"]:focus {
-            outline: 2px solid #5b9dd9;
+            outline: 2px solid var(--sidebar-accent);
             background: rgba(91, 157, 217, 0.05);
         }
 
@@ -393,7 +396,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #5b9dd9;
+            background: var(--sidebar-accent);
             color: white;
             padding: 8px 16px;
             border-radius: 20px;
@@ -408,6 +411,125 @@
 
         .edit-indicator.show {
             display: flex;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+        }
+
+        .modal-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--sidebar-accent);
+        }
+
+        .color-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .color-option {
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.selected {
+            border-color: #111;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: #f1f3f5;
+            color: #2d3748;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
         }
 
         #fileInput {
@@ -458,7 +580,7 @@
 
     <div class="scroll-container">
         <div class="page" id="document">
-            <div class="sidebar">
+            <div class="sidebar" id="sidebar">
                 <div class="profile-section">
                     <div class="profile-image-wrapper" onclick="document.getElementById('fileInput').click()">
                         <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" alt="Profile" class="profile-image" id="profileImage">
@@ -499,19 +621,19 @@
                     <div class="language-item">
                         <div class="language-name" contenteditable="true">English</div>
                         <div class="progress-bar">
-                            <div class="progress-fill" style="width: 95%"></div>
+                            <div class="progress-fill" style="width: 95%" data-width="95"></div>
                         </div>
                     </div>
                     <div class="language-item">
                         <div class="language-name" contenteditable="true">Urdu</div>
                         <div class="progress-bar">
-                            <div class="progress-fill" style="width: 85%"></div>
+                            <div class="progress-fill" style="width: 85%" data-width="85"></div>
                         </div>
                     </div>
                     <div class="language-item">
                         <div class="language-name" contenteditable="true">Spanish</div>
                         <div class="progress-bar">
-                            <div class="progress-fill" style="width: 60%"></div>
+                            <div class="progress-fill" style="width: 60%" data-width="60"></div>
                         </div>
                     </div>
                 </div>
@@ -607,7 +729,7 @@
                                 <span class="skill-level">Expert</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: 90%"></div>
+                                <div class="progress-fill" style="width: 90%" data-width="90"></div>
                             </div>
                         </div>
                         
@@ -617,7 +739,7 @@
                                 <span class="skill-level">Advanced</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: 85%"></div>
+                                <div class="progress-fill" style="width: 85%" data-width="85"></div>
                             </div>
                         </div>
                         
@@ -627,7 +749,7 @@
                                 <span class="skill-level">Expert</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: 95%"></div>
+                                <div class="progress-fill" style="width: 95%" data-width="95"></div>
                             </div>
                         </div>
                         
@@ -637,7 +759,7 @@
                                 <span class="skill-level">Intermediate</span>
                             </div>
                             <div class="progress-bar">
-                                <div class="progress-fill" style="width: 70%"></div>
+                                <div class="progress-fill" style="width: 70%" data-width="70"></div>
                             </div>
                         </div>
                     </div>
@@ -658,15 +780,64 @@
                 <ion-icon name="download-outline"></ion-icon>
                 <span>PDF</span>
             </button>
+            <button class="tab" id="tab-settings" aria-label="Settings">
+                <ion-icon name="options-outline"></ion-icon>
+            </button>
             <button class="tab" id="tab-zoom-in" aria-label="Zoom in">
                 <ion-icon name="add-outline"></ion-icon>
             </button>
         </nav>
     </div>
 
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h3 class="modal-title">Customize Resume</h3>
+            
+            <div class="modal-section">
+                <label class="modal-label">File Name</label>
+                <input type="text" class="modal-input" id="fileName" value="henry-madison-resume">
+            </div>
+
+            <div class="modal-section">
+                <label class="modal-label">Accent Color</label>
+                <div class="color-picker-grid">
+                    <div class="color-option selected" style="background: #5b9dd9" data-color="#5b9dd9"></div>
+                    <div class="color-option" style="background: #10b981" data-color="#10b981"></div>
+                    <div class="color-option" style="background: #f59e0b" data-color="#f59e0b"></div>
+                    <div class="color-option" style="background: #ef4444" data-color="#ef4444"></div>
+                    <div class="color-option" style="background: #8b5cf6" data-color="#8b5cf6"></div>
+                    <div class="color-option" style="background: #ec4899" data-color="#ec4899"></div>
+                    <div class="color-option" style="background: #06b6d4" data-color="#06b6d4"></div>
+                    <div class="color-option" style="background: #84cc16" data-color="#84cc16"></div>
+                    <div class="color-option" style="background: #f97316" data-color="#f97316"></div>
+                    <div class="color-option" style="background: #6366f1" data-color="#6366f1"></div>
+                </div>
+            </div>
+
+            <div class="modal-section">
+                <label class="modal-label">Sidebar Background</label>
+                <div class="color-picker-grid">
+                    <div class="color-option selected" style="background: #3d4f5d" data-sidebar-color="#3d4f5d"></div>
+                    <div class="color-option" style="background: #1f2937" data-sidebar-color="#1f2937"></div>
+                    <div class="color-option" style="background: #374151" data-sidebar-color="#374151"></div>
+                    <div class="color-option" style="background: #064e3b" data-sidebar-color="#064e3b"></div>
+                    <div class="color-option" style="background: #7c2d12" data-sidebar-color="#7c2d12"></div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="closeSettingsModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="applySettings()">Apply</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentZoom = 1;
         let editMode = false;
+        let currentAccentColor = '#5b9dd9';
+        let currentSidebarColor = '#3d4f5d';
+        let currentFileName = 'henry-madison-resume';
 
         function handleImageUpload(event) {
             const file = event.target.files[0];
@@ -682,6 +853,7 @@
         const tabZoomOut = document.getElementById('tab-zoom-out');
         const tabZoomIn = document.getElementById('tab-zoom-in');
         const tabEdit = document.getElementById('tab-edit');
+        const tabSettings = document.getElementById('tab-settings');
         const btnDownload = document.getElementById('btn-download');
         const page = document.getElementById('document');
         const editIndicator = document.getElementById('editIndicator');
@@ -713,6 +885,52 @@
             });
         });
 
+        tabSettings.addEventListener('click', () => {
+            document.getElementById('settingsModal').classList.add('active');
+        });
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        function applySettings() {
+            currentFileName = document.getElementById('fileName').value;
+            
+            const selectedAccent = document.querySelector('.color-option[data-color].selected');
+            if (selectedAccent) {
+                currentAccentColor = selectedAccent.getAttribute('data-color');
+                document.documentElement.style.setProperty('--sidebar-accent', currentAccentColor);
+            }
+
+            const selectedSidebar = document.querySelector('.color-option[data-sidebar-color].selected');
+            if (selectedSidebar) {
+                currentSidebarColor = selectedSidebar.getAttribute('data-sidebar-color');
+                document.documentElement.style.setProperty('--sidebar-bg', currentSidebarColor);
+            }
+
+            closeSettingsModal();
+        }
+
+        document.querySelectorAll('.color-option[data-color]').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.color-option[data-color]').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.querySelectorAll('.color-option[data-sidebar-color]').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.color-option[data-sidebar-color]').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        document.getElementById('settingsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSettingsModal();
+            }
+        });
+
         btnDownload.addEventListener('click', async () => {
             try {
                 const wasEditMode = editMode;
@@ -734,7 +952,7 @@
                 const element = document.getElementById('document');
                 const opt = {
                     margin: [0, 0, 0, 0],
-                    filename: 'resume.pdf',
+                    filename: currentFileName + '.pdf',
                     image: { 
                         type: 'jpeg', 
                         quality: 0.98 
@@ -782,6 +1000,18 @@
         const editableElements = document.querySelectorAll('[contenteditable]');
         editableElements.forEach(el => {
             el.contentEditable = false;
+        });
+
+        document.querySelectorAll('.progress-bar').forEach(bar => {
+            const fill = bar.querySelector('.progress-fill');
+            fill.addEventListener('click', function(e) {
+                if (editMode) {
+                    const rect = bar.getBoundingClientRect();
+                    const percent = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+                    fill.style.width = percent + '%';
+                    fill.setAttribute('data-width', percent);
+                }
+            });
         });
     </script>
 </body>
