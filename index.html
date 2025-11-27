@@ -705,8 +705,8 @@
                 const iframe = document.createElement('iframe');
                 iframe.style.position = 'absolute';
                 iframe.style.left = '-9999px';
-                iframe.style.width = '794px';
-                iframe.style.height = '1123px';
+                iframe.style.width = '210mm';
+                iframe.style.visibility = 'hidden';
                 document.body.appendChild(iframe);
 
                 const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
@@ -714,36 +714,53 @@
                 iframeDoc.write(html);
                 iframeDoc.close();
 
-                await new Promise(resolve => {
-                    if (iframe.contentWindow.document.readyState === 'complete') {
-                        resolve();
-                    } else {
-                        iframe.contentWindow.addEventListener('load', resolve);
-                    }
-                });
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
-                await new Promise(resolve => setTimeout(resolve, 500));
+                const links = iframeDoc.querySelectorAll('link[rel="stylesheet"]');
+                if (links.length > 0) {
+                    await Promise.all(
+                        Array.from(links).map(link => {
+                            return new Promise(resolve => {
+                                if (link.sheet && link.sheet.cssRules) {
+                                    resolve();
+                                } else {
+                                    link.onload = resolve;
+                                    link.onerror = resolve;
+                                }
+                            });
+                        })
+                    );
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
 
                 const opt = {
-                    margin: [10, 10, 10, 10],
+                    margin: 0,
                     filename: 'preview.pdf',
-                    image: { type: 'jpeg', quality: 0.9 },
+                    image: { type: 'jpeg', quality: 1 },
                     html2canvas: { 
-                        scale: 1.5,
+                        scale: 2,
                         useCORS: true,
                         logging: false,
                         letterRendering: true,
-                        allowTaint: true
+                        allowTaint: true,
+                        backgroundColor: null,
+                        removeContainer: false
                     },
                     jsPDF: { 
                         unit: 'mm', 
                         format: 'a4', 
-                        orientation: 'portrait'
+                        orientation: 'portrait',
+                        compress: false
                     },
-                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                    pagebreak: { 
+                        mode: ['css', 'legacy'],
+                        before: '.page',
+                        after: '.page'
+                    }
                 };
 
-                const worker = html2pdf().set(opt).from(iframe.contentWindow.document.body);
+                const element = iframeDoc.body;
+                const worker = html2pdf().set(opt).from(element);
                 const pdfBlob = await worker.output('blob');
                 
                 document.body.removeChild(iframe);
@@ -809,8 +826,8 @@
                 const iframe = document.createElement('iframe');
                 iframe.style.position = 'absolute';
                 iframe.style.left = '-9999px';
-                iframe.style.width = '794px';
-                iframe.style.height = '1123px';
+                iframe.style.width = '210mm';
+                iframe.style.visibility = 'hidden';
                 document.body.appendChild(iframe);
 
                 const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
@@ -818,36 +835,53 @@
                 iframeDoc.write(html);
                 iframeDoc.close();
 
-                await new Promise(resolve => {
-                    if (iframe.contentWindow.document.readyState === 'complete') {
-                        resolve();
-                    } else {
-                        iframe.contentWindow.addEventListener('load', resolve);
-                    }
-                });
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
-                await new Promise(resolve => setTimeout(resolve, 500));
+                const links = iframeDoc.querySelectorAll('link[rel="stylesheet"]');
+                if (links.length > 0) {
+                    await Promise.all(
+                        Array.from(links).map(link => {
+                            return new Promise(resolve => {
+                                if (link.sheet && link.sheet.cssRules) {
+                                    resolve();
+                                } else {
+                                    link.onload = resolve;
+                                    link.onerror = resolve;
+                                }
+                            });
+                        })
+                    );
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
 
                 const opt = {
-                    margin: [10, 10, 10, 10],
+                    margin: 0,
                     filename: 'documento-' + Date.now() + '.pdf',
-                    image: { type: 'jpeg', quality: 0.9 },
+                    image: { type: 'jpeg', quality: 1 },
                     html2canvas: { 
-                        scale: 1.5,
+                        scale: 2,
                         useCORS: true,
                         logging: false,
                         letterRendering: true,
-                        allowTaint: true
+                        allowTaint: true,
+                        backgroundColor: null,
+                        removeContainer: false
                     },
                     jsPDF: { 
                         unit: 'mm', 
                         format: 'a4', 
-                        orientation: 'portrait'
+                        orientation: 'portrait',
+                        compress: false
                     },
-                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                    pagebreak: { 
+                        mode: ['css', 'legacy'],
+                        before: '.page',
+                        after: '.page'
+                    }
                 };
 
-                await html2pdf().set(opt).from(iframe.contentWindow.document.body).save();
+                const element = iframeDoc.body;
+                await html2pdf().set(opt).from(element).save();
                 
                 document.body.removeChild(iframe);
                 showToast('PDF exportado com sucesso!');
