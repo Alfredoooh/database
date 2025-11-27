@@ -507,9 +507,6 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #444;
         }
-
-        /* container temporário off-screen */
-        #__pdf_temp_container { position: fixed; left: -99999px; top: 0; opacity: 0; pointer-events: none; z-index: -9999; background: #ffffff; }
     </style>
 </head>
 <body>
@@ -637,7 +634,6 @@
     </div>
 
     <script>
-        // Configura worker do pdf.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
         const htmlEditor = document.getElementById('htmlEditor');
@@ -693,84 +689,67 @@
             }
         }
 
-        // Função para parse de HTML sem executar scripts
-        function parseHTMLString(htmlString) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(htmlString, 'text/html');
-            // remover scripts para segurança (não executamos scripts do usuário)
-            doc.querySelectorAll('script').forEach(s => s.remove());
-            return doc;
+        async function refreshPreview() {
+            const html = htmlEditor.value.trim();
+            
+            if (!html) {
+                showToast('Adicione conteúdo HTML primeiro', 'error');
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            pdfViewer.style.display = 'block';
+            pdfViewer.innerHTML = '<div class="loading"><div class="spinner"></div>Gerando preview...</div>';
+
+            try {
+                const tempDiv = document.createElement('div');
+                tempDiv.style.position = 'fixed';
+                tempDiv.style.left = '-9999px';
+                tempDiv.style.top = '0';
+                tempDiv.innerHTML = html;
+                document.body.appendChild(tempDiv);
+
+                const element = tempDiv.querySelector('body') || tempDiv.firstElementChild || tempDiv;
+
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const opt = {
+                    margin: [0, 0, 0, 0],
+                    filename: 'preview.pdf',
+                    image: { 
+                        type: 'jpeg', 
+                        quality: 0.98 
+                    },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        letterRendering: true,
+                        logging: false,
+                        scrollY: 0,
+                        scrollX: 0
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'portrait'
+                    },
+                    pagebreak: { mode: 'avoid-all' }
+                };
+
+                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+                
+                document.body.removeChild(tempDiv);
+                currentPdfData = pdfBlob;
+                
+                await renderPDF(pdfBlob);
+                showToast('Preview gerado com sucesso');
+            } catch (error) {
+                console.error('Erro completo:', error);
+                pdfViewer.innerHTML = '<div class="empty-state"><ion-icon name="alert-circle"></ion-icon><p>Erro: ' + error.message + '</p></div>';
+                showToast('Erro ao gerar preview', 'error');
+            }
         }
 
-        // Cria contêiner temporário off-screen com o HTML do usuário e aguarda carregamento de CSS/imagens
-        async function createTempContainerFromHTML(htmlString) {
-            const doc = parseHTMLString(htmlString);
-            const bodyHTML = doc.body && doc.body.innerHTML ? doc.body.innerHTML : htmlString;
-
-            const styleNodes = Array.from(doc.querySelectorAll('style'));
-            const linkNodes = Array.from(doc.querySelectorAll('link[rel="stylesheet"], link[rel~=stylesheet]'));
-
-            const container = document.createElement('div');
-            container.id = '__pdf_temp_container';
-            container.style.position = 'fixed';
-            container.style.left = '-99999px';
-            container.style.top = '0';
-            container.style.opacity = '0';
-            container.style.pointerEvents = 'none';
-            container.style.zIndex = '-9999';
-            container.style.background = '#ffffff';
-            container.innerHTML = bodyHTML;
-
-            // append inline styles
-            styleNodes.forEach(s => {
-                try {
-                    const st = document.createElement('style');
-                    st.type = 'text/css';
-                    st.textContent = s.textContent;
-                    container.appendChild(st);
-                } catch (e) {}
-            });
-
-            // append link styles and wait for load (safety timeout)
-            const linkPromises = linkNodes.map(link => {
-                return new Promise(resolve => {
-                    try {
-                        const l = document.createElement('link');
-                        l.rel = 'stylesheet';
-                        if (link.href) l.href = link.href;
-                        if (link.crossOrigin) l.crossOrigin = link.crossOrigin;
-                        l.onload = () => resolve({ ok: true });
-                        l.onerror = () => resolve({ ok: false });
-                        container.appendChild(l);
-                        setTimeout(() => resolve({ ok: false }), 4000);
-                    } catch (e) { resolve({ ok: false }); }
-                });
-            });
-
-            document.body.appendChild(container);
-
-            // esperar imagens do container
-            const imgEls = Array.from(container.querySelectorAll('img'));
-            const imgPromises = imgEls.map(img => {
-                return new Promise(resolve => {
-                    if (img.complete) return resolve();
-                    img.onload = () => resolve();
-                    img.onerror = () => resolve();
-                    setTimeout(() => resolve(), 5000);
-                });
-            });
-
-            await Promise.all([ Promise.all(linkPromises), Promise.all(imgPromises) ]);
-            await new Promise(r => setTimeout(r, 250));
-            return container;
-        }
-
-        function removeTempContainer() {
-            const c = document.getElementById('__pdf_temp_container');
-            if (c) c.remove();
-        }
-
-        // Renderiza blob PDF com pdf.js no painel de preview
         async function renderPDF(pdfBlob) {
             try {
                 const arrayBuffer = await pdfBlob.arrayBuffer();
@@ -786,15 +765,9 @@
                     const viewport = page.getViewport({ scale });
                     
                     const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d', { alpha: false });
-                    canvas.height = Math.floor(viewport.height);
-                    canvas.width = Math.floor(viewport.width);
-                    canvas.style.width = '100%';
-                    canvas.style.height = 'auto';
-
-                    // fundo branco para evitar transparência preta
-                    context.fillStyle = '#ffffff';
-                    context.fillRect(0, 0, canvas.width, canvas.height);
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
 
                     const pageDiv = document.createElement('div');
                     pageDiv.className = 'pdf-page';
@@ -814,55 +787,6 @@
             }
         }
 
-        // Gera preview: cria contêiner temporário, usa html2pdf para blob, renderiza com pdf.js
-        async function refreshPreview() {
-            const html = htmlEditor.value.trim();
-            
-            if (!html) {
-                showToast('Adicione conteúdo HTML primeiro', 'error');
-                return;
-            }
-
-            emptyState.style.display = 'none';
-            pdfViewer.style.display = 'block';
-            pdfViewer.innerHTML = '<div class="loading"><div class="spinner"></div>Gerando preview...</div>';
-
-            try {
-                const container = await createTempContainerFromHTML(html);
-
-                const opt = {
-                    margin: 0,
-                    filename: 'preview.pdf',
-                    image: { type: 'jpeg', quality: 1 },
-                    html2canvas: { 
-                        scale: 2,
-                        useCORS: true,
-                        logging: false,
-                        allowTaint: false,
-                        backgroundColor: '#ffffff',
-                        windowWidth: container.scrollWidth,
-                        windowHeight: container.scrollHeight
-                    },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                    pagebreak: { mode: ['css', 'legacy'], before: '.page', after: '.page' }
-                };
-
-                const pdfBlob = await html2pdf().set(opt).from(container).output('blob');
-                
-                removeTempContainer();
-                currentPdfData = pdfBlob;
-                
-                await renderPDF(pdfBlob);
-                showToast('Preview gerado com sucesso');
-            } catch (error) {
-                console.error('Erro completo:', error);
-                removeTempContainer();
-                pdfViewer.innerHTML = '<div class="empty-state"><ion-icon name="alert-circle"></ion-icon><p>Erro: ' + (error.message || 'Falha ao gerar preview') + '</p></div>';
-                showToast('Erro ao gerar preview', 'error');
-            }
-        }
-
-        // Gera e salva PDF (download)
         async function generatePDF() {
             const html = htmlEditor.value.trim();
             
@@ -874,33 +798,47 @@
             showToast('Gerando PDF, aguarde...');
 
             try {
-                const container = await createTempContainerFromHTML(html);
+                const tempDiv = document.createElement('div');
+                tempDiv.style.position = 'fixed';
+                tempDiv.style.left = '-9999px';
+                tempDiv.style.top = '0';
+                tempDiv.innerHTML = html;
+                document.body.appendChild(tempDiv);
+
+                const element = tempDiv.querySelector('body') || tempDiv.firstElementChild || tempDiv;
+
+                await new Promise(resolve => setTimeout(resolve, 500));
 
                 const opt = {
-                    margin: 0,
+                    margin: [0, 0, 0, 0],
                     filename: 'documento-' + Date.now() + '.pdf',
-                    image: { type: 'jpeg', quality: 1 },
-                    html2canvas: { 
+                    image: { 
+                        type: 'jpeg', 
+                        quality: 0.98 
+                    },
+                    html2canvas: {
                         scale: 2,
                         useCORS: true,
+                        letterRendering: true,
                         logging: false,
-                        allowTaint: false,
-                        backgroundColor: '#ffffff',
-                        windowWidth: container.scrollWidth,
-                        windowHeight: container.scrollHeight
+                        scrollY: 0,
+                        scrollX: 0
                     },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                    pagebreak: { mode: ['css', 'legacy'], before: '.page', after: '.page' }
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'portrait'
+                    },
+                    pagebreak: { mode: 'avoid-all' }
                 };
 
-                await html2pdf().set(opt).from(container).save();
+                await html2pdf().set(opt).from(element).save();
                 
-                removeTempContainer();
+                document.body.removeChild(tempDiv);
                 showToast('PDF exportado com sucesso!');
             } catch (error) {
                 console.error('Erro completo:', error);
-                removeTempContainer();
-                showToast('Erro ao gerar PDF: ' + (error.message || 'Falha'), 'error');
+                showToast('Erro ao gerar PDF: ' + error.message, 'error');
             }
         }
 
@@ -943,9 +881,6 @@
                 refreshPreview();
             }
         });
-
-        // inicializa contadores
-        updateStats();
     </script>
 </body>
 </html>
