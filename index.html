@@ -702,59 +702,86 @@
             pdfViewer.innerHTML = '<div class="loading"><div class="spinner"></div>Gerando preview...</div>';
 
             try {
-                const element = document.createElement('div');
-                element.innerHTML = html;
-                element.style.padding = '40px';
-                element.style.background = 'white';
-                element.style.color = 'black';
+                const tempContainer = document.createElement('div');
+                tempContainer.style.position = 'absolute';
+                tempContainer.style.left = '-9999px';
+                tempContainer.style.top = '0';
+                tempContainer.style.width = '210mm';
+                tempContainer.style.padding = '20mm';
+                tempContainer.style.background = 'white';
+                tempContainer.style.color = 'black';
+                tempContainer.innerHTML = html;
+                document.body.appendChild(tempContainer);
 
                 const opt = {
-                    margin: 10,
+                    margin: [10, 10, 10, 10],
                     filename: 'preview.pdf',
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: { 
+                        scale: 2, 
+                        useCORS: true,
+                        logging: false,
+                        width: tempContainer.scrollWidth,
+                        height: tempContainer.scrollHeight
+                    },
+                    jsPDF: { 
+                        unit: 'mm', 
+                        format: 'a4', 
+                        orientation: 'portrait',
+                        compress: true
+                    },
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
                 };
 
-                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+                const worker = html2pdf().set(opt).from(tempContainer);
+                const pdfBlob = await worker.output('blob');
+                
+                document.body.removeChild(tempContainer);
                 currentPdfData = pdfBlob;
                 
                 await renderPDF(pdfBlob);
-                
-                const pageCount = Math.ceil(element.scrollHeight / 1122);
-                document.getElementById('pageCount').textContent = pageCount;
-                
                 showToast('Preview gerado com sucesso');
             } catch (error) {
-                pdfViewer.innerHTML = '<div class="empty-state"><ion-icon name="alert-circle"></ion-icon><p>Erro ao gerar preview</p></div>';
-                showToast('Erro ao gerar preview', 'error');
+                console.error('Erro no preview:', error);
+                pdfViewer.innerHTML = '<div class="empty-state"><ion-icon name="alert-circle"></ion-icon><p>Erro: ' + error.message + '</p></div>';
+                showToast('Erro ao gerar preview: ' + error.message, 'error');
             }
         }
 
         async function renderPDF(pdfBlob) {
-            const arrayBuffer = await pdfBlob.arrayBuffer();
-            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-            
-            pdfViewer.innerHTML = '';
-
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 1.5 });
+            try {
+                const arrayBuffer = await pdfBlob.arrayBuffer();
+                const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+                const pdf = await loadingTask.promise;
                 
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
+                pdfViewer.innerHTML = '';
+                document.getElementById('pageCount').textContent = pdf.numPages;
 
-                const pageDiv = document.createElement('div');
-                pageDiv.className = 'pdf-page';
-                pageDiv.appendChild(canvas);
-                pdfViewer.appendChild(pageDiv);
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const scale = 1.5;
+                    const viewport = page.getViewport({ scale });
+                    
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
 
-                await page.render({
-                    canvasContext: context,
-                    viewport: viewport
-                }).promise;
+                    const pageDiv = document.createElement('div');
+                    pageDiv.className = 'pdf-page';
+                    pageDiv.appendChild(canvas);
+                    pdfViewer.appendChild(pageDiv);
+
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    
+                    await page.render(renderContext).promise;
+                }
+            } catch (error) {
+                console.error('Erro ao renderizar PDF:', error);
+                throw error;
             }
         }
 
@@ -766,27 +793,47 @@
                 return;
             }
 
-            showToast('Gerando PDF...');
+            const loadingToast = showToast('Gerando PDF, aguarde...');
 
             try {
-                const element = document.createElement('div');
-                element.innerHTML = html;
-                element.style.padding = '40px';
-                element.style.background = 'white';
-                element.style.color = 'black';
+                const tempContainer = document.createElement('div');
+                tempContainer.style.position = 'absolute';
+                tempContainer.style.left = '-9999px';
+                tempContainer.style.top = '0';
+                tempContainer.style.width = '210mm';
+                tempContainer.style.padding = '20mm';
+                tempContainer.style.background = 'white';
+                tempContainer.style.color = 'black';
+                tempContainer.innerHTML = html;
+                document.body.appendChild(tempContainer);
 
                 const opt = {
-                    margin: 10,
-                    filename: 'documento.pdf',
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    margin: [10, 10, 10, 10],
+                    filename: 'documento-' + Date.now() + '.pdf',
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: { 
+                        scale: 2, 
+                        useCORS: true,
+                        logging: false,
+                        width: tempContainer.scrollWidth,
+                        height: tempContainer.scrollHeight
+                    },
+                    jsPDF: { 
+                        unit: 'mm', 
+                        format: 'a4', 
+                        orientation: 'portrait',
+                        compress: true
+                    },
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
                 };
 
-                await html2pdf().set(opt).from(element).save();
-                showToast('PDF exportado com sucesso');
+                await html2pdf().set(opt).from(tempContainer).save();
+                
+                document.body.removeChild(tempContainer);
+                showToast('PDF exportado com sucesso!');
             } catch (error) {
-                showToast('Erro ao gerar PDF', 'error');
+                console.error('Erro ao gerar PDF:', error);
+                showToast('Erro ao gerar PDF: ' + error.message, 'error');
             }
         }
 
