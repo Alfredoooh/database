@@ -702,59 +702,57 @@
             pdfViewer.innerHTML = '<div class="loading"><div class="spinner"></div>Gerando preview...</div>';
 
             try {
-                const iframe = document.createElement('iframe');
-                iframe.style.position = 'fixed';
-                iframe.style.left = '0';
-                iframe.style.top = '0';
-                iframe.style.width = '210mm';
-                iframe.style.height = '297mm';
-                iframe.style.border = 'none';
-                iframe.style.zIndex = '-1000';
-                iframe.style.opacity = '0';
-                document.body.appendChild(iframe);
+                const wrapper = document.createElement('div');
+                wrapper.id = 'temp-pdf-wrapper';
+                wrapper.style.position = 'fixed';
+                wrapper.style.left = '0';
+                wrapper.style.top = '0';
+                wrapper.style.width = '210mm';
+                wrapper.style.zIndex = '-9999';
+                wrapper.style.visibility = 'hidden';
+                wrapper.innerHTML = html;
+                document.body.appendChild(wrapper);
 
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                iframeDoc.open();
-                iframeDoc.write(html);
-                iframeDoc.close();
-
-                await new Promise(resolve => {
-                    iframe.onload = resolve;
-                    setTimeout(resolve, 2000);
+                const styles = wrapper.querySelectorAll('style');
+                styles.forEach(style => {
+                    const newStyle = document.createElement('style');
+                    newStyle.textContent = style.textContent;
+                    newStyle.id = 'temp-style-' + Math.random();
+                    document.head.appendChild(newStyle);
                 });
 
-                const links = iframeDoc.querySelectorAll('link[rel="stylesheet"]');
-                if (links.length > 0) {
-                    await Promise.all(Array.from(links).map(link => 
-                        new Promise(resolve => {
-                            if (link.sheet) {
-                                resolve();
-                            } else {
-                                link.onload = resolve;
-                                link.onerror = resolve;
-                                setTimeout(resolve, 2000);
-                            }
-                        })
-                    ));
-                }
+                const links = wrapper.querySelectorAll('link[rel="stylesheet"]');
+                const linkPromises = Array.from(links).map(link => {
+                    return new Promise(resolve => {
+                        const newLink = document.createElement('link');
+                        newLink.rel = 'stylesheet';
+                        newLink.href = link.href;
+                        newLink.id = 'temp-link-' + Math.random();
+                        newLink.onload = resolve;
+                        newLink.onerror = resolve;
+                        document.head.appendChild(newLink);
+                        setTimeout(resolve, 3000);
+                    });
+                });
 
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await Promise.all(linkPromises);
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
-                const element = iframeDoc.body || iframeDoc.documentElement;
+                const targetElement = wrapper.querySelector('.page') || wrapper.querySelector('body') || wrapper.children[0] || wrapper;
 
                 const opt = {
                     margin: 0,
                     filename: 'preview.pdf',
                     image: { 
                         type: 'jpeg', 
-                        quality: 0.98 
+                        quality: 1
                     },
                     html2canvas: {
                         scale: 2,
                         useCORS: true,
                         allowTaint: true,
-                        letterRendering: true,
-                        logging: false
+                        logging: false,
+                        backgroundColor: '#ffffff'
                     },
                     jsPDF: {
                         unit: 'mm',
@@ -763,15 +761,21 @@
                     }
                 };
 
-                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+                const pdfBlob = await html2pdf().set(opt).from(targetElement).output('blob');
                 
-                document.body.removeChild(iframe);
+                document.querySelectorAll('[id^="temp-style-"]').forEach(el => el.remove());
+                document.querySelectorAll('[id^="temp-link-"]').forEach(el => el.remove());
+                document.body.removeChild(wrapper);
+                
                 currentPdfData = pdfBlob;
-                
                 await renderPDF(pdfBlob);
                 showToast('Preview gerado com sucesso');
             } catch (error) {
                 console.error('Erro:', error);
+                document.querySelectorAll('[id^="temp-style-"]').forEach(el => el.remove());
+                document.querySelectorAll('[id^="temp-link-"]').forEach(el => el.remove());
+                const wrapper = document.getElementById('temp-pdf-wrapper');
+                if (wrapper) document.body.removeChild(wrapper);
                 pdfViewer.innerHTML = '<div class="empty-state"><ion-icon name="alert-circle"></ion-icon><p>Erro: ' + error.message + '</p></div>';
                 showToast('Erro ao gerar preview', 'error');
             }
@@ -825,59 +829,57 @@
             showToast('Gerando PDF, aguarde...');
 
             try {
-                const iframe = document.createElement('iframe');
-                iframe.style.position = 'fixed';
-                iframe.style.left = '0';
-                iframe.style.top = '0';
-                iframe.style.width = '210mm';
-                iframe.style.height = '297mm';
-                iframe.style.border = 'none';
-                iframe.style.zIndex = '-1000';
-                iframe.style.opacity = '0';
-                document.body.appendChild(iframe);
+                const wrapper = document.createElement('div');
+                wrapper.id = 'temp-pdf-wrapper';
+                wrapper.style.position = 'fixed';
+                wrapper.style.left = '0';
+                wrapper.style.top = '0';
+                wrapper.style.width = '210mm';
+                wrapper.style.zIndex = '-9999';
+                wrapper.style.visibility = 'hidden';
+                wrapper.innerHTML = html;
+                document.body.appendChild(wrapper);
 
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                iframeDoc.open();
-                iframeDoc.write(html);
-                iframeDoc.close();
-
-                await new Promise(resolve => {
-                    iframe.onload = resolve;
-                    setTimeout(resolve, 2000);
+                const styles = wrapper.querySelectorAll('style');
+                styles.forEach(style => {
+                    const newStyle = document.createElement('style');
+                    newStyle.textContent = style.textContent;
+                    newStyle.id = 'temp-style-' + Math.random();
+                    document.head.appendChild(newStyle);
                 });
 
-                const links = iframeDoc.querySelectorAll('link[rel="stylesheet"]');
-                if (links.length > 0) {
-                    await Promise.all(Array.from(links).map(link => 
-                        new Promise(resolve => {
-                            if (link.sheet) {
-                                resolve();
-                            } else {
-                                link.onload = resolve;
-                                link.onerror = resolve;
-                                setTimeout(resolve, 2000);
-                            }
-                        })
-                    ));
-                }
+                const links = wrapper.querySelectorAll('link[rel="stylesheet"]');
+                const linkPromises = Array.from(links).map(link => {
+                    return new Promise(resolve => {
+                        const newLink = document.createElement('link');
+                        newLink.rel = 'stylesheet';
+                        newLink.href = link.href;
+                        newLink.id = 'temp-link-' + Math.random();
+                        newLink.onload = resolve;
+                        newLink.onerror = resolve;
+                        document.head.appendChild(newLink);
+                        setTimeout(resolve, 3000);
+                    });
+                });
 
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await Promise.all(linkPromises);
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
-                const element = iframeDoc.body || iframeDoc.documentElement;
+                const targetElement = wrapper.querySelector('.page') || wrapper.querySelector('body') || wrapper.children[0] || wrapper;
 
                 const opt = {
                     margin: 0,
                     filename: 'documento-' + Date.now() + '.pdf',
                     image: { 
                         type: 'jpeg', 
-                        quality: 0.98 
+                        quality: 1
                     },
                     html2canvas: {
                         scale: 2,
                         useCORS: true,
                         allowTaint: true,
-                        letterRendering: true,
-                        logging: false
+                        logging: false,
+                        backgroundColor: '#ffffff'
                     },
                     jsPDF: {
                         unit: 'mm',
@@ -886,12 +888,19 @@
                     }
                 };
 
-                await html2pdf().set(opt).from(element).save();
+                await html2pdf().set(opt).from(targetElement).save();
                 
-                document.body.removeChild(iframe);
+                document.querySelectorAll('[id^="temp-style-"]').forEach(el => el.remove());
+                document.querySelectorAll('[id^="temp-link-"]').forEach(el => el.remove());
+                document.body.removeChild(wrapper);
+                
                 showToast('PDF exportado com sucesso!');
             } catch (error) {
                 console.error('Erro:', error);
+                document.querySelectorAll('[id^="temp-style-"]').forEach(el => el.remove());
+                document.querySelectorAll('[id^="temp-link-"]').forEach(el => el.remove());
+                const wrapper = document.getElementById('temp-pdf-wrapper');
+                if (wrapper) document.body.removeChild(wrapper);
                 showToast('Erro ao gerar PDF: ' + error.message, 'error');
             }
         }
