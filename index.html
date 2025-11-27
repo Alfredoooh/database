@@ -1,101 +1,515 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Studio</title>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
-        /* === seu CSS original (sem alterações de design) === */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; overflow-x: hidden; }
-        .app-container { display: flex; height: 100vh; }
-        .sidebar { width: 280px; background: #111; border-right: 1px solid #222; display: flex; flex-direction: column; transition: transform 0.3s ease; }
-        .sidebar-header { padding: 24px 20px; border-bottom: 1px solid #222; }
-        .logo { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-        .logo ion-icon { font-size: 28px; color: #0ea5e9; }
-        .sidebar-content { flex: 1; padding: 20px; overflow-y: auto; }
-        .stats-grid { display: grid; gap: 12px; margin-bottom: 24px; }
-        .stat-card { background: #1a1a1a; padding: 16px; border-radius: 12px; border: 1px solid #222; }
-        .stat-label { font-size: 12px; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-value { font-size: 24px; font-weight: 700; color: #0ea5e9; }
-        .menu-section { margin-bottom: 24px; }
-        .menu-title { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; padding: 0 12px; }
-        .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; color: #aaa; margin-bottom: 4px; }
-        .menu-item:hover { background: #1a1a1a; color: #fff; }
-        .menu-item.active { background: #0ea5e9; color: #fff; }
-        .menu-item ion-icon { font-size: 20px; }
-        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .topbar { height: 70px; background: #111; border-bottom: 1px solid #222; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
-        .mobile-toggle { display: none; background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; padding: 8px; }
-        .page-title { font-size: 18px; font-weight: 600; }
-        .topbar-actions { display: flex; gap: 12px; }
-        .action-btn { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
-        .action-btn:hover { background: #222; border-color: #444; }
-        .action-btn.primary { background: #0ea5e9; border-color: #0ea5e9; }
-        .action-btn.primary:hover { background: #0284c7; }
-        .action-btn ion-icon { font-size: 18px; }
-        .workspace { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #222; overflow: hidden; }
-        .editor-panel, .preview-panel { background: #0a0a0a; display: flex; flex-direction: column; overflow: hidden; }
-        .panel-header { padding: 16px 20px; border-bottom: 1px solid #222; display: flex; align-items: center; justify-content: space-between; }
-        .panel-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; color: #aaa; }
-        .panel-title ion-icon { font-size: 18px; }
-        .panel-controls { display: flex; gap: 8px; }
-        .control-btn { background: #1a1a1a; border: 1px solid #333; color: #888; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
-        .control-btn:hover { color: #fff; border-color: #444; }
-        .control-btn.active { background: #0ea5e9; color: #fff; border-color: #0ea5e9; }
-        .editor-container { flex: 1; padding: 20px; overflow-y: auto; }
-        .code-editor { width: 100%; height: 100%; background: #111; border: 1px solid #222; border-radius: 8px; padding: 16px; font-family: 'Monaco', 'Courier New', monospace; font-size: 13px; color: #e0e0e0; resize: none; line-height: 1.6; }
-        .code-editor:focus { outline: none; border-color: #0ea5e9; }
-        .preview-container { flex: 1; padding: 20px; overflow-y: auto; display: flex; align-items: flex-start; justify-content: center; background: #050505; }
-        #pdf-viewer { width: 100%; max-width: 800px; }
-        .pdf-page { background: #fff; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border-radius: 4px; overflow: hidden; }
-        .pdf-page canvas { display: block; width: 100%; height: auto; background: #fff; }
-        .empty-state { text-align: center; padding: 60px 20px; color: #666; }
-        .empty-state ion-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.3; }
-        .empty-state p { font-size: 14px; }
-        .quick-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 20px; }
-        .quick-action { background: #1a1a1a; border: 1px solid #222; padding: 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s; text-align: center; }
-        .quick-action:hover { background: #222; border-color: #333; }
-        .quick-action ion-icon { font-size: 24px; color: #0ea5e9; margin-bottom: 8px; }
-        .quick-action-text { font-size: 12px; color: #aaa; }
-        .loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: #666; }
-        .spinner { width: 24px; height: 24px; border: 3px solid #333; border-top-color: #0ea5e9; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 12px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; border: 1px solid #333; padding: 16px 20px; border-radius: 8px; display: flex; align-items: center; gap: 12px; opacity: 0; transform: translateY(20px); transition: all 0.3s; z-index: 1000; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        .toast.show { opacity: 1; transform: translateY(0); }
-        .toast ion-icon { font-size: 20px; }
-        .toast.success { border-color: #10b981; }
-        .toast.success ion-icon { color: #10b981; }
-        .toast.error { border-color: #ef4444; }
-        .toast.error ion-icon { color: #ef4444; }
-        @media (max-width: 1024px) {
-            .workspace { grid-template-columns: 1fr; }
-            .preview-panel { display: none; }
-            .preview-panel.mobile-active { display: flex; }
-            .editor-panel.mobile-hidden { display: none; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        @media (max-width: 768px) {
-            .sidebar { position: fixed; left: 0; top: 0; height: 100vh; z-index: 1000; transform: translateX(-100%); }
-            .sidebar.mobile-open { transform: translateX(0); }
-            .mobile-toggle { display: flex; align-items: center; justify-content: center; }
-            .topbar { padding: 0 16px; }
-            .topbar-actions .action-btn span { display: none; }
-            .page-title { font-size: 16px; }
-            .editor-container, .preview-container { padding: 12px; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-        }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #444; }
 
-        /* ===== estilo do contêiner temporário (visível apenas para renderização) ===== */
-        /* Será colocado off-screen e com opacidade 0 para permitir renderização por html2canvas */
-        #__pdf_temp_container { position: fixed; left: -99999px; top: 0; opacity: 0; pointer-events: none; z-index: -9999; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #111;
+            border-right: 1px solid #222;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid #222;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo ion-icon {
+            font-size: 28px;
+            color: #0ea5e9;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #1a1a1a;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #222;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0ea5e9;
+        }
+
+        .menu-section {
+            margin-bottom: 24px;
+        }
+
+        .menu-title {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding: 0 12px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+
+        .menu-item:hover {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .menu-item.active {
+            background: #0ea5e9;
+            color: #fff;
+        }
+
+        .menu-item ion-icon {
+            font-size: 20px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar {
+            height: 70px;
+            background: #111;
+            border-bottom: 1px solid #222;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .page-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #222;
+            border-color: #444;
+        }
+
+        .action-btn.primary {
+            background: #0ea5e9;
+            border-color: #0ea5e9;
+        }
+
+        .action-btn.primary:hover {
+            background: #0284c7;
+        }
+
+        .action-btn ion-icon {
+            font-size: 18px;
+        }
+
+        .workspace {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: #222;
+            overflow: hidden;
+        }
+
+        .editor-panel,
+        .preview-panel {
+            background: #0a0a0a;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #aaa;
+        }
+
+        .panel-title ion-icon {
+            font-size: 18px;
+        }
+
+        .panel-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-btn {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #888;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            color: #fff;
+            border-color: #444;
+        }
+
+        .control-btn.active {
+            background: #0ea5e9;
+            color: #fff;
+            border-color: #0ea5e9;
+        }
+
+        .editor-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .code-editor {
+            width: 100%;
+            height: 100%;
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            color: #e0e0e0;
+            resize: none;
+            line-height: 1.6;
+        }
+
+        .code-editor:focus {
+            outline: none;
+            border-color: #0ea5e9;
+        }
+
+        .preview-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            background: #050505;
+        }
+
+        #pdf-viewer {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .pdf-page {
+            background: #fff;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .pdf-page canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state ion-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .quick-action {
+            background: #1a1a1a;
+            border: 1px solid #222;
+            padding: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .quick-action:hover {
+            background: #222;
+            border-color: #333;
+        }
+
+        .quick-action ion-icon {
+            font-size: 24px;
+            color: #0ea5e9;
+            margin-bottom: 8px;
+        }
+
+        .quick-action-text {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #333;
+            border-top-color: #0ea5e9;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 16px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast ion-icon {
+            font-size: 20px;
+        }
+
+        .toast.success {
+            border-color: #10b981;
+        }
+
+        .toast.success ion-icon {
+            color: #10b981;
+        }
+
+        .toast.error {
+            border-color: #ef4444;
+        }
+
+        .toast.error ion-icon {
+            color: #ef4444;
+        }
+
+        @media (max-width: 1024px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-panel {
+                display: none;
+            }
+
+            .preview-panel.mobile-active {
+                display: flex;
+            }
+
+            .editor-panel.mobile-hidden {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                z-index: 1000;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .mobile-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .topbar {
+                padding: 0 16px;
+            }
+
+            .topbar-actions .action-btn span {
+                display: none;
+            }
+
+            .page-title {
+                font-size: 16px;
+            }
+
+            .editor-container,
+            .preview-container {
+                padding: 12px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+
+        /* container temporário off-screen */
+        #__pdf_temp_container { position: fixed; left: -99999px; top: 0; opacity: 0; pointer-events: none; z-index: -9999; background: #ffffff; }
     </style>
 </head>
 <body>
@@ -223,10 +637,9 @@
     </div>
 
     <script>
-        /* ===== configuração do worker do pdf.js ===== */
+        // Configura worker do pdf.js
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-        /* ===== referências DOM ===== */
         const htmlEditor = document.getElementById('htmlEditor');
         const pdfViewer = document.getElementById('pdf-viewer');
         const emptyState = document.getElementById('emptyState');
@@ -243,16 +656,16 @@
             const toast = document.getElementById('toast');
             const toastText = document.getElementById('toastText');
             const icon = toast.querySelector('ion-icon');
-
+            
             toast.className = `toast ${type}`;
             toastText.textContent = message;
-
+            
             if (type === 'success') {
                 icon.setAttribute('name', 'checkmark-circle');
             } else {
                 icon.setAttribute('name', 'alert-circle');
             }
-
+            
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
@@ -265,11 +678,11 @@
             const editorPanel = document.getElementById('editorPanel');
             const previewPanel = document.getElementById('previewPanel');
             const viewToggle = document.getElementById('viewToggle');
-
+            
             if (window.innerWidth <= 1024) {
                 editorPanel.classList.toggle('mobile-hidden');
                 previewPanel.classList.toggle('mobile-active');
-
+                
                 if (previewPanel.classList.contains('mobile-active')) {
                     viewToggle.querySelector('span').textContent = 'Editor';
                     viewToggle.querySelector('ion-icon').setAttribute('name', 'code-slash');
@@ -280,111 +693,90 @@
             }
         }
 
-        /* ===== helpers: parse HTML colado (remove scripts), extrai head/body ===== */
+        // Função para parse de HTML sem executar scripts
         function parseHTMLString(htmlString) {
             const parser = new DOMParser();
             const doc = parser.parseFromString(htmlString, 'text/html');
-            // remove scripts (não executamos scripts do HTML do usuário)
+            // remover scripts para segurança (não executamos scripts do usuário)
             doc.querySelectorAll('script').forEach(s => s.remove());
             return doc;
         }
 
-        /* ===== cria contêiner temporário (off-screen) com o conteúdo do HTML do usuário =====
-           - injeta <style> e <link rel=stylesheet> do HTML original
-           - espera carregamento de stylesheets e imagens dentro do contêiner
-        */
+        // Cria contêiner temporário off-screen com o HTML do usuário e aguarda carregamento de CSS/imagens
         async function createTempContainerFromHTML(htmlString) {
-            // parse
             const doc = parseHTMLString(htmlString);
-
-            // conteúdo do body (ou todo html se body vazio)
             const bodyHTML = doc.body && doc.body.innerHTML ? doc.body.innerHTML : htmlString;
 
-            // extrair styles e links do head
             const styleNodes = Array.from(doc.querySelectorAll('style'));
             const linkNodes = Array.from(doc.querySelectorAll('link[rel="stylesheet"], link[rel~=stylesheet]'));
 
-            // criar container off-screen
             const container = document.createElement('div');
             container.id = '__pdf_temp_container';
-            // manter visível (mas fora da viewport) para html2canvas renderizar corretamente
             container.style.position = 'fixed';
             container.style.left = '-99999px';
             container.style.top = '0';
             container.style.opacity = '0';
             container.style.pointerEvents = 'none';
             container.style.zIndex = '-9999';
-            container.style.background = '#ffffff'; // fundo branco para evitar transparência preta
+            container.style.background = '#ffffff';
             container.innerHTML = bodyHTML;
 
-            // adicionar style tags (inline)
+            // append inline styles
             styleNodes.forEach(s => {
                 try {
                     const st = document.createElement('style');
                     st.type = 'text/css';
                     st.textContent = s.textContent;
                     container.appendChild(st);
-                } catch (e) { /* ignore */ }
+                } catch (e) {}
             });
 
-            // adicionar link tags e aguardar carregamento
+            // append link styles and wait for load (safety timeout)
             const linkPromises = linkNodes.map(link => {
                 return new Promise(resolve => {
                     try {
                         const l = document.createElement('link');
                         l.rel = 'stylesheet';
                         if (link.href) l.href = link.href;
-                        // se houver crossorigin no link original, preserve (ajuda CORS)
                         if (link.crossOrigin) l.crossOrigin = link.crossOrigin;
                         l.onload = () => resolve({ ok: true });
                         l.onerror = () => resolve({ ok: false });
-                        // append ao container (links funcionam também quando no body)
                         container.appendChild(l);
-                        // safety timeout
                         setTimeout(() => resolve({ ok: false }), 4000);
-                    } catch (e) {
-                        resolve({ ok: false });
-                    }
+                    } catch (e) { resolve({ ok: false }); }
                 });
             });
 
-            // inserir container no DOM
             document.body.appendChild(container);
 
-            // esperar carregamento de estilosheets e imagens
+            // esperar imagens do container
             const imgEls = Array.from(container.querySelectorAll('img'));
             const imgPromises = imgEls.map(img => {
                 return new Promise(resolve => {
                     if (img.complete) return resolve();
                     img.onload = () => resolve();
                     img.onerror = () => resolve();
-                    // safety timeout
                     setTimeout(() => resolve(), 5000);
                 });
             });
 
-            // aguardar tudo (links e imagens)
             await Promise.all([ Promise.all(linkPromises), Promise.all(imgPromises) ]);
-
-            // força reflow / pequeno delay para garantir renderização
             await new Promise(r => setTimeout(r, 250));
-
             return container;
         }
 
-        /* ===== remove contêiner temporário ===== */
         function removeTempContainer() {
             const c = document.getElementById('__pdf_temp_container');
             if (c) c.remove();
         }
 
-        /* ===== renderiza um Blob PDF usando pdf.js dentro do viewer ===== */
+        // Renderiza blob PDF com pdf.js no painel de preview
         async function renderPDF(pdfBlob) {
             try {
                 const arrayBuffer = await pdfBlob.arrayBuffer();
                 const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
                 const pdf = await loadingTask.promise;
-
+                
                 pdfViewer.innerHTML = '';
                 document.getElementById('pageCount').textContent = pdf.numPages;
 
@@ -392,14 +784,15 @@
                     const page = await pdf.getPage(i);
                     const scale = 1.5;
                     const viewport = page.getViewport({ scale });
-
+                    
                     const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d', { alpha: false }); // alpha false para evitar transparência
+                    const context = canvas.getContext('2d', { alpha: false });
                     canvas.height = Math.floor(viewport.height);
                     canvas.width = Math.floor(viewport.width);
                     canvas.style.width = '100%';
                     canvas.style.height = 'auto';
-                    // garantir fundo branco do canvas (evita "preto")
+
+                    // fundo branco para evitar transparência preta
                     context.fillStyle = '#ffffff';
                     context.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -408,7 +801,11 @@
                     pageDiv.appendChild(canvas);
                     pdfViewer.appendChild(pageDiv);
 
-                    const renderContext = { canvasContext: context, viewport: viewport };
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    
                     await page.render(renderContext).promise;
                 }
             } catch (error) {
@@ -417,10 +814,10 @@
             }
         }
 
-        /* ===== gerar preview (gera blob + renderiza) ===== */
+        // Gera preview: cria contêiner temporário, usa html2pdf para blob, renderiza com pdf.js
         async function refreshPreview() {
             const html = htmlEditor.value.trim();
-
+            
             if (!html) {
                 showToast('Adicione conteúdo HTML primeiro', 'error');
                 return;
@@ -431,58 +828,50 @@
             pdfViewer.innerHTML = '<div class="loading"><div class="spinner"></div>Gerando preview...</div>';
 
             try {
-                // cria container temporário e espera recursos
                 const container = await createTempContainerFromHTML(html);
 
-                // preparar opções html2pdf
                 const opt = {
                     margin: 0,
                     filename: 'preview.pdf',
                     image: { type: 'jpeg', quality: 1 },
-                    html2canvas: {
+                    html2canvas: { 
                         scale: 2,
                         useCORS: true,
                         logging: false,
                         allowTaint: false,
                         backgroundColor: '#ffffff',
-                        // width/height serão calculados automaticamente a partir do elemento
                         windowWidth: container.scrollWidth,
-                        windowHeight: container.scrollHeight,
-                        onclone: (clonedDoc) => {
-                            // nada adicional necessário aqui (já clonamos/styles inline)
-                        }
+                        windowHeight: container.scrollHeight
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                     pagebreak: { mode: ['css', 'legacy'], before: '.page', after: '.page' }
                 };
 
-                // gerar blob
                 const pdfBlob = await html2pdf().set(opt).from(container).output('blob');
-
-                // limpar container temporário
+                
                 removeTempContainer();
-
                 currentPdfData = pdfBlob;
+                
                 await renderPDF(pdfBlob);
                 showToast('Preview gerado com sucesso');
             } catch (error) {
-                console.error('Erro completo (preview):', error);
+                console.error('Erro completo:', error);
                 removeTempContainer();
                 pdfViewer.innerHTML = '<div class="empty-state"><ion-icon name="alert-circle"></ion-icon><p>Erro: ' + (error.message || 'Falha ao gerar preview') + '</p></div>';
                 showToast('Erro ao gerar preview', 'error');
             }
         }
 
-        /* ===== gerar e salvar PDF (download) ===== */
+        // Gera e salva PDF (download)
         async function generatePDF() {
             const html = htmlEditor.value.trim();
-
+            
             if (!html) {
                 showToast('Adicione conteúdo HTML primeiro', 'error');
                 return;
             }
 
-            showToast('Gerando PDF...');
+            showToast('Gerando PDF, aguarde...');
 
             try {
                 const container = await createTempContainerFromHTML(html);
@@ -491,7 +880,7 @@
                     margin: 0,
                     filename: 'documento-' + Date.now() + '.pdf',
                     image: { type: 'jpeg', quality: 1 },
-                    html2canvas: {
+                    html2canvas: { 
                         scale: 2,
                         useCORS: true,
                         logging: false,
@@ -505,10 +894,11 @@
                 };
 
                 await html2pdf().set(opt).from(container).save();
+                
                 removeTempContainer();
                 showToast('PDF exportado com sucesso!');
             } catch (error) {
-                console.error('Erro completo (save):', error);
+                console.error('Erro completo:', error);
                 removeTempContainer();
                 showToast('Erro ao gerar PDF: ' + (error.message || 'Falha'), 'error');
             }
