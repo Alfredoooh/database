@@ -1,1321 +1,322 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=1920, initial-scale=1.0">
-    <title>Resume Editor</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor HTML para PDF</title>
     <style>
-        :root {
-            --bg: #505050;
-            --bar-bg: #ffffff;
-            --accent: #111111;
-            --sidebar-bg: #3d4f5d;
-            --sidebar-accent: #5b9dd9;
-            --text-primary: #111111;
-            --shadow: 0 4px 12px rgba(16,16,16,0.08);
-            --scale: 0.9;
-            --page-bg-image: none;
-            --page-bg-color: #ffffff;
-        }
-
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
-
-        html, body {
-            height: 100%;
-            overflow-x: hidden;
-            min-width: 1200px;
-        }
-
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg);
-            padding: 0;
-            display: flex;
-            flex-direction: column;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
         }
-
-        .scroll-container {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 20px 20px 120px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .page {
-            width: calc(210mm * var(--scale));
-            height: calc(297mm * var(--scale));
-            background-color: var(--page-bg-color);
-            background-image: var(--page-bg-image);
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        
+        .container {
+            max-width: 1000px;
             margin: 0 auto;
-            position: relative;
-            display: grid;
-            grid-template-columns: calc(270px * var(--scale)) 1fr;
-            overflow: hidden;
-            min-height: 0;
-            transition: width 150ms ease, height 150ms ease;
-            transform-origin: top center;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-
-        .page.pdf-rendering {
-            width: 210mm;
-            height: 297mm;
-            grid-template-columns: 270px 1fr;
-        }
-
-        .sidebar,
-        .main-content {
-            min-height: 0;
-            overflow: visible;
-        }
-
-        .sidebar {
-            background: var(--sidebar-bg);
+        
+        .header {
+            background: #333;
             color: white;
-            padding: calc(25px * var(--scale)) calc(20px * var(--scale));
-            min-height: 0;
-            overflow: visible;
+            padding: 20px 30px;
+            border-radius: 5px 5px 0 0;
         }
-
-        .page.pdf-rendering .sidebar {
-            padding: 25px 20px;
+        
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
         }
-
-        .profile-section {
-            text-align: center;
+        
+        .header p {
+            font-size: 0.95em;
+            color: #ddd;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
             margin-bottom: 25px;
         }
-
-        .profile-image-wrapper {
-            position: relative;
-            width: calc(130px * var(--scale));
-            height: calc(130px * var(--scale));
-            margin: 0 auto 15px;
-            cursor: pointer;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 4px solid rgba(255,255,255,0.2);
-            transition: all 0.3s ease;
+        
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 8px;
         }
-
-        .page.pdf-rendering .profile-image-wrapper {
-            width: 130px;
-            height: 130px;
+        
+        .input-group {
+            margin-bottom: 15px;
         }
-
-        .profile-image-wrapper:hover {
-            border-color: var(--sidebar-accent);
-            transform: scale(1.05);
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
         }
-
-        .profile-image {
+        
+        textarea {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            min-height: 300px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            resize: vertical;
         }
-
-        .image-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.6);
+        
+        textarea:focus {
+            outline: none;
+            border-color: #666;
+        }
+        
+        .button-group {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s;
+            gap: 10px;
+            flex-wrap: wrap;
         }
-
-        .page.pdf-rendering .image-overlay {
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 3px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #333;
+            color: white;
+            flex: 1;
+        }
+        
+        .btn-primary:hover {
+            background: #555;
+        }
+        
+        .btn-secondary {
+            background: #ddd;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #ccc;
+        }
+        
+        .preview-section {
+            margin-top: 25px;
+            border-top: 2px solid #ddd;
+            padding-top: 25px;
+        }
+        
+        .preview-frame {
+            width: 100%;
+            min-height: 500px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+        }
+        
+        .alert {
+            padding: 12px 15px;
+            border-radius: 3px;
+            margin-bottom: 15px;
             display: none;
         }
-
-        .profile-image-wrapper:hover .image-overlay {
-            opacity: 1;
+        
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
         }
-
-        .image-overlay span {
-            color: white;
-            font-size: 9px;
-            font-weight: 600;
+        
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
         }
-
-        .name {
-            font-size: 19px;
-            font-weight: 700;
-            margin-bottom: 5px;
-            line-height: 1.2;
+        
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
         }
-
-        .job-title {
-            font-size: 10px;
-            color: #b0b8c0;
-            margin-bottom: 12px;
+        
+        .instructions {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 15px;
+            margin-bottom: 20px;
         }
-
-        .social-links {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
+        
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            color: #555;
+        }
+        
+        .instructions li {
             margin-bottom: 6px;
         }
-
-        .social-link {
-            width: calc(26px * var(--scale));
-            height: calc(26px * var(--scale));
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 8px;
-            font-weight: 600;
-        }
-
-        .page.pdf-rendering .social-link {
-            width: 26px;
-            height: 26px;
-        }
-
-        .social-link:hover {
-            background: var(--sidebar-accent);
-            transform: translateY(-2px);
-        }
-
-        .section {
-            margin-bottom: 22px;
-        }
-
-        .section-title {
-            font-size: 12px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            padding-bottom: 6px;
-            border-bottom: 2px solid rgba(255,255,255,0.2);
-        }
-
-        .contact-item {
-            margin-bottom: 10px;
-            font-size: 7.5px;
-            line-height: 1.4;
-        }
-
-        .contact-label {
-            font-weight: 600;
-            color: var(--sidebar-accent);
-            display: block;
-            margin-bottom: 2px;
-        }
-
-        .language-item {
-            margin-bottom: 10px;
-        }
-
-        .language-name {
-            font-size: 8.5px;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        .progress-bar {
-            height: calc(6px * var(--scale));
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .page.pdf-rendering .progress-bar {
-            height: 6px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--sidebar-accent);
-            transition: width 0.3s;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        .main-content {
-            padding: calc(25px * var(--scale)) calc(30px * var(--scale));
-            min-height: 0;
-            overflow: visible;
-        }
-
-        .page.pdf-rendering .main-content {
-            padding: 25px 30px;
-        }
-
-        .content-section {
-            margin-bottom: 22px;
-        }
-
-        .content-section-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 5px;
-            padding-bottom: 5px;
-            border-bottom: 2.5px solid #2d3748;
-            display: inline-block;
-        }
-
-        .section-description {
-            color: #6b7280;
-            line-height: 1.5;
-            margin-bottom: 16px;
-            font-size: 7.5px;
-        }
-
-        .experience-item, .education-item {
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .experience-item:last-child, .education-item:last-child {
-            border-bottom: none;
-        }
-
-        .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 5px;
-        }
-
-        .item-title {
-            font-size: 10.5px;
-            font-weight: 600;
-            color: #2d3748;
-        }
-
-        .item-date {
-            font-size: 7.5px;
-            color: #9ca3af;
-            font-weight: 500;
-        }
-
-        .item-company {
-            color: var(--sidebar-accent);
-            font-size: 8.5px;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        .item-description {
-            color: #6b7280;
-            line-height: 1.4;
-            font-size: 7.5px;
-        }
-
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 14px;
-        }
-
-        .skill-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .skill-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-
-        .skill-name {
-            font-weight: 600;
-            color: #2d3748;
-            font-size: 8.5px;
-        }
-
-        .skill-level {
-            font-size: 7px;
-            color: #9ca3af;
-        }
-
-        [contenteditable="true"]:focus {
-            outline: 2px solid var(--sidebar-accent);
-            background: rgba(91, 157, 217, 0.05);
-        }
-
-        .bottom-bar-wrapper {
-            position: fixed;
-            left: 0;
-            right: 0;
-            bottom: 20px;
-            display: flex;
-            justify-content: center;
-            pointer-events: none;
-            z-index: 999;
-            padding: 0 20px;
-        }
-
-        .bottom-bar {
-            pointer-events: auto;
-            width: 100%;
-            max-width: 600px;
-            background: var(--bar-bg);
-            border-radius: 999px;
-            padding: 8px 16px;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-        }
-
-        .tab {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-            padding: 0;
-            color: #5b5b5b;
-            text-decoration: none;
-            border-radius: 50%;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            flex-shrink: 0;
-            font-size: 24px;
-        }
-
-        .tab:hover {
-            background: rgba(128,128,128,0.1);
-        }
-
-        .tab:active {
-            transform: scale(0.9);
-        }
-
-        .tab.active {
-            color: var(--accent);
-            background: rgba(128,128,128,0.15);
-        }
-
-        .center-btn {
-            background: var(--accent);
-            color: white;
-            padding: 14px 28px;
-            border-radius: 999px;
-            box-shadow: 0 4px 12px rgba(17,17,17,0.2);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 15px;
-            border: none;
-            cursor: pointer;
-            justify-content: center;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-            flex-shrink: 0;
-            height: 48px;
-        }
-
-        .center-btn:hover {
-            opacity: 0.9;
-            box-shadow: 0 6px 16px rgba(17,17,17,0.25);
-        }
-
-        .center-btn:active {
-            transform: scale(0.96);
-        }
-
-        .zoom-indicator {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: var(--accent);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            z-index: 1000;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .edit-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--sidebar-accent);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            display: none;
-            align-items: center;
-            gap: 8px;
-            z-index: 1000;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .edit-indicator.show {
-            display: flex;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.6);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-
-        .modal-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: #2d3748;
-        }
-
-        .modal-section {
-            margin-bottom: 20px;
-        }
-
-        .modal-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #4a5568;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .modal-input {
-            width: 100%;
-            padding: 10px 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-
-        .modal-input:focus {
-            outline: none;
-            border-color: var(--sidebar-accent);
-        }
-
-        .color-picker-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-        }
-
-        .color-option {
-            width: 45px;
-            height: 45px;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 3px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .color-option:hover {
-            transform: scale(1.1);
-        }
-
-        .color-option.selected {
-            border-color: #111;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
+        
+        .info-box {
+            background: #f9f9f9;
+            border-left: 3px solid #333;
+            padding: 12px;
             margin-top: 20px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
-        }
-
-        .btn-secondary {
-            background: #f1f3f5;
-            color: #2d3748;
-        }
-
-        .btn-secondary:hover {
-            background: #e2e8f0;
-        }
-
-        #fileInput, #bgFileInput {
-            display: none;
-        }
-
-        .add-page-btn {
-            width: calc(210mm * var(--scale));
-            height: 60px;
-            background: rgba(255,255,255,0.9);
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-            color: #666;
-            font-size: 15px;
-        }
-
-        .add-page-btn:hover {
-            background: white;
-            border-color: var(--sidebar-accent);
-            color: var(--sidebar-accent);
-        }
-
-        .page-controls {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: none;
-            gap: 5px;
-            z-index: 10;
-        }
-
-        .page:hover .page-controls {
-            display: flex;
-        }
-
-        .page-control-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.6);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            transition: all 0.2s;
-        }
-
-        .page-control-btn:hover {
-            background: rgba(0,0,0,0.8);
-        }
-
-        .background-options {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .bg-option {
-            width: 100%;
-            height: 80px;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 3px solid transparent;
-            transition: all 0.2s;
-            background-size: cover;
-            background-position: center;
-        }
-
-        .bg-option:hover {
-            transform: scale(1.05);
-        }
-
-        .bg-option.selected {
-            border-color: var(--sidebar-accent);
-        }
-
-        .bg-option.solid {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 600;
-            color: #666;
-        }
-
-        @media print {
-            body {
-                background-color: white;
-                padding: 0;
-            }
-            .bottom-bar-wrapper,
-            .edit-indicator,
-            .zoom-indicator,
-            .page-controls,
-            .add-page-btn {
-                display: none !important;
-            }
-            .page {
-                width: 210mm !important;
-                height: 297mm !important;
-                box-shadow: none;
-                margin: 0;
-                page-break-after: always;
-            }
-            [contenteditable="true"] {
-                outline: none;
-            }
+            font-size: 0.9em;
+            color: #555;
         }
     </style>
 </head>
 <body>
-    <div class="zoom-indicator" id="zoomIndicator">
-        <ion-icon name="expand-outline"></ion-icon>
-        <span id="zoomPercentage">90%</span>
-    </div>
-
-    <div class="edit-indicator" id="editIndicator">
-        <ion-icon name="create-outline"></ion-icon>
-        Edit mode active
-    </div>
-
-    <div class="scroll-container" id="scrollContainer">
-        <div class="page" id="page-1" data-page-id="1">
-            <div class="page-controls">
-                <button class="page-control-btn" onclick="duplicatePage(1)" title="Duplicate page">
-                    <ion-icon name="copy-outline"></ion-icon>
-                </button>
-                <button class="page-control-btn" onclick="deletePage(1)" title="Delete page">
-                    <ion-icon name="trash-outline"></ion-icon>
-                </button>
+    <div class="container">
+        <div class="header">
+            <h1>Conversor HTML para PDF</h1>
+            <p>Transforme seu código HTML em documentos PDF</p>
+        </div>
+        
+        <div class="content">
+            <div class="instructions">
+                <h3>Como usar:</h3>
+                <ol>
+                    <li>Cole seu código HTML completo na área de texto abaixo</li>
+                    <li>Clique em "Visualizar HTML" para ver o resultado</li>
+                    <li>Use Ctrl+P (ou Cmd+P no Mac) e selecione "Salvar como PDF"</li>
+                    <li>Ajuste as configurações de impressão conforme necessário</li>
+                </ol>
             </div>
             
-            <div class="sidebar" id="sidebar">
-                <div class="profile-section">
-                    <div class="profile-image-wrapper" onclick="document.getElementById('fileInput').click()">
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" alt="Profile" class="profile-image" id="profileImage">
-                        <div class="image-overlay">
-                            <span>Change Photo</span>
-                        </div>
-                    </div>
-                    <input type="file" id="fileInput" accept="image/*" onchange="handleImageUpload(event)">
-                    
-                    <h1 class="name" contenteditable="true">Henry Madison</h1>
-                    <p class="job-title" contenteditable="true">Graphic Designer</p>
-                    
-                    <div class="social-links">
-                        <div class="social-link">in</div>
-                        <div class="social-link">tw</div>
-                        <div class="social-link">fb</div>
-                    </div>
+            <div id="alert" class="alert"></div>
+            
+            <div class="section">
+                <h2>Cole seu código HTML</h2>
+                <div class="input-group">
+                    <label for="htmlInput">Código HTML:</label>
+                    <textarea id="htmlInput" placeholder="Cole seu código HTML aqui..."></textarea>
                 </div>
-
+                
+                <div class="button-group">
+                    <button class="btn-primary" onclick="previewHTML()">
+                        Visualizar HTML
+                    </button>
+                    <button class="btn-secondary" onclick="clearInput()">
+                        Limpar
+                    </button>
+                    <button class="btn-primary" onclick="printToPDF()">
+                        Gerar PDF
+                    </button>
+                </div>
+            </div>
+            
+            <div class="preview-section" id="previewSection" style="display: none;">
                 <div class="section">
-                    <h2 class="section-title">Contact</h2>
-                    <div class="contact-item">
-                        <span class="contact-label">Email:</span>
-                        <span contenteditable="true">info@yourmail.com</span>
-                    </div>
-                    <div class="contact-item">
-                        <span class="contact-label">Phone:</span>
-                        <span contenteditable="true">+0000 1234 5678</span>
-                    </div>
-                    <div class="contact-item">
-                        <span class="contact-label">Address:</span>
-                        <span contenteditable="true">New York City - 000</span>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <h2 class="section-title">Languages</h2>
-                    <div class="language-item">
-                        <div class="language-name" contenteditable="true">English</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 95%" data-width="95"></div>
-                        </div>
-                    </div>
-                    <div class="language-item">
-                        <div class="language-name" contenteditable="true">Urdu</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 85%" data-width="85"></div>
-                        </div>
-                    </div>
-                    <div class="language-item">
-                        <div class="language-name" contenteditable="true">Spanish</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 60%" data-width="60"></div>
-                        </div>
-                    </div>
+                    <h2>Pré-visualização</h2>
+                    <iframe id="previewFrame" class="preview-frame"></iframe>
                 </div>
             </div>
-
-            <div class="main-content">
-                <div class="content-section">
-                    <h2 class="content-section-title">Profile</h2>
-                    <p class="section-description" contenteditable="true">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis ipsum suspendisse ultrices gravida. Risus commodo viverra maecenas accumsan lacus vel facilisis.
-                    </p>
-                </div>
-
-                <div class="content-section">
-                    <h2 class="content-section-title">Experience</h2>
-                    
-                    <div class="experience-item">
-                        <div class="item-header">
-                            <div>
-                                <div class="item-title" contenteditable="true">Senior Designer</div>
-                                <div class="item-company" contenteditable="true">Company Name</div>
-                            </div>
-                            <div class="item-date" contenteditable="true">2000 - 2000</div>
-                        </div>
-                        <p class="item-description" contenteditable="true">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                        </p>
-                    </div>
-                </div>
-
-                <div class="content-section">
-                    <h2 class="content-section-title">Education</h2>
-                    
-                    <div class="education-item">
-                        <div class="item-header">
-                            <div>
-                                <div class="item-title" contenteditable="true">Asian University</div>
-                                <div class="item-company" contenteditable="true">Bachelors in Science</div>
-                            </div>
-                            <div class="item-date" contenteditable="true">2005 - 2009</div>
-                        </div>
-                        <p class="item-description" contenteditable="true">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                        </p>
-                    </div>
-                </div>
-
-                <div class="content-section">
-                    <h2 class="content-section-title">Expertise</h2>
-                    <div class="skills-grid">
-                        <div class="skill-item">
-                            <div class="skill-header">
-                                <span class="skill-name" contenteditable="true">Premiere Pro</span>
-                                <span class="skill-level">Expert</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 90%" data-width="90"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="skill-item">
-                            <div class="skill-header">
-                                <span class="skill-name" contenteditable="true">After Effect</span>
-                                <span class="skill-level">Advanced</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 85%" data-width="85"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="skill-item">
-                            <div class="skill-header">
-                                <span class="skill-name" contenteditable="true">Photoshop</span>
-                                <span class="skill-level">Expert</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 95%" data-width="95"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="skill-item">
-                            <div class="skill-header">
-                                <span class="skill-name" contenteditable="true">Illustrator</span>
-                                <span class="skill-level">Intermediate</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 70%" data-width="70"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <button class="add-page-btn" onclick="addNewPage()">
-            <ion-icon name="add-circle-outline" style="font-size: 24px;"></ion-icon>
-            <span>Add New Page</span>
-        </button>
-    </div>
-
-    <div class="bottom-bar-wrapper">
-        <nav class="bottom-bar" role="navigation">
-            <button class="tab" id="tab-zoom-out" aria-label="Zoom out">
-                <ion-icon name="remove-outline"></ion-icon>
-            </button>
-            <button class="tab" id="tab-edit" aria-label="Edit document">
-                <ion-icon name="create-outline"></ion-icon>
-            </button>
-            <button class="tab" id="tab-background" aria-label="Change background">
-                <ion-icon name="image-outline"></ion-icon>
-            </button>
-            <button class="center-btn" id="btn-download" aria-label="Download PDF">
-                <ion-icon name="download-outline"></ion-icon>
-                <span>PDF</span>
-            </button>
-            <button class="tab" id="tab-settings" aria-label="Settings">
-                <ion-icon name="options-outline"></ion-icon>
-            </button>
-            <button class="tab" id="tab-zoom-in" aria-label="Zoom in">
-                <ion-icon name="add-outline"></ion-icon>
-            </button>
-        </nav>
-    </div>
-
-    <div class="modal" id="settingsModal">
-        <div class="modal-content">
-            <h3 class="modal-title">Customize Resume</h3>
             
-            <div class="modal-section">
-                <label class="modal-label">File Name</label>
-                <input type="text" class="modal-input" id="fileName" value="henry-madison-resume">
-            </div>
-
-            <div class="modal-section">
-                <label class="modal-label">Accent Color</label>
-                <div class="color-picker-grid">
-                    <div class="color-option selected" style="background: #5b9dd9" data-color="#5b9dd9"></div>
-                    <div class="color-option" style="background: #10b981" data-color="#10b981"></div>
-                    <div class="color-option" style="background: #f59e0b" data-color="#f59e0b"></div>
-                    <div class="color-option" style="background: #ef4444" data-color="#ef4444"></div>
-                    <div class="color-option" style="background: #8b5cf6" data-color="#8b5cf6"></div>
-                    <div class="color-option" style="background: #ec4899" data-color="#ec4899"></div>
-                    <div class="color-option" style="background: #06b6d4" data-color="#06b6d4"></div>
-                    <div class="color-option" style="background: #84cc16" data-color="#84cc16"></div>
-                    <div class="color-option" style="background: #f97316" data-color="#f97316"></div>
-                    <div class="color-option" style="background: #6366f1" data-color="#6366f1"></div>
-                </div>
-            </div>
-
-            <div class="modal-section">
-                <label class="modal-label">Sidebar Background</label>
-                <div class="color-picker-grid">
-                    <div class="color-option selected" style="background: #3d4f5d" data-sidebar-color="#3d4f5d"></div>
-                    <div class="color-option" style="background: #1f2937" data-sidebar-color="#1f2937"></div>
-                    <div class="color-option" style="background: #374151" data-sidebar-color="#374151"></div>
-                    <div class="color-option" style="background: #064e3b" data-sidebar-color="#064e3b"></div>
-                    <div class="color-option" style="background: #7c2d12" data-sidebar-color="#7c2d12"></div>
-                </div>
-            </div>
-
-            <div class="btn-group">
-                <button class="btn btn-secondary" onclick="closeSettingsModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="applySettings()">Apply</button>
+            <div class="info-box">
+                <strong>Dica:</strong> Para melhores resultados, use Ctrl+Enter para visualizar rapidamente. 
+                Ao gerar o PDF, selecione as opções corretas de margem e orientação de página.
             </div>
         </div>
     </div>
-
-    <div class="modal" id="backgroundModal">
-        <div class="modal-content">
-            <h3 class="modal-title">Page Background</h3>
-            
-            <div class="modal-section">
-                <label class="modal-label">Solid Colors</label>
-                <div class="background-options">
-                    <div class="bg-option solid selected" style="background: #ffffff" data-bg-type="color" data-bg-value="#ffffff">White</div>
-                    <div class="bg-option solid" style="background: #f8f9fa" data-bg-type="color" data-bg-value="#f8f9fa">Light</div>
-                    <div class="bg-option solid" style="background: #e9ecef" data-bg-type="color" data-bg-value="#e9ecef">Gray</div>
-                    <div class="bg-option solid" style="background: #fef3c7" data-bg-type="color" data-bg-value="#fef3c7">Cream</div>
-                </div>
-            </div>
-
-            <div class="modal-section">
-                <label class="modal-label">Upload Custom Background</label>
-                <input type="file" id="bgFileInput" accept="image/*">
-                <button class="btn btn-secondary" onclick="document.getElementById('bgFileInput').click()" style="width: 100%; margin-top: 10px;">Choose Image</button>
-            </div>
-
-            <div class="modal-section">
-                <label class="modal-label">Preset Backgrounds</label>
-                <div class="background-options">
-                    <div class="bg-option" style="background-image: url('https://images.unsplash.com/photo-1557683316-973673baf926?w=400')" data-bg-type="image" data-bg-value="url('https://images.unsplash.com/photo-1557683316-973673baf926?w=800')"></div>
-                    <div class="bg-option" style="background-image: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400')" data-bg-type="image" data-bg-value="url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800')"></div>
-                    <div class="bg-option" style="background-image: url('https://images.unsplash.com/photo-1554034483-04fda0d3507b?w=400')" data-bg-type="image" data-bg-value="url('https://images.unsplash.com/photo-1554034483-04fda0d3507b?w=800')"></div>
-                    <div class="bg-option" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400')" data-bg-type="image" data-bg-value="url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800')"></div>
-                </div>
-            </div>
-
-            <div class="btn-group">
-                <button class="btn btn-secondary" onclick="closeBackgroundModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="applyBackground()">Apply</button>
-            </div>
-        </div>
-    </div>
-
+    
     <script>
-        let currentZoom = 0.9;
-        let editMode = false;
-        let currentAccentColor = '#5b9dd9';
-        let currentSidebarColor = '#3d4f5d';
-        let currentFileName = 'henry-madison-resume';
-        let pageCounter = 1;
-        let selectedBackground = { type: 'color', value: '#ffffff' };
-
-        function updateZoomIndicator() {
-            const percentage = Math.round(currentZoom * 100);
-            document.getElementById('zoomPercentage').textContent = percentage + '%';
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 3000);
         }
-
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('profileImage').src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        const tabZoomOut = document.getElementById('tab-zoom-out');
-        const tabZoomIn = document.getElementById('tab-zoom-in');
-        const tabEdit = document.getElementById('tab-edit');
-        const tabSettings = document.getElementById('tab-settings');
-        const tabBackground = document.getElementById('tab-background');
-        const btnDownload = document.getElementById('btn-download');
-        const editIndicator = document.getElementById('editIndicator');
-
-        function applyScale(scale) {
-            const clamped = Math.min(1.2, Math.max(0.3, scale));
-            currentZoom = Math.round(clamped * 100) / 100;
-            document.documentElement.style.setProperty('--scale', currentZoom);
-            updateZoomIndicator();
-        }
-
-        tabZoomOut.addEventListener('click', () => {
-            applyScale(currentZoom - 0.1);
-        });
-
-        tabZoomIn.addEventListener('click', () => {
-            applyScale(currentZoom + 0.1);
-        });
-
-        tabEdit.addEventListener('click', () => {
-            editMode = !editMode;
-            tabEdit.classList.toggle('active', editMode);
-            editIndicator.classList.toggle('show', editMode);
-
-            const editableElements = document.querySelectorAll('[contenteditable]');
-            editableElements.forEach(el => {
-                el.contentEditable = editMode;
-            });
-        });
-
-        tabSettings.addEventListener('click', () => {
-            document.getElementById('settingsModal').classList.add('active');
-        });
-
-        tabBackground.addEventListener('click', () => {
-            document.getElementById('backgroundModal').classList.add('active');
-        });
-
-        function closeSettingsModal() {
-            document.getElementById('settingsModal').classList.remove('active');
-        }
-
-        function closeBackgroundModal() {
-            document.getElementById('backgroundModal').classList.remove('active');
-        }
-
-        function applySettings() {
-            currentFileName = document.getElementById('fileName').value;
-
-            const selectedAccent = document.querySelector('.color-option[data-color].selected');
-            if (selectedAccent) {
-                currentAccentColor = selectedAccent.getAttribute('data-color');
-                document.documentElement.style.setProperty('--sidebar-accent', currentAccentColor);
-            }
-
-            const selectedSidebar = document.querySelector('.color-option[data-sidebar-color].selected');
-            if (selectedSidebar) {
-                currentSidebarColor = selectedSidebar.getAttribute('data-sidebar-color');
-                document.documentElement.style.setProperty('--sidebar-bg', currentSidebarColor);
-            }
-
-            closeSettingsModal();
-        }
-
-        function applyBackground() {
-            const pages = document.querySelectorAll('.page');
-            pages.forEach(page => {
-                if (selectedBackground.type === 'color') {
-                    page.style.setProperty('--page-bg-color', selectedBackground.value);
-                    page.style.setProperty('--page-bg-image', 'none');
-                } else if (selectedBackground.type === 'image') {
-                    page.style.setProperty('--page-bg-image', selectedBackground.value);
-                }
-            });
-            closeBackgroundModal();
-        }
-
-        document.querySelectorAll('.color-option[data-color]').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.color-option[data-color]').forEach(opt => opt.classList.remove('selected'));
-                this.classList.add('selected');
-            });
-        });
-
-        document.querySelectorAll('.color-option[data-sidebar-color]').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.color-option[data-sidebar-color]').forEach(opt => opt.classList.remove('selected'));
-                this.classList.add('selected');
-            });
-        });
-
-        document.querySelectorAll('.bg-option').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.bg-option').forEach(opt => opt.classList.remove('selected'));
-                this.classList.add('selected');
-                selectedBackground = {
-                    type: this.getAttribute('data-bg-type'),
-                    value: this.getAttribute('data-bg-value')
-                };
-            });
-        });
-
-        document.getElementById('bgFileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    selectedBackground = {
-                        type: 'image',
-                        value: `url('${event.target.result}')`
-                    };
-                    document.querySelectorAll('.bg-option').forEach(opt => opt.classList.remove('selected'));
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        document.getElementById('settingsModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeSettingsModal();
-            }
-        });
-
-        document.getElementById('backgroundModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeBackgroundModal();
-            }
-        });
-
-        function addNewPage() {
-            pageCounter++;
-            const newPage = document.createElement('div');
-            newPage.className = 'page';
-            newPage.id = `page-${pageCounter}`;
-            newPage.setAttribute('data-page-id', pageCounter);
-            newPage.style.setProperty('--page-bg-color', selectedBackground.type === 'color' ? selectedBackground.value : '#ffffff');
-            if (selectedBackground.type === 'image') {
-                newPage.style.setProperty('--page-bg-image', selectedBackground.value);
+        
+        function previewHTML() {
+            const htmlInput = document.getElementById('htmlInput').value.trim();
+            
+            if (!htmlInput) {
+                showAlert('Por favor, cole o código HTML primeiro!', 'error');
+                return;
             }
             
-            newPage.innerHTML = `
-                <div class="page-controls">
-                    <button class="page-control-btn" onclick="duplicatePage(${pageCounter})" title="Duplicate page">
-                        <ion-icon name="copy-outline"></ion-icon>
-                    </button>
-                    <button class="page-control-btn" onclick="deletePage(${pageCounter})" title="Delete page">
-                        <ion-icon name="trash-outline"></ion-icon>
-                    </button>
-                </div>
-                <div class="sidebar"></div>
-                <div class="main-content" contenteditable="${editMode}">
-                    <h2 class="content-section-title">New Page</h2>
-                    <p class="section-description" contenteditable="true">Start typing your content here...</p>
-                </div>
-            `;
-            
-            const addButton = document.querySelector('.add-page-btn');
-            addButton.parentNode.insertBefore(newPage, addButton);
-        }
-
-        function duplicatePage(pageId) {
-            const originalPage = document.getElementById(`page-${pageId}`);
-            if (originalPage) {
-                pageCounter++;
-                const clonedPage = originalPage.cloneNode(true);
-                clonedPage.id = `page-${pageCounter}`;
-                clonedPage.setAttribute('data-page-id', pageCounter);
-                
-                const controls = clonedPage.querySelector('.page-controls');
-                controls.innerHTML = `
-                    <button class="page-control-btn" onclick="duplicatePage(${pageCounter})" title="Duplicate page">
-                        <ion-icon name="copy-outline"></ion-icon>
-                    </button>
-                    <button class="page-control-btn" onclick="deletePage(${pageCounter})" title="Delete page">
-                        <ion-icon name="trash-outline"></ion-icon>
-                    </button>
-                `;
-                
-                const addButton = document.querySelector('.add-page-btn');
-                addButton.parentNode.insertBefore(clonedPage, addButton);
-            }
-        }
-
-        function deletePage(pageId) {
-            const pages = document.querySelectorAll('.page');
-            if (pages.length > 1) {
-                const pageToDelete = document.getElementById(`page-${pageId}`);
-                if (pageToDelete) {
-                    pageToDelete.remove();
-                }
-            } else {
-                alert('Cannot delete the last page!');
-            }
-        }
-
-        btnDownload.addEventListener('click', async () => {
             try {
-                const wasEditMode = editMode;
-                if (editMode) {
-                    editMode = false;
-                    tabEdit.classList.remove('active');
-                    editIndicator.classList.remove('show');
-                    const editableElements = document.querySelectorAll('[contenteditable]');
-                    editableElements.forEach(el => { el.contentEditable = false; });
-                }
-
-                const originalScale = currentZoom;
-                document.documentElement.style.setProperty('--scale', 1);
-
-                const pages = document.querySelectorAll('.page');
-                const pdf = new jspdf.jsPDF({
-                    unit: 'mm',
-                    format: 'a4',
-                    orientation: 'portrait'
-                });
-
-                for (let i = 0; i < pages.length; i++) {
-                    const element = pages[i];
-                    element.classList.add('pdf-rendering');
-
-                    document.querySelectorAll('.progress-fill').forEach(fill => {
-                        const width = fill.getAttribute('data-width') + '%';
-                        fill.style.width = width;
-                        fill.style.backgroundColor = currentAccentColor;
-                    });
-
-                    await new Promise(resolve => setTimeout(resolve, 200));
-
-                    const canvas = await html2canvas(element, {
-                        scale: 3,
-                        useCORS: true,
-                        letterRendering: true,
-                        logging: false,
-                        scrollY: 0,
-                        scrollX: 0,
-                        backgroundColor: null
-                    });
-
-                    const imgData = canvas.toDataURL('image/jpeg', 0.98);
-                    
-                    if (i > 0) {
-                        pdf.addPage();
-                    }
-                    
-                    pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
-                    element.classList.remove('pdf-rendering');
-                }
-
-                pdf.save(currentFileName + '.pdf');
-
-                document.documentElement.style.setProperty('--scale', originalScale);
-
-                if (wasEditMode) {
-                    editMode = true;
-                    tabEdit.classList.add('active');
-                    editIndicator.classList.add('show');
-                    const editableElements = document.querySelectorAll('[contenteditable]');
-                    editableElements.forEach(el => { el.contentEditable = true; });
-                }
+                const previewSection = document.getElementById('previewSection');
+                const previewFrame = document.getElementById('previewFrame');
+                
+                const blob = new Blob([htmlInput], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                
+                previewFrame.src = url;
+                previewSection.style.display = 'block';
+                
+                previewSection.scrollIntoView({ behavior: 'smooth' });
+                
+                showAlert('HTML carregado com sucesso!', 'success');
             } catch (error) {
-                console.error('Error generating PDF:', error);
-                alert('Erro ao gerar PDF. Por favor, tente novamente.');
+                showAlert('Erro ao processar HTML: ' + error.message, 'error');
+            }
+        }
+        
+        function clearInput() {
+            document.getElementById('htmlInput').value = '';
+            document.getElementById('previewSection').style.display = 'none';
+            showAlert('Área de texto limpa!', 'info');
+        }
+        
+        function printToPDF() {
+            const htmlInput = document.getElementById('htmlInput').value.trim();
+            
+            if (!htmlInput) {
+                showAlert('Por favor, carregue o HTML primeiro!', 'error');
+                return;
+            }
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(htmlInput);
+            printWindow.document.close();
+            
+            printWindow.onload = function() {
+                setTimeout(() => {
+                    printWindow.print();
+                }, 500);
+            };
+            
+            showAlert('Abrindo janela de impressão... Selecione "Salvar como PDF"', 'success');
+        }
+        
+        document.getElementById('htmlInput').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                previewHTML();
             }
         });
-
-        const editableElements = document.querySelectorAll('[contenteditable]');
-        editableElements.forEach(el => { el.contentEditable = false; });
-
-        document.querySelectorAll('.progress-bar').forEach(bar => {
-            const fill = bar.querySelector('.progress-fill');
-            fill.addEventListener('click', function(e) {
-                if (editMode) {
-                    const rect = bar.getBoundingClientRect();
-                    const percent = Math.round(((e.clientX - rect.left) / rect.width) * 100);
-                    fill.style.width = percent + '%';
-                    fill.setAttribute('data-width', percent);
-                }
-            });
-        });
-
-        document.documentElement.style.setProperty('--scale', currentZoom);
-        updateZoomIndicator();
     </script>
 </body>
 </html>
