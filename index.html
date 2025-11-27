@@ -3,318 +3,830 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conversor HTML para PDF</title>
+    <title>PDF Studio</title>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
             min-height: 100vh;
-            padding: 20px;
+            overflow-x: hidden;
         }
-        
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .header {
-            background: #333;
-            color: white;
-            padding: 20px 30px;
-            border-radius: 5px 5px 0 0;
-        }
-        
-        .header h1 {
-            font-size: 1.8em;
-            margin-bottom: 5px;
-        }
-        
-        .header p {
-            font-size: 0.95em;
-            color: #ddd;
-        }
-        
-        .content {
-            padding: 30px;
-        }
-        
-        .section {
-            margin-bottom: 25px;
-        }
-        
-        .section h2 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-            border-bottom: 2px solid #ddd;
-            padding-bottom: 8px;
-        }
-        
-        .input-group {
-            margin-bottom: 15px;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-        }
-        
-        textarea {
-            width: 100%;
-            min-height: 300px;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            resize: vertical;
-        }
-        
-        textarea:focus {
-            outline: none;
-            border-color: #666;
-        }
-        
-        .button-group {
+
+        .app-container {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            height: 100vh;
         }
-        
-        button {
-            padding: 12px 25px;
+
+        .sidebar {
+            width: 280px;
+            background: #111;
+            border-right: 1px solid #222;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid #222;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo ion-icon {
+            font-size: 28px;
+            color: #0ea5e9;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #1a1a1a;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #222;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0ea5e9;
+        }
+
+        .menu-section {
+            margin-bottom: 24px;
+        }
+
+        .menu-title {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding: 0 12px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+
+        .menu-item:hover {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .menu-item.active {
+            background: #0ea5e9;
+            color: #fff;
+        }
+
+        .menu-item ion-icon {
+            font-size: 20px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar {
+            height: 70px;
+            background: #111;
+            border-bottom: 1px solid #222;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
             border: none;
-            border-radius: 3px;
-            font-size: 0.95em;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .page-title {
+            font-size: 18px;
             font-weight: 600;
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #222;
+            border-color: #444;
+        }
+
+        .action-btn.primary {
+            background: #0ea5e9;
+            border-color: #0ea5e9;
+        }
+
+        .action-btn.primary:hover {
+            background: #0284c7;
+        }
+
+        .action-btn ion-icon {
+            font-size: 18px;
+        }
+
+        .workspace {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: #222;
+            overflow: hidden;
+        }
+
+        .editor-panel,
+        .preview-panel {
+            background: #0a0a0a;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #aaa;
+        }
+
+        .panel-title ion-icon {
+            font-size: 18px;
+        }
+
+        .panel-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-btn {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #888;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
             cursor: pointer;
             transition: all 0.2s;
         }
-        
-        .btn-primary {
-            background: #333;
-            color: white;
+
+        .control-btn:hover {
+            color: #fff;
+            border-color: #444;
+        }
+
+        .control-btn.active {
+            background: #0ea5e9;
+            color: #fff;
+            border-color: #0ea5e9;
+        }
+
+        .editor-container {
             flex: 1;
+            padding: 20px;
+            overflow-y: auto;
         }
-        
-        .btn-primary:hover {
-            background: #555;
-        }
-        
-        .btn-secondary {
-            background: #ddd;
-            color: #333;
-        }
-        
-        .btn-secondary:hover {
-            background: #ccc;
-        }
-        
-        .preview-section {
-            margin-top: 25px;
-            border-top: 2px solid #ddd;
-            padding-top: 25px;
-        }
-        
-        .preview-frame {
+
+        .code-editor {
             width: 100%;
-            min-height: 500px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            background: white;
+            height: 100%;
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            color: #e0e0e0;
+            resize: none;
+            line-height: 1.6;
         }
-        
-        .alert {
-            padding: 12px 15px;
-            border-radius: 3px;
-            margin-bottom: 15px;
-            display: none;
+
+        .code-editor:focus {
+            outline: none;
+            border-color: #0ea5e9;
         }
-        
-        .alert-success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
+
+        .preview-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            background: #050505;
         }
-        
-        .alert-error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
+
+        #pdf-viewer {
+            width: 100%;
+            max-width: 800px;
         }
-        
-        .alert-info {
-            background: #d1ecf1;
-            border: 1px solid #bee5eb;
-            color: #0c5460;
-        }
-        
-        .instructions {
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-            padding: 15px;
+
+        .pdf-page {
+            background: #fff;
             margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border-radius: 4px;
+            overflow: hidden;
         }
-        
-        .instructions h3 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 1.1em;
+
+        .pdf-page canvas {
+            display: block;
+            width: 100%;
+            height: auto;
         }
-        
-        .instructions ol {
-            margin-left: 20px;
-            color: #555;
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
         }
-        
-        .instructions li {
-            margin-bottom: 6px;
+
+        .empty-state ion-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
         }
-        
-        .info-box {
-            background: #f9f9f9;
-            border-left: 3px solid #333;
-            padding: 12px;
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
             margin-top: 20px;
-            font-size: 0.9em;
-            color: #555;
+        }
+
+        .quick-action {
+            background: #1a1a1a;
+            border: 1px solid #222;
+            padding: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .quick-action:hover {
+            background: #222;
+            border-color: #333;
+        }
+
+        .quick-action ion-icon {
+            font-size: 24px;
+            color: #0ea5e9;
+            margin-bottom: 8px;
+        }
+
+        .quick-action-text {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #333;
+            border-top-color: #0ea5e9;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 16px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast ion-icon {
+            font-size: 20px;
+        }
+
+        .toast.success {
+            border-color: #10b981;
+        }
+
+        .toast.success ion-icon {
+            color: #10b981;
+        }
+
+        .toast.error {
+            border-color: #ef4444;
+        }
+
+        .toast.error ion-icon {
+            color: #ef4444;
+        }
+
+        @media (max-width: 1024px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-panel {
+                display: none;
+            }
+
+            .preview-panel.mobile-active {
+                display: flex;
+            }
+
+            .editor-panel.mobile-hidden {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                z-index: 1000;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .mobile-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .topbar {
+                padding: 0 16px;
+            }
+
+            .topbar-actions .action-btn span {
+                display: none;
+            }
+
+            .page-title {
+                font-size: 16px;
+            }
+
+            .editor-container,
+            .preview-container {
+                padding: 12px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Conversor HTML para PDF</h1>
-            <p>Transforme seu código HTML em documentos PDF</p>
-        </div>
-        
-        <div class="content">
-            <div class="instructions">
-                <h3>Como usar:</h3>
-                <ol>
-                    <li>Cole seu código HTML completo na área de texto abaixo</li>
-                    <li>Clique em "Visualizar HTML" para ver o resultado</li>
-                    <li>Use Ctrl+P (ou Cmd+P no Mac) e selecione "Salvar como PDF"</li>
-                    <li>Ajuste as configurações de impressão conforme necessário</li>
-                </ol>
-            </div>
-            
-            <div id="alert" class="alert"></div>
-            
-            <div class="section">
-                <h2>Cole seu código HTML</h2>
-                <div class="input-group">
-                    <label for="htmlInput">Código HTML:</label>
-                    <textarea id="htmlInput" placeholder="Cole seu código HTML aqui..."></textarea>
-                </div>
-                
-                <div class="button-group">
-                    <button class="btn-primary" onclick="previewHTML()">
-                        Visualizar HTML
-                    </button>
-                    <button class="btn-secondary" onclick="clearInput()">
-                        Limpar
-                    </button>
-                    <button class="btn-primary" onclick="printToPDF()">
-                        Gerar PDF
-                    </button>
+    <div class="app-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <ion-icon name="documents"></ion-icon>
+                    PDF Studio
                 </div>
             </div>
-            
-            <div class="preview-section" id="previewSection" style="display: none;">
-                <div class="section">
-                    <h2>Pré-visualização</h2>
-                    <iframe id="previewFrame" class="preview-frame"></iframe>
+
+            <div class="sidebar-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Páginas</div>
+                        <div class="stat-value" id="pageCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Caracteres</div>
+                        <div class="stat-value" id="charCount">0</div>
+                    </div>
+                </div>
+
+                <div class="menu-section">
+                    <div class="menu-title">Ferramentas</div>
+                    <div class="menu-item active">
+                        <ion-icon name="create"></ion-icon>
+                        <span>Editor</span>
+                    </div>
+                    <div class="menu-item" onclick="showTemplates()">
+                        <ion-icon name="grid"></ion-icon>
+                        <span>Templates</span>
+                    </div>
+                    <div class="menu-item" onclick="showSettings()">
+                        <ion-icon name="settings"></ion-icon>
+                        <span>Configurações</span>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <div class="quick-action" onclick="insertTemplate('heading')">
+                        <ion-icon name="text"></ion-icon>
+                        <div class="quick-action-text">Título</div>
+                    </div>
+                    <div class="quick-action" onclick="insertTemplate('paragraph')">
+                        <ion-icon name="document-text"></ion-icon>
+                        <div class="quick-action-text">Parágrafo</div>
+                    </div>
+                    <div class="quick-action" onclick="insertTemplate('list')">
+                        <ion-icon name="list"></ion-icon>
+                        <div class="quick-action-text">Lista</div>
+                    </div>
+                    <div class="quick-action" onclick="insertTemplate('table')">
+                        <ion-icon name="grid"></ion-icon>
+                        <div class="quick-action-text">Tabela</div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="info-box">
-                <strong>Dica:</strong> Para melhores resultados, use Ctrl+Enter para visualizar rapidamente. 
-                Ao gerar o PDF, selecione as opções corretas de margem e orientação de página.
+        </aside>
+
+        <main class="main-content">
+            <div class="topbar">
+                <button class="mobile-toggle" onclick="toggleSidebar()">
+                    <ion-icon name="menu"></ion-icon>
+                </button>
+                <div class="page-title">Novo Documento</div>
+                <div class="topbar-actions">
+                    <button class="action-btn" onclick="toggleView()" id="viewToggle">
+                        <ion-icon name="eye"></ion-icon>
+                        <span>Preview</span>
+                    </button>
+                    <button class="action-btn" onclick="clearEditor()">
+                        <ion-icon name="trash"></ion-icon>
+                        <span>Limpar</span>
+                    </button>
+                    <button class="action-btn primary" onclick="generatePDF()">
+                        <ion-icon name="download"></ion-icon>
+                        <span>Exportar PDF</span>
+                    </button>
+                </div>
             </div>
-        </div>
+
+            <div class="workspace">
+                <div class="editor-panel" id="editorPanel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <ion-icon name="code-slash"></ion-icon>
+                            HTML Editor
+                        </div>
+                        <div class="panel-controls">
+                            <button class="control-btn" onclick="formatCode()">Formatar</button>
+                        </div>
+                    </div>
+                    <div class="editor-container">
+                        <textarea class="code-editor" id="htmlEditor" placeholder="Cole ou escreva seu código HTML aqui..."></textarea>
+                    </div>
+                </div>
+
+                <div class="preview-panel" id="previewPanel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <ion-icon name="document"></ion-icon>
+                            Preview PDF
+                        </div>
+                        <div class="panel-controls">
+                            <button class="control-btn active" onclick="refreshPreview()">Atualizar</button>
+                        </div>
+                    </div>
+                    <div class="preview-container">
+                        <div class="empty-state" id="emptyState">
+                            <ion-icon name="document-text-outline"></ion-icon>
+                            <p>Escreva algo no editor e clique em "Preview" para visualizar</p>
+                        </div>
+                        <div id="pdf-viewer" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
-    
+
+    <div class="toast" id="toast">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        <span id="toastText"></span>
+    </div>
+
     <script>
-        function showAlert(message, type) {
-            const alert = document.getElementById('alert');
-            alert.className = `alert alert-${type}`;
-            alert.textContent = message;
-            alert.style.display = 'block';
-            
-            setTimeout(() => {
-                alert.style.display = 'none';
-            }, 3000);
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const htmlEditor = document.getElementById('htmlEditor');
+        const pdfViewer = document.getElementById('pdf-viewer');
+        const emptyState = document.getElementById('emptyState');
+        let currentPdfData = null;
+
+        htmlEditor.addEventListener('input', updateStats);
+
+        function updateStats() {
+            const text = htmlEditor.value;
+            document.getElementById('charCount').textContent = text.length;
         }
-        
-        function previewHTML() {
-            const htmlInput = document.getElementById('htmlInput').value.trim();
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toastText');
+            const icon = toast.querySelector('ion-icon');
             
-            if (!htmlInput) {
-                showAlert('Por favor, cole o código HTML primeiro!', 'error');
-                return;
+            toast.className = `toast ${type}`;
+            toastText.textContent = message;
+            
+            if (type === 'success') {
+                icon.setAttribute('name', 'checkmark-circle');
+            } else {
+                icon.setAttribute('name', 'alert-circle');
             }
             
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        }
+
+        function toggleView() {
+            const editorPanel = document.getElementById('editorPanel');
+            const previewPanel = document.getElementById('previewPanel');
+            const viewToggle = document.getElementById('viewToggle');
+            
+            if (window.innerWidth <= 1024) {
+                editorPanel.classList.toggle('mobile-hidden');
+                previewPanel.classList.toggle('mobile-active');
+                
+                if (previewPanel.classList.contains('mobile-active')) {
+                    viewToggle.querySelector('span').textContent = 'Editor';
+                    viewToggle.querySelector('ion-icon').setAttribute('name', 'code-slash');
+                } else {
+                    viewToggle.querySelector('span').textContent = 'Preview';
+                    viewToggle.querySelector('ion-icon').setAttribute('name', 'eye');
+                }
+            }
+        }
+
+        async function refreshPreview() {
+            const html = htmlEditor.value.trim();
+            
+            if (!html) {
+                showToast('Adicione conteúdo HTML primeiro', 'error');
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            pdfViewer.style.display = 'block';
+            pdfViewer.innerHTML = '<div class="loading"><div class="spinner"></div>Gerando preview...</div>';
+
             try {
-                const previewSection = document.getElementById('previewSection');
-                const previewFrame = document.getElementById('previewFrame');
+                const element = document.createElement('div');
+                element.innerHTML = html;
+                element.style.padding = '40px';
+                element.style.background = 'white';
+                element.style.color = 'black';
+
+                const opt = {
+                    margin: 10,
+                    filename: 'preview.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+                currentPdfData = pdfBlob;
                 
-                const blob = new Blob([htmlInput], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
+                await renderPDF(pdfBlob);
                 
-                previewFrame.src = url;
-                previewSection.style.display = 'block';
+                const pageCount = Math.ceil(element.scrollHeight / 1122);
+                document.getElementById('pageCount').textContent = pageCount;
                 
-                previewSection.scrollIntoView({ behavior: 'smooth' });
-                
-                showAlert('HTML carregado com sucesso!', 'success');
+                showToast('Preview gerado com sucesso');
             } catch (error) {
-                showAlert('Erro ao processar HTML: ' + error.message, 'error');
+                pdfViewer.innerHTML = '<div class="empty-state"><ion-icon name="alert-circle"></ion-icon><p>Erro ao gerar preview</p></div>';
+                showToast('Erro ao gerar preview', 'error');
             }
         }
-        
-        function clearInput() {
-            document.getElementById('htmlInput').value = '';
-            document.getElementById('previewSection').style.display = 'none';
-            showAlert('Área de texto limpa!', 'info');
-        }
-        
-        function printToPDF() {
-            const htmlInput = document.getElementById('htmlInput').value.trim();
+
+        async function renderPDF(pdfBlob) {
+            const arrayBuffer = await pdfBlob.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
             
-            if (!htmlInput) {
-                showAlert('Por favor, carregue o HTML primeiro!', 'error');
+            pdfViewer.innerHTML = '';
+
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 1.5 });
+                
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'pdf-page';
+                pageDiv.appendChild(canvas);
+                pdfViewer.appendChild(pageDiv);
+
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
+            }
+        }
+
+        async function generatePDF() {
+            const html = htmlEditor.value.trim();
+            
+            if (!html) {
+                showToast('Adicione conteúdo HTML primeiro', 'error');
                 return;
             }
-            
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(htmlInput);
-            printWindow.document.close();
-            
-            printWindow.onload = function() {
-                setTimeout(() => {
-                    printWindow.print();
-                }, 500);
-            };
-            
-            showAlert('Abrindo janela de impressão... Selecione "Salvar como PDF"', 'success');
+
+            showToast('Gerando PDF...');
+
+            try {
+                const element = document.createElement('div');
+                element.innerHTML = html;
+                element.style.padding = '40px';
+                element.style.background = 'white';
+                element.style.color = 'black';
+
+                const opt = {
+                    margin: 10,
+                    filename: 'documento.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                await html2pdf().set(opt).from(element).save();
+                showToast('PDF exportado com sucesso');
+            } catch (error) {
+                showToast('Erro ao gerar PDF', 'error');
+            }
         }
-        
-        document.getElementById('htmlInput').addEventListener('keydown', function(e) {
+
+        function clearEditor() {
+            if (confirm('Deseja limpar todo o conteúdo?')) {
+                htmlEditor.value = '';
+                pdfViewer.style.display = 'none';
+                emptyState.style.display = 'block';
+                updateStats();
+                showToast('Editor limpo');
+            }
+        }
+
+        function formatCode() {
+            showToast('Formatação de código não disponível nesta versão');
+        }
+
+        function showTemplates() {
+            showToast('Galeria de templates em breve');
+        }
+
+        function showSettings() {
+            showToast('Configurações em breve');
+        }
+
+        function insertTemplate(type) {
+            const templates = {
+                heading: '<h1>Título Principal</h1>\n',
+                paragraph: '<p>Este é um parágrafo de exemplo.</p>\n',
+                list: '<ul>\n  <li>Item 1</li>\n  <li>Item 2</li>\n  <li>Item 3</li>\n</ul>\n',
+                table: '<table border="1">\n  <tr>\n    <th>Coluna 1</th>\n    <th>Coluna 2</th>\n  </tr>\n  <tr>\n    <td>Dado 1</td>\n    <td>Dado 2</td>\n  </tr>\n</table>\n'
+            };
+
+            htmlEditor.value += templates[type] || '';
+            updateStats();
+        }
+
+        htmlEditor.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.key === 'Enter') {
-                previewHTML();
+                refreshPreview();
             }
         });
     </script>
