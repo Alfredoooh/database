@@ -702,36 +702,30 @@
             pdfViewer.innerHTML = '<div class="loading"><div class="spinner"></div>Gerando preview...</div>';
 
             try {
-                const iframe = document.createElement('iframe');
-                iframe.style.position = 'absolute';
-                iframe.style.left = '-9999px';
-                iframe.style.width = '210mm';
-                iframe.style.visibility = 'hidden';
-                document.body.appendChild(iframe);
+                const newWindow = window.open('', '_blank', 'width=800,height=600');
+                newWindow.document.write(html);
+                newWindow.document.close();
 
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                iframeDoc.open();
-                iframeDoc.write(html);
-                iframeDoc.close();
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                const allLinks = newWindow.document.querySelectorAll('link[rel="stylesheet"]');
+                if (allLinks.length > 0) {
+                    await Promise.all(Array.from(allLinks).map(link => {
+                        return new Promise(resolve => {
+                            if (link.sheet) {
+                                resolve();
+                            } else {
+                                link.onload = resolve;
+                                link.onerror = resolve;
+                                setTimeout(resolve, 2000);
+                            }
+                        });
+                    }));
+                }
 
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
-                const links = iframeDoc.querySelectorAll('link[rel="stylesheet"]');
-                if (links.length > 0) {
-                    await Promise.all(
-                        Array.from(links).map(link => {
-                            return new Promise(resolve => {
-                                if (link.sheet && link.sheet.cssRules) {
-                                    resolve();
-                                } else {
-                                    link.onload = resolve;
-                                    link.onerror = resolve;
-                                }
-                            });
-                        })
-                    );
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
+                const element = newWindow.document.body;
 
                 const opt = {
                     margin: 0,
@@ -740,17 +734,31 @@
                     html2canvas: { 
                         scale: 2,
                         useCORS: true,
-                        logging: false,
-                        letterRendering: true,
+                        logging: true,
                         allowTaint: true,
-                        backgroundColor: null,
-                        removeContainer: false
+                        backgroundColor: '#ffffff',
+                        windowWidth: element.scrollWidth,
+                        windowHeight: element.scrollHeight,
+                        onclone: function(clonedDoc) {
+                            const clonedBody = clonedDoc.body;
+                            const computedStyle = newWindow.getComputedStyle(element);
+                            clonedBody.style.cssText = computedStyle.cssText;
+                            
+                            const allElements = element.querySelectorAll('*');
+                            const clonedElements = clonedBody.querySelectorAll('*');
+                            
+                            allElements.forEach((el, index) => {
+                                if (clonedElements[index]) {
+                                    const style = newWindow.getComputedStyle(el);
+                                    clonedElements[index].style.cssText = style.cssText;
+                                }
+                            });
+                        }
                     },
                     jsPDF: { 
                         unit: 'mm', 
                         format: 'a4', 
-                        orientation: 'portrait',
-                        compress: false
+                        orientation: 'portrait'
                     },
                     pagebreak: { 
                         mode: ['css', 'legacy'],
@@ -759,17 +767,15 @@
                     }
                 };
 
-                const element = iframeDoc.body;
-                const worker = html2pdf().set(opt).from(element);
-                const pdfBlob = await worker.output('blob');
+                const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
                 
-                document.body.removeChild(iframe);
+                newWindow.close();
                 currentPdfData = pdfBlob;
                 
                 await renderPDF(pdfBlob);
                 showToast('Preview gerado com sucesso');
             } catch (error) {
-                console.error('Erro no preview:', error);
+                console.error('Erro completo:', error);
                 pdfViewer.innerHTML = '<div class="empty-state"><ion-icon name="alert-circle"></ion-icon><p>Erro: ' + error.message + '</p></div>';
                 showToast('Erro ao gerar preview', 'error');
             }
@@ -823,36 +829,30 @@
             showToast('Gerando PDF, aguarde...');
 
             try {
-                const iframe = document.createElement('iframe');
-                iframe.style.position = 'absolute';
-                iframe.style.left = '-9999px';
-                iframe.style.width = '210mm';
-                iframe.style.visibility = 'hidden';
-                document.body.appendChild(iframe);
+                const newWindow = window.open('', '_blank', 'width=800,height=600');
+                newWindow.document.write(html);
+                newWindow.document.close();
 
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                iframeDoc.open();
-                iframeDoc.write(html);
-                iframeDoc.close();
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                const allLinks = newWindow.document.querySelectorAll('link[rel="stylesheet"]');
+                if (allLinks.length > 0) {
+                    await Promise.all(Array.from(allLinks).map(link => {
+                        return new Promise(resolve => {
+                            if (link.sheet) {
+                                resolve();
+                            } else {
+                                link.onload = resolve;
+                                link.onerror = resolve;
+                                setTimeout(resolve, 2000);
+                            }
+                        });
+                    }));
+                }
 
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
-                const links = iframeDoc.querySelectorAll('link[rel="stylesheet"]');
-                if (links.length > 0) {
-                    await Promise.all(
-                        Array.from(links).map(link => {
-                            return new Promise(resolve => {
-                                if (link.sheet && link.sheet.cssRules) {
-                                    resolve();
-                                } else {
-                                    link.onload = resolve;
-                                    link.onerror = resolve;
-                                }
-                            });
-                        })
-                    );
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
+                const element = newWindow.document.body;
 
                 const opt = {
                     margin: 0,
@@ -861,17 +861,31 @@
                     html2canvas: { 
                         scale: 2,
                         useCORS: true,
-                        logging: false,
-                        letterRendering: true,
+                        logging: true,
                         allowTaint: true,
-                        backgroundColor: null,
-                        removeContainer: false
+                        backgroundColor: '#ffffff',
+                        windowWidth: element.scrollWidth,
+                        windowHeight: element.scrollHeight,
+                        onclone: function(clonedDoc) {
+                            const clonedBody = clonedDoc.body;
+                            const computedStyle = newWindow.getComputedStyle(element);
+                            clonedBody.style.cssText = computedStyle.cssText;
+                            
+                            const allElements = element.querySelectorAll('*');
+                            const clonedElements = clonedBody.querySelectorAll('*');
+                            
+                            allElements.forEach((el, index) => {
+                                if (clonedElements[index]) {
+                                    const style = newWindow.getComputedStyle(el);
+                                    clonedElements[index].style.cssText = style.cssText;
+                                }
+                            });
+                        }
                     },
                     jsPDF: { 
                         unit: 'mm', 
                         format: 'a4', 
-                        orientation: 'portrait',
-                        compress: false
+                        orientation: 'portrait'
                     },
                     pagebreak: { 
                         mode: ['css', 'legacy'],
@@ -880,13 +894,12 @@
                     }
                 };
 
-                const element = iframeDoc.body;
                 await html2pdf().set(opt).from(element).save();
                 
-                document.body.removeChild(iframe);
+                newWindow.close();
                 showToast('PDF exportado com sucesso!');
             } catch (error) {
-                console.error('Erro ao gerar PDF:', error);
+                console.error('Erro completo:', error);
                 showToast('Erro ao gerar PDF: ' + error.message, 'error');
             }
         }
