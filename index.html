@@ -702,41 +702,51 @@
             pdfViewer.innerHTML = '<div class="loading"><div class="spinner"></div>Gerando preview...</div>';
 
             try {
-                const tempContainer = document.createElement('div');
-                tempContainer.style.position = 'absolute';
-                tempContainer.style.left = '-9999px';
-                tempContainer.style.top = '0';
-                tempContainer.style.width = '210mm';
-                tempContainer.style.padding = '20mm';
-                tempContainer.style.background = 'white';
-                tempContainer.style.color = 'black';
-                tempContainer.innerHTML = html;
-                document.body.appendChild(tempContainer);
+                const iframe = document.createElement('iframe');
+                iframe.style.position = 'absolute';
+                iframe.style.left = '-9999px';
+                iframe.style.width = '794px';
+                iframe.style.height = '1123px';
+                document.body.appendChild(iframe);
+
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                iframeDoc.open();
+                iframeDoc.write(html);
+                iframeDoc.close();
+
+                await new Promise(resolve => {
+                    if (iframe.contentWindow.document.readyState === 'complete') {
+                        resolve();
+                    } else {
+                        iframe.contentWindow.addEventListener('load', resolve);
+                    }
+                });
+
+                await new Promise(resolve => setTimeout(resolve, 500));
 
                 const opt = {
                     margin: [10, 10, 10, 10],
                     filename: 'preview.pdf',
-                    image: { type: 'jpeg', quality: 0.95 },
+                    image: { type: 'jpeg', quality: 0.9 },
                     html2canvas: { 
-                        scale: 2, 
+                        scale: 1.5,
                         useCORS: true,
                         logging: false,
-                        width: tempContainer.scrollWidth,
-                        height: tempContainer.scrollHeight
+                        letterRendering: true,
+                        allowTaint: true
                     },
                     jsPDF: { 
                         unit: 'mm', 
                         format: 'a4', 
-                        orientation: 'portrait',
-                        compress: true
+                        orientation: 'portrait'
                     },
                     pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
                 };
 
-                const worker = html2pdf().set(opt).from(tempContainer);
+                const worker = html2pdf().set(opt).from(iframe.contentWindow.document.body);
                 const pdfBlob = await worker.output('blob');
                 
-                document.body.removeChild(tempContainer);
+                document.body.removeChild(iframe);
                 currentPdfData = pdfBlob;
                 
                 await renderPDF(pdfBlob);
@@ -744,7 +754,7 @@
             } catch (error) {
                 console.error('Erro no preview:', error);
                 pdfViewer.innerHTML = '<div class="empty-state"><ion-icon name="alert-circle"></ion-icon><p>Erro: ' + error.message + '</p></div>';
-                showToast('Erro ao gerar preview: ' + error.message, 'error');
+                showToast('Erro ao gerar preview', 'error');
             }
         }
 
@@ -793,43 +803,53 @@
                 return;
             }
 
-            const loadingToast = showToast('Gerando PDF, aguarde...');
+            showToast('Gerando PDF, aguarde...');
 
             try {
-                const tempContainer = document.createElement('div');
-                tempContainer.style.position = 'absolute';
-                tempContainer.style.left = '-9999px';
-                tempContainer.style.top = '0';
-                tempContainer.style.width = '210mm';
-                tempContainer.style.padding = '20mm';
-                tempContainer.style.background = 'white';
-                tempContainer.style.color = 'black';
-                tempContainer.innerHTML = html;
-                document.body.appendChild(tempContainer);
+                const iframe = document.createElement('iframe');
+                iframe.style.position = 'absolute';
+                iframe.style.left = '-9999px';
+                iframe.style.width = '794px';
+                iframe.style.height = '1123px';
+                document.body.appendChild(iframe);
+
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                iframeDoc.open();
+                iframeDoc.write(html);
+                iframeDoc.close();
+
+                await new Promise(resolve => {
+                    if (iframe.contentWindow.document.readyState === 'complete') {
+                        resolve();
+                    } else {
+                        iframe.contentWindow.addEventListener('load', resolve);
+                    }
+                });
+
+                await new Promise(resolve => setTimeout(resolve, 500));
 
                 const opt = {
                     margin: [10, 10, 10, 10],
                     filename: 'documento-' + Date.now() + '.pdf',
-                    image: { type: 'jpeg', quality: 0.95 },
+                    image: { type: 'jpeg', quality: 0.9 },
                     html2canvas: { 
-                        scale: 2, 
+                        scale: 1.5,
                         useCORS: true,
                         logging: false,
-                        width: tempContainer.scrollWidth,
-                        height: tempContainer.scrollHeight
+                        letterRendering: true,
+                        allowTaint: true
                     },
                     jsPDF: { 
                         unit: 'mm', 
                         format: 'a4', 
-                        orientation: 'portrait',
-                        compress: true
+                        orientation: 'portrait'
                     },
                     pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
                 };
 
-                await html2pdf().set(opt).from(tempContainer).save();
+                await html2pdf().set(opt).from(iframe.contentWindow.document.body).save();
                 
-                document.body.removeChild(tempContainer);
+                document.body.removeChild(iframe);
                 showToast('PDF exportado com sucesso!');
             } catch (error) {
                 console.error('Erro ao gerar PDF:', error);
