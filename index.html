@@ -702,19 +702,48 @@
             pdfViewer.innerHTML = '<div class="loading"><div class="spinner"></div>Gerando preview...</div>';
 
             try {
-                const tempDiv = document.createElement('div');
-                tempDiv.style.position = 'fixed';
-                tempDiv.style.left = '-9999px';
-                tempDiv.style.top = '0';
-                tempDiv.innerHTML = html;
-                document.body.appendChild(tempDiv);
+                const iframe = document.createElement('iframe');
+                iframe.style.position = 'fixed';
+                iframe.style.left = '0';
+                iframe.style.top = '0';
+                iframe.style.width = '210mm';
+                iframe.style.height = '297mm';
+                iframe.style.border = 'none';
+                iframe.style.zIndex = '-1000';
+                iframe.style.opacity = '0';
+                document.body.appendChild(iframe);
 
-                const element = tempDiv.querySelector('body') || tempDiv.firstElementChild || tempDiv;
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                iframeDoc.open();
+                iframeDoc.write(html);
+                iframeDoc.close();
+
+                await new Promise(resolve => {
+                    iframe.onload = resolve;
+                    setTimeout(resolve, 2000);
+                });
+
+                const links = iframeDoc.querySelectorAll('link[rel="stylesheet"]');
+                if (links.length > 0) {
+                    await Promise.all(Array.from(links).map(link => 
+                        new Promise(resolve => {
+                            if (link.sheet) {
+                                resolve();
+                            } else {
+                                link.onload = resolve;
+                                link.onerror = resolve;
+                                setTimeout(resolve, 2000);
+                            }
+                        })
+                    ));
+                }
 
                 await new Promise(resolve => setTimeout(resolve, 500));
 
+                const element = iframeDoc.body || iframeDoc.documentElement;
+
                 const opt = {
-                    margin: [0, 0, 0, 0],
+                    margin: 0,
                     filename: 'preview.pdf',
                     image: { 
                         type: 'jpeg', 
@@ -723,28 +752,26 @@
                     html2canvas: {
                         scale: 2,
                         useCORS: true,
+                        allowTaint: true,
                         letterRendering: true,
-                        logging: false,
-                        scrollY: 0,
-                        scrollX: 0
+                        logging: false
                     },
                     jsPDF: {
                         unit: 'mm',
                         format: 'a4',
                         orientation: 'portrait'
-                    },
-                    pagebreak: { mode: 'avoid-all' }
+                    }
                 };
 
                 const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
                 
-                document.body.removeChild(tempDiv);
+                document.body.removeChild(iframe);
                 currentPdfData = pdfBlob;
                 
                 await renderPDF(pdfBlob);
                 showToast('Preview gerado com sucesso');
             } catch (error) {
-                console.error('Erro completo:', error);
+                console.error('Erro:', error);
                 pdfViewer.innerHTML = '<div class="empty-state"><ion-icon name="alert-circle"></ion-icon><p>Erro: ' + error.message + '</p></div>';
                 showToast('Erro ao gerar preview', 'error');
             }
@@ -798,19 +825,48 @@
             showToast('Gerando PDF, aguarde...');
 
             try {
-                const tempDiv = document.createElement('div');
-                tempDiv.style.position = 'fixed';
-                tempDiv.style.left = '-9999px';
-                tempDiv.style.top = '0';
-                tempDiv.innerHTML = html;
-                document.body.appendChild(tempDiv);
+                const iframe = document.createElement('iframe');
+                iframe.style.position = 'fixed';
+                iframe.style.left = '0';
+                iframe.style.top = '0';
+                iframe.style.width = '210mm';
+                iframe.style.height = '297mm';
+                iframe.style.border = 'none';
+                iframe.style.zIndex = '-1000';
+                iframe.style.opacity = '0';
+                document.body.appendChild(iframe);
 
-                const element = tempDiv.querySelector('body') || tempDiv.firstElementChild || tempDiv;
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                iframeDoc.open();
+                iframeDoc.write(html);
+                iframeDoc.close();
+
+                await new Promise(resolve => {
+                    iframe.onload = resolve;
+                    setTimeout(resolve, 2000);
+                });
+
+                const links = iframeDoc.querySelectorAll('link[rel="stylesheet"]');
+                if (links.length > 0) {
+                    await Promise.all(Array.from(links).map(link => 
+                        new Promise(resolve => {
+                            if (link.sheet) {
+                                resolve();
+                            } else {
+                                link.onload = resolve;
+                                link.onerror = resolve;
+                                setTimeout(resolve, 2000);
+                            }
+                        })
+                    ));
+                }
 
                 await new Promise(resolve => setTimeout(resolve, 500));
 
+                const element = iframeDoc.body || iframeDoc.documentElement;
+
                 const opt = {
-                    margin: [0, 0, 0, 0],
+                    margin: 0,
                     filename: 'documento-' + Date.now() + '.pdf',
                     image: { 
                         type: 'jpeg', 
@@ -819,25 +875,23 @@
                     html2canvas: {
                         scale: 2,
                         useCORS: true,
+                        allowTaint: true,
                         letterRendering: true,
-                        logging: false,
-                        scrollY: 0,
-                        scrollX: 0
+                        logging: false
                     },
                     jsPDF: {
                         unit: 'mm',
                         format: 'a4',
                         orientation: 'portrait'
-                    },
-                    pagebreak: { mode: 'avoid-all' }
+                    }
                 };
 
                 await html2pdf().set(opt).from(element).save();
                 
-                document.body.removeChild(tempDiv);
+                document.body.removeChild(iframe);
                 showToast('PDF exportado com sucesso!');
             } catch (error) {
-                console.error('Erro completo:', error);
+                console.error('Erro:', error);
                 showToast('Erro ao gerar PDF: ' + error.message, 'error');
             }
         }
