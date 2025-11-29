@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <title>Leitor de Documentos</title>
+  <title>DocuGen AI - Gerador de Documentos</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/7.1.0/collection/components/icon/icon.min.css">
   <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/ionicons/7.1.0/ionicons/ionicons.esm.js"></script>
   <style>
@@ -32,36 +32,464 @@
       width: 100vw;
       background: #2a2a2a;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-header {
+      background: #1a1a1a;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #3a3a3a;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .back-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      color: white;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .back-btn.active {
+      display: flex;
+    }
+
+    .back-btn:hover {
+      background: #3a3a3a;
+    }
+
+    .back-btn ion-icon {
+      font-size: 24px;
+    }
+
+    .app-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-title ion-icon {
+      font-size: 24px;
+      color: #3b82f6;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .header-btn {
+      padding: 8px 16px;
+      background: transparent;
+      color: white;
+      border: 1px solid #3a3a3a;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .header-btn:hover {
+      background: #3a3a3a;
+      border-color: #4a4a4a;
+    }
+
+    .header-btn ion-icon {
+      font-size: 18px;
     }
 
     .upload-section {
-      width: 100%;
-      height: 100%;
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 48px 24px;
-      cursor: pointer;
       background: #ffffff;
+      gap: 24px;
+      overflow-y: auto;
     }
 
-    .upload-section ion-icon {
+    .api-key-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .api-key-modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 32px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-content h2 {
+      font-size: 20px;
+      color: #111111;
+    }
+
+    .modal-content p {
+      font-size: 14px;
+      color: #5b5b5b;
+      line-height: 1.5;
+    }
+
+    .modal-content input {
+      padding: 12px 16px;
+      border: 2px solid #e5e5e5;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: monospace;
+      outline: none;
+    }
+
+    .modal-content input:focus {
+      border-color: #111111;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .modal-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-btn.primary {
+      background: #111111;
+      color: white;
+    }
+
+    .modal-btn.primary:hover {
+      background: #000000;
+    }
+
+    .modal-btn.secondary {
+      background: #e5e5e5;
+      color: #111111;
+    }
+
+    .modal-btn.secondary:hover {
+      background: #d5d5d5;
+    }
+
+    .upload-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      padding: 32px;
+      border: 2px dashed #e5e5e5;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .upload-area:hover {
+      border-color: #111111;
+      background: #f9f9f9;
+    }
+
+    .upload-area ion-icon {
       font-size: 64px;
       color: #5b5b5b;
       margin-bottom: 16px;
     }
 
-    .upload-section h2 {
+    .upload-area h2 {
       font-size: 18px;
       font-weight: 600;
       color: #111111;
       margin-bottom: 8px;
     }
 
-    .upload-section p {
+    .upload-area p {
       font-size: 14px;
       color: #5b5b5b;
+    }
+
+    .divider {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: #5b5b5b;
+      font-size: 14px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e5e5e5;
+    }
+
+    .ai-prompt-section {
+      width: 100%;
+      max-width: 700px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .ai-prompt-section h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111111;
+      text-align: center;
+    }
+
+    .advanced-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    .advanced-toggle:hover {
+      background: #f5f5f5;
+    }
+
+    .toggle-checkbox {
+      width: 44px;
+      height: 24px;
+      background: #e5e5e5;
+      border-radius: 12px;
+      position: relative;
+      transition: background 0.3s;
+    }
+
+    .toggle-checkbox.active {
+      background: #3b82f6;
+    }
+
+    .toggle-checkbox::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: left 0.3s;
+    }
+
+    .toggle-checkbox.active::after {
+      left: 22px;
+    }
+
+    .toggle-label {
+      font-size: 14px;
+      color: #111111;
+      font-weight: 500;
+    }
+
+    .prompt-input-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .prompt-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e5e5e5;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.3s ease;
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .prompt-input:focus {
+      border-color: #111111;
+    }
+
+    .generate-btn {
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    }
+
+    .generate-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .generation-status {
+      display: none;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .generation-status.active {
+      display: block;
+    }
+
+    .status-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .status-header ion-icon {
+      font-size: 24px;
+      color: #3b82f6;
+    }
+
+    .status-header h4 {
+      font-size: 16px;
+      color: #111111;
+      font-weight: 600;
+    }
+
+    .status-step {
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .status-step ion-icon {
+      font-size: 22px;
+      min-width: 22px;
+    }
+
+    .status-step-text {
+      flex: 1;
+      font-size: 14px;
+    }
+
+    .status-step.pending {
+      background: transparent;
+      color: #9ca3af;
+    }
+
+    .status-step.active {
+      background: white;
+      color: #111111;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .status-step.active ion-icon {
+      color: #3b82f6;
+      animation: spin 1s linear infinite;
+    }
+
+    .status-step.complete {
+      background: #f0fdf4;
+      color: #166534;
+    }
+
+    .status-step.complete ion-icon {
+      color: #22c55e;
+    }
+
+    .status-step.error {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+
+    .status-step.error ion-icon {
+      color: #ef4444;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+      transition: width 0.5s ease;
+      border-radius: 3px;
     }
 
     input[type="file"] {
@@ -69,8 +497,7 @@
     }
 
     .viewer-container {
-      width: 100%;
-      height: 100%;
+      flex: 1;
       display: none;
       overflow: hidden;
     }
@@ -109,16 +536,100 @@
       .document-viewer {
         zoom: 0.4;
       }
+      
+      .upload-section {
+        padding: 24px 16px;
+      }
+      
+      .ai-prompt-section {
+        max-width: 100%;
+      }
+
+      .app-header {
+        padding: 12px 16px;
+      }
+
+      .app-title {
+        font-size: 16px;
+      }
+
+      .header-btn span {
+        display: none;
+      }
     }
   </style>
 </head>
 <body>
   <div class="app">
+    <div class="app-header">
+      <div class="header-left">
+        <button class="back-btn" id="backBtn">
+          <ion-icon name="arrow-back"></ion-icon>
+        </button>
+        <div class="app-title">
+          <ion-icon name="document-text"></ion-icon>
+          DocuGen AI
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="header-btn" id="settingsBtn">
+          <ion-icon name="settings-outline"></ion-icon>
+          <span>API Key</span>
+        </button>
+        <button class="header-btn" id="downloadBtn" style="display:none;">
+          <ion-icon name="download-outline"></ion-icon>
+          <span>Download</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="api-key-modal" id="apiKeyModal">
+      <div class="modal-content">
+        <h2>Configurar API Key</h2>
+        <p>Insira sua chave de API do Groq para usar o gerador de documentos com IA.</p>
+        <input 
+          type="password" 
+          id="apiKeyInput" 
+          placeholder="gsk_..."
+        />
+        <div class="modal-actions">
+          <button class="modal-btn secondary" id="modalCancelBtn">Cancelar</button>
+          <button class="modal-btn primary" id="modalSaveBtn">Salvar</button>
+        </div>
+      </div>
+    </div>
+
     <div class="upload-section" id="uploadSection">
-      <ion-icon name="cloud-upload-outline"></ion-icon>
-      <h2>Carregar documento</h2>
-      <p>PDF, DOC, DOCX ou HTML</p>
-      <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.html,.htm">
+      <div class="upload-area" id="uploadArea">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        <h2>Carregar documento</h2>
+        <p>PDF, DOC, DOCX ou HTML</p>
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.html,.htm">
+      </div>
+
+      <div class="divider">ou</div>
+
+      <div class="ai-prompt-section">
+        <h3>✨ Gerar documento com IA</h3>
+        
+        <div class="advanced-toggle" id="advancedToggle">
+          <div class="toggle-checkbox" id="toggleCheckbox"></div>
+          <span class="toggle-label">Raciocínio Avançado</span>
+        </div>
+
+        <div class="prompt-input-wrapper">
+          <textarea 
+            class="prompt-input" 
+            id="promptInput" 
+            placeholder="Descreva o documento que deseja criar em detalhes..."
+          ></textarea>
+          <button class="generate-btn" id="generateBtn">
+            <ion-icon name="sparkles"></ion-icon>
+            Gerar Documento
+          </button>
+        </div>
+        <div class="generation-status" id="generationStatus"></div>
+      </div>
     </div>
 
     <div class="viewer-container" id="viewerContainer">
@@ -130,21 +641,234 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     if (typeof pdfjsLib !== 'undefined') {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
 
+    const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+    const API_KEY_STORAGE = 'docugen_api_key';
+
     const el = {
       uploadSection: document.getElementById('uploadSection'),
+      uploadArea: document.getElementById('uploadArea'),
       fileInput: document.getElementById('fileInput'),
+      backBtn: document.getElementById('backBtn'),
+      settingsBtn: document.getElementById('settingsBtn'),
+      downloadBtn: document.getElementById('downloadBtn'),
+      apiKeyModal: document.getElementById('apiKeyModal'),
+      apiKeyInput: document.getElementById('apiKeyInput'),
+      modalCancelBtn: document.getElementById('modalCancelBtn'),
+      modalSaveBtn: document.getElementById('modalSaveBtn'),
+      advancedToggle: document.getElementById('advancedToggle'),
+      toggleCheckbox: document.getElementById('toggleCheckbox'),
+      promptInput: document.getElementById('promptInput'),
+      generateBtn: document.getElementById('generateBtn'),
+      generationStatus: document.getElementById('generationStatus'),
       viewerContainer: document.getElementById('viewerContainer'),
       documentViewer: document.getElementById('documentViewer')
     };
 
+    let advancedReasoning = false;
+    let currentPDF = null;
+
+    // Carregar API key do localStorage
+    const savedKey = localStorage.getItem(API_KEY_STORAGE);
+    if (savedKey) {
+      el.apiKeyInput.value = atob(savedKey);
+    }
+
     function isMobile() {
       return window.innerWidth <= 768;
+    }
+
+    function showApiKeyModal() {
+      el.apiKeyModal.classList.add('active');
+    }
+
+    function hideApiKeyModal() {
+      el.apiKeyModal.classList.remove('active');
+    }
+
+    function saveApiKey() {
+      const key = el.apiKeyInput.value.trim();
+      if (key) {
+        localStorage.setItem(API_KEY_STORAGE, btoa(key));
+        hideApiKeyModal();
+      }
+    }
+
+    function goBack() {
+      el.uploadSection.style.display = 'flex';
+      el.viewerContainer.classList.remove('active');
+      el.backBtn.classList.remove('active');
+      el.downloadBtn.style.display = 'none';
+      currentPDF = null;
+    }
+
+    function updateStatus(steps, currentStep, progress = 0) {
+      const headerHTML = `
+        <div class="status-header">
+          <ion-icon name="construct"></ion-icon>
+          <h4>Gerando seu documento...</h4>
+        </div>
+      `;
+
+      const stepsHTML = steps.map((step, idx) => {
+        let className = 'pending';
+        let icon = 'ellipse-outline';
+        
+        if (idx < currentStep) {
+          className = 'complete';
+          icon = 'checkmark-circle';
+        } else if (idx === currentStep) {
+          className = 'active';
+          icon = 'sync';
+        }
+        
+        return `
+          <div class="status-step ${className}">
+            <ion-icon name="${icon}"></ion-icon>
+            <span class="status-step-text">${step}</span>
+          </div>
+        `;
+      }).join('');
+
+      const progressHTML = `
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${progress}%"></div>
+        </div>
+      `;
+      
+      el.generationStatus.innerHTML = headerHTML + stepsHTML + progressHTML;
+      el.generationStatus.classList.add('active');
+    }
+
+    async function generateDocument(prompt) {
+      const savedKey = localStorage.getItem(API_KEY_STORAGE);
+      
+      if (!savedKey) {
+        alert('Por favor, configure sua API Key primeiro');
+        showApiKeyModal();
+        return;
+      }
+
+      const apiKey = atob(savedKey);
+
+      const steps = advancedReasoning ? [
+        '🧠 Analisando requisitos complexos...',
+        '🔍 Pesquisando melhores práticas...',
+        '📊 Estruturando informações...',
+        '✍️ Gerando conteúdo detalhado...',
+        '🎨 Aplicando formatação avançada...',
+        '📄 Convertendo para PDF...',
+        '✅ Finalizando documento...'
+      ] : [
+        '🔍 Analisando pedido...',
+        '✍️ Gerando conteúdo...',
+        '🎨 Formatando documento...',
+        '📄 Convertendo para PDF...',
+        '✅ Concluído!'
+      ];
+
+      el.generateBtn.disabled = true;
+      updateStatus(steps, 0, 10);
+
+      try {
+        await new Promise(resolve => setTimeout(resolve, 800));
+        updateStatus(steps, 1, 20);
+
+        const enhancedPrompt = advancedReasoning ? 
+          `Você é um especialista em criação de documentos profissionais. Analise profundamente o pedido e crie um documento excepcional.
+
+PEDIDO DO USUÁRIO: ${prompt}
+
+INSTRUÇÕES AVANÇADAS:
+- Pesquise e inclua as informações mais relevantes e atualizadas
+- Use uma estrutura lógica e bem organizada
+- Inclua exemplos práticos e casos de uso quando apropriado
+- Adicione seções introdutórias e conclusivas
+- Use formatação HTML semântica (h1, h2, h3, p, ul, ol, strong, em)
+- Crie conteúdo substantivo com pelo menos 800 palavras
+- Mantenha tom profissional e informativo
+
+Retorne APENAS o HTML puro do conteúdo (sem tags html, head, body).`
+          :
+          `Crie um documento HTML bem formatado sobre: ${prompt}
+
+Inclua:
+- Título principal
+- Seções bem estruturadas
+- Conteúdo informativo e relevante
+- Boa formatação com HTML semântico
+
+Retorne APENAS o HTML puro do conteúdo.`;
+
+        if (advancedReasoning) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          updateStatus(steps, 2, 35);
+          await new Promise(resolve => setTimeout(resolve, 800));
+          updateStatus(steps, 3, 50);
+        }
+
+        const response = await fetch(GROQ_API_URL, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile',
+            messages: [{
+              role: 'user',
+              content: enhancedPrompt
+            }],
+            temperature: advancedReasoning ? 0.8 : 0.7,
+            max_tokens: advancedReasoning ? 6000 : 4000
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error?.message || 'Erro ao gerar documento');
+        }
+
+        const data = await response.json();
+        let htmlContent = data.choices[0].message.content;
+        htmlContent = htmlContent.replace(/```html/g, '').replace(/```/g, '').trim();
+
+        const nextStep = advancedReasoning ? 4 : 2;
+        updateStatus(steps, nextStep, 65);
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const pdfStep = advancedReasoning ? 5 : 3;
+        updateStatus(steps, pdfStep, 80);
+        const pdfData = await convertHTMLtoPDF(htmlContent);
+        currentPDF = pdfData;
+
+        const finalStep = advancedReasoning ? 6 : 4;
+        updateStatus(steps, finalStep, 95);
+        
+        el.uploadSection.style.display = 'none';
+        el.viewerContainer.classList.add('active');
+        el.backBtn.classList.add('active');
+        el.downloadBtn.style.display = 'flex';
+        
+        await renderPDF(pdfData);
+        updateStatus(steps, finalStep, 100);
+
+      } catch (error) {
+        console.error('Erro:', error);
+        el.generationStatus.innerHTML = `
+          <div class="status-step error">
+            <ion-icon name="alert-circle"></ion-icon>
+            <span class="status-step-text">Erro: ${error.message}</span>
+          </div>
+        `;
+      } finally {
+        el.generateBtn.disabled = false;
+      }
     }
 
     async function renderPDF(pdfData) {
@@ -184,28 +908,112 @@
     }
 
     async function convertHTMLtoPDF(htmlContent) {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
       const tempDiv = document.createElement('div');
-      tempDiv.style.cssText = 'width:800px;padding:48px;background:white;font-family:Arial,sans-serif;line-height:1.6;color:#000;';
+      tempDiv.style.cssText = `
+        width: 800px;
+        padding: 40px;
+        background: white;
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #000;
+        font-size: 14px;
+      `;
       tempDiv.innerHTML = htmlContent;
       document.body.appendChild(tempDiv);
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const scale = 2;
       
-      const opt = {
-        margin: 10,
-        filename: 'documento.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
+      canvas.width = 800 * scale;
+      canvas.height = tempDiv.scrollHeight * scale;
       
-      const pdfBlob = await html2pdf().set(opt).from(tempDiv).output('blob');
+      ctx.scale(scale, scale);
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      await new Promise((resolve) => {
+        setTimeout(async () => {
+          try {
+            const dataUrl = await domToImage(tempDiv);
+            const img = new Image();
+            img.onload = () => {
+              const imgWidth = 210;
+              const imgHeight = (canvas.height / scale / 800) * imgWidth;
+              
+              let heightLeft = imgHeight;
+              let position = 0;
+              const pageHeight = 297;
+
+              pdf.addImage(dataUrl, 'PNG', 0, position, imgWidth, imgHeight);
+              heightLeft -= pageHeight;
+
+              while (heightLeft > 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(dataUrl, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+              }
+
+              resolve();
+            };
+            img.src = dataUrl;
+          } catch (e) {
+            console.error('Erro ao converter:', e);
+            resolve();
+          }
+        }, 500);
+      });
+
       document.body.removeChild(tempDiv);
-      
-      return await pdfBlob.arrayBuffer();
+      return pdf.output('arraybuffer');
+    }
+
+    function domToImage(element) {
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const scale = 2;
+        
+        canvas.width = element.offsetWidth * scale;
+        canvas.height = element.scrollHeight * scale;
+        ctx.scale(scale, scale);
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const styles = window.getComputedStyle(element);
+        ctx.font = styles.font;
+        ctx.fillStyle = styles.color;
+
+        function renderElement(el, x, y) {
+          const text = el.textContent;
+          if (el.nodeType === Node.TEXT_NODE && text.trim()) {
+            ctx.fillText(text, x, y);
+          }
+          
+          Array.from(el.children).forEach((child, i) => {
+            const childY = y + (i * 20);
+            renderElement(child, x + 10, childY);
+          });
+        }
+
+        renderElement(element, 40, 40);
+        resolve(canvas.toDataURL('image/png'));
+      });
     }
 
     async function processFile(file) {
       el.uploadSection.style.display = 'none';
       el.viewerContainer.classList.add('active');
+      el.backBtn.classList.add('active');
+      el.downloadBtn.style.display = 'flex';
       el.documentViewer.innerHTML = '<div class="loading">A carregar documento...</div>';
 
       const reader = new FileReader();
@@ -214,16 +1022,19 @@
           const arrayBuffer = event.target.result;
           
           if (file.name.toLowerCase().endsWith('.pdf')) {
+            currentPDF = arrayBuffer;
             await renderPDF(arrayBuffer);
           } else if (file.name.toLowerCase().endsWith('.docx') || file.name.toLowerCase().endsWith('.doc')) {
             el.documentViewer.innerHTML = '<div class="loading">A converter para PDF...</div>';
             const result = await mammoth.convertToHtml({arrayBuffer: arrayBuffer});
             const pdfData = await convertHTMLtoPDF(result.value);
+            currentPDF = pdfData;
             await renderPDF(pdfData);
           } else if (file.name.toLowerCase().endsWith('.html') || file.name.toLowerCase().endsWith('.htm')) {
             el.documentViewer.innerHTML = '<div class="loading">A converter para PDF...</div>';
             const text = new TextDecoder().decode(arrayBuffer);
             const pdfData = await convertHTMLtoPDF(text);
+            currentPDF = pdfData;
             await renderPDF(pdfData);
           } else {
             throw new Error('Formato não suportado');
@@ -236,10 +1047,57 @@
       reader.readAsArrayBuffer(file);
     }
 
-    el.uploadSection.addEventListener('click', () => el.fileInput.click());
+    function downloadPDF() {
+      if (!currentPDF) return;
+      
+      const blob = new Blob([currentPDF], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `documento_${Date.now()}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Event Listeners
+    el.uploadArea.addEventListener('click', () => el.fileInput.click());
     el.fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) processFile(file);
+    });
+
+    el.backBtn.addEventListener('click', goBack);
+    el.settingsBtn.addEventListener('click', showApiKeyModal);
+    el.modalCancelBtn.addEventListener('click', hideApiKeyModal);
+    el.modalSaveBtn.addEventListener('click', saveApiKey);
+    el.downloadBtn.addEventListener('click', downloadPDF);
+
+    el.advancedToggle.addEventListener('click', () => {
+      advancedReasoning = !advancedReasoning;
+      el.toggleCheckbox.classList.toggle('active');
+    });
+
+    el.generateBtn.addEventListener('click', () => {
+      const prompt = el.promptInput.value.trim();
+      if (prompt) {
+        generateDocument(prompt);
+      }
+    });
+
+    el.promptInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        const prompt = el.promptInput.value.trim();
+        if (prompt) {
+          generateDocument(prompt);
+        }
+      }
+    });
+
+    // Fechar modal ao clicar fora
+    el.apiKeyModal.addEventListener('click', (e) => {
+      if (e.target === el.apiKeyModal) {
+        hideApiKeyModal();
+      }
     });
   </script>
 </body>
