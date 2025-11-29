@@ -9,467 +9,225 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/7.1.0/collection/components/icon/icon.min.css">
   <script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/ionicons/7.1.0/ionicons/ionicons.esm.js"></script>
   <style>
-    :root{
-      --bg: #ffffff;
-      --accent: #111111;
-      --muted: #5b5b5b;
-      --text-primary: #111111;
-      --text-secondary: #5b5b5b;
-      --border: #e5e5e5;
-      --card-bg: #ffffff;
-      --shadow: 0 4px 12px rgba(16,16,16,0.08);
-    }
-
-    [data-theme="dark"]{
-      --bg: #000000;
-      --accent: #ffffff;
-      --muted: #a0a0a0;
-      --text-primary: #ffffff;
-      --text-secondary: #a0a0a0;
-      --border: #2a2a2a;
-      --card-bg: #1a1a1a;
-      --shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-
-    *{
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
       -webkit-tap-highlight-color: transparent;
-      -webkit-touch-callout: none;
     }
     
-    html,body{height:100%;overflow:hidden;}
-    body{
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background:var(--bg);
-      color:var(--text-primary);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: #2a2a2a;
+    }
+    
+    body {
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
     }
 
     .app {
-      height:100vh;
-      display:flex;
-      flex-direction:column;
-      background: var(--bg);
-    }
-
-    header{
-      padding: 12px 24px;
-      background: var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      z-index: 100;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .header-left{
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    h1{
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-
-    .header-actions{
-      display: flex;
-      gap: 8px;
-    }
-
-    .icon-btn{
-      width: 40px;
-      height: 40px;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      transition: background 0.2s ease;
-    }
-
-    .icon-btn:hover{
-      background: var(--border);
-    }
-
-    .icon-btn ion-icon{
-      font-size: 24px;
-      color: var(--text-primary);
-    }
-
-    .content{
-      flex: 1;
-      display: flex;
-      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      background: #2a2a2a;
       overflow: hidden;
     }
 
-    .upload-section{
-      flex: 1;
+    .upload-section {
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 48px 24px;
       cursor: pointer;
+      background: #ffffff;
     }
 
-    .upload-section ion-icon{
+    .upload-section ion-icon {
       font-size: 64px;
-      color: var(--text-secondary);
+      color: #5b5b5b;
       margin-bottom: 16px;
     }
 
-    .upload-section h2{
+    .upload-section h2 {
       font-size: 18px;
       font-weight: 600;
-      color: var(--text-primary);
+      color: #111111;
       margin-bottom: 8px;
     }
 
-    .upload-section p{
+    .upload-section p {
       font-size: 14px;
-      color: var(--text-secondary);
+      color: #5b5b5b;
     }
 
-    input[type="file"]{
+    input[type="file"] {
       display: none;
     }
 
-    .viewer-container{
-      flex: 1;
+    .viewer-container {
+      width: 100%;
+      height: 100%;
       display: none;
-      flex-direction: column;
       overflow: hidden;
     }
 
-    .viewer-container.active{
-      display: flex;
+    .viewer-container.active {
+      display: block;
     }
 
-    .toolbar{
-      padding: 12px 24px;
-      background: var(--card-bg);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .toolbar-left{
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .page-info{
-      font-size: 14px;
-      color: var(--text-secondary);
-      min-width: 100px;
-      text-align: center;
-    }
-
-    .zoom-controls{
-      display: flex;
-      gap: 8px;
-    }
-
-    .zoom-btn{
-      width: 36px;
-      height: 36px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-      transition: all 0.2s ease;
-    }
-
-    .zoom-btn:hover{
-      background: var(--border);
-    }
-
-    .zoom-btn ion-icon{
-      font-size: 20px;
-      color: var(--text-primary);
-    }
-
-    .zoom-level{
-      min-width: 60px;
-      text-align: center;
-      font-size: 14px;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .document-viewer{
-      flex: 1;
+    .document-viewer {
+      width: 100%;
+      height: 100%;
       overflow-y: auto;
-      overflow-x: hidden;
-      background: #525659;
-      padding: 24px;
+      overflow-x: auto;
+      background: #2a2a2a;
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 16px;
+      align-items: flex-start;
+      gap: 20px;
     }
 
-    .page-canvas{
+    .page-canvas {
       background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      margin: 0 auto;
       display: block;
-      max-width: 100%;
-      height: auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
 
-    .loading{
+    .loading {
       text-align: center;
       padding: 48px;
-      color: var(--text-secondary);
+      color: #ffffff;
       font-size: 16px;
     }
 
-    .doc-content{
-      background: white;
-      padding: 48px;
-      max-width: 800px;
-      width: 100%;
-      box-shadow: var(--shadow);
-      color: #000;
-      line-height: 1.8;
-      font-size: 16px;
-    }
-
-    .doc-content h1{
-      color: #000;
-      font-size: 28px;
-      margin: 24px 0 16px 0;
-    }
-
-    .doc-content h2{
-      color: #000;
-      font-size: 24px;
-      margin: 20px 0 12px 0;
-    }
-
-    .doc-content h3{
-      color: #000;
-      font-size: 20px;
-      margin: 16px 0 10px 0;
-    }
-
-    .doc-content p{
-      margin-bottom: 12px;
-      color: #000;
-    }
-
-    .doc-content ul, .doc-content ol{
-      margin: 12px 0;
-      padding-left: 32px;
-      color: #000;
-    }
-
-    .doc-content li{
-      margin-bottom: 8px;
-      color: #000;
-    }
-
-    .doc-content strong{
-      font-weight: 600;
-      color: #000;
-    }
-
-    .doc-content em{
-      font-style: italic;
-    }
-
-    .doc-content table{
-      width: 100%;
-      border-collapse: collapse;
-      margin: 16px 0;
-    }
-
-    .doc-content table td, .doc-content table th{
-      border: 1px solid #ddd;
-      padding: 8px;
-      color: #000;
-    }
-
-    .doc-content table th{
-      background: #f5f5f5;
-      font-weight: 600;
+    @media (max-width: 768px) {
+      .document-viewer {
+        zoom: 0.4;
+      }
     }
   </style>
 </head>
-<body data-theme="light">
+<body>
   <div class="app">
-    <header>
-      <div class="header-left">
-        <h1 id="docTitle">📄 Leitor de Documentos</h1>
-      </div>
-      <div class="header-actions">
-        <button class="icon-btn" id="downloadBtn" style="display:none;">
-          <ion-icon name="download-outline"></ion-icon>
-        </button>
-        <button class="icon-btn" id="themeBtn">
-          <ion-icon name="sunny-outline" id="themeIcon"></ion-icon>
-        </button>
-      </div>
-    </header>
+    <div class="upload-section" id="uploadSection">
+      <ion-icon name="cloud-upload-outline"></ion-icon>
+      <h2>Carregar documento</h2>
+      <p>PDF, DOC, DOCX ou HTML</p>
+      <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.html,.htm">
+    </div>
 
-    <div class="content">
-      <div class="upload-section" id="uploadSection">
-        <ion-icon name="cloud-upload-outline"></ion-icon>
-        <h2>Carregar documento</h2>
-        <p>PDF, DOC ou DOCX</p>
-        <input type="file" id="fileInput" accept=".pdf,.doc,.docx">
-      </div>
-
-      <div class="viewer-container" id="viewerContainer">
-        <div class="toolbar" id="toolbar">
-          <div class="toolbar-left">
-            <button class="icon-btn" id="closeDoc">
-              <ion-icon name="arrow-back-outline"></ion-icon>
-            </button>
-            <div class="page-info" id="pageInfo">Página 1 de 1</div>
-          </div>
-          <div class="zoom-controls">
-            <button class="zoom-btn" id="zoomOut">
-              <ion-icon name="remove-outline"></ion-icon>
-            </button>
-            <div class="zoom-level" id="zoomLevel">100%</div>
-            <button class="zoom-btn" id="zoomIn">
-              <ion-icon name="add-outline"></ion-icon>
-            </button>
-          </div>
-        </div>
-        <div class="document-viewer" id="documentViewer">
-          <div class="loading">A carregar...</div>
-        </div>
+    <div class="viewer-container" id="viewerContainer">
+      <div class="document-viewer" id="documentViewer">
+        <div class="loading">A carregar...</div>
       </div>
     </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     if (typeof pdfjsLib !== 'undefined') {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
 
-    let currentTheme = localStorage.getItem('theme') || 'light';
-    let currentFile = null;
-    let pdfDoc = null;
-    let currentZoom = 1.0;
-    let currentPage = 1;
-    let totalPages = 1;
-
-    document.body.setAttribute('data-theme', currentTheme);
-
-    const elements = {
-      themeBtn: document.getElementById('themeBtn'),
-      themeIcon: document.getElementById('themeIcon'),
+    const el = {
       uploadSection: document.getElementById('uploadSection'),
       fileInput: document.getElementById('fileInput'),
       viewerContainer: document.getElementById('viewerContainer'),
-      documentViewer: document.getElementById('documentViewer'),
-      docTitle: document.getElementById('docTitle'),
-      pageInfo: document.getElementById('pageInfo'),
-      zoomLevel: document.getElementById('zoomLevel'),
-      zoomIn: document.getElementById('zoomIn'),
-      zoomOut: document.getElementById('zoomOut'),
-      closeDoc: document.getElementById('closeDoc'),
-      downloadBtn: document.getElementById('downloadBtn'),
-      toolbar: document.getElementById('toolbar')
+      documentViewer: document.getElementById('documentViewer')
     };
 
-    function updateThemeIcon() {
-      elements.themeIcon.setAttribute('name', currentTheme === 'dark' ? 'moon-outline' : 'sunny-outline');
+    function isMobile() {
+      return window.innerWidth <= 768;
     }
 
-    function toggleTheme() {
-      currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-      document.body.setAttribute('data-theme', currentTheme);
-      localStorage.setItem('theme', currentTheme);
-      updateThemeIcon();
-    }
-
-    async function renderPDFPages() {
-      elements.documentViewer.innerHTML = '';
+    async function renderPDF(pdfData) {
+      const pdfDoc = await pdfjsLib.getDocument({data: pdfData}).promise;
+      el.documentViewer.innerHTML = '';
+      const viewerWidth = el.documentViewer.clientWidth - 40;
       
       for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
         const page = await pdfDoc.getPage(pageNum);
-        const scale = currentZoom * 2.5;
-        const viewport = page.getViewport({ scale: scale });
+        const viewport = page.getViewport({ scale: viewerWidth / page.getViewport({ scale: 1 }).width });
         
         const canvas = document.createElement('canvas');
         canvas.className = 'page-canvas';
-        const context = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d');
         
-        const outputScale = window.devicePixelRatio || 1;
-        canvas.width = Math.floor(viewport.width * outputScale);
-        canvas.height = Math.floor(viewport.height * outputScale);
+        const scale = window.devicePixelRatio || 1;
+        canvas.width = Math.floor(viewport.width * scale);
+        canvas.height = Math.floor(viewport.height * scale);
         canvas.style.width = Math.floor(viewport.width) + 'px';
         canvas.style.height = Math.floor(viewport.height) + 'px';
         
-        const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+        el.documentViewer.appendChild(canvas);
         
-        elements.documentViewer.appendChild(canvas);
-        
-        const renderContext = {
-          canvasContext: context,
+        await page.render({
+          canvasContext: ctx,
           viewport: viewport,
-          transform: transform
-        };
-        
-        await page.render(renderContext).promise;
+          transform: scale !== 1 ? [scale, 0, 0, scale, 0, 0] : null
+        }).promise;
       }
       
-      totalPages = pdfDoc.numPages;
-      updatePageInfo();
+      if (isMobile()) {
+        setTimeout(() => {
+          const maxScroll = el.documentViewer.scrollWidth - el.documentViewer.clientWidth;
+          el.documentViewer.scrollLeft = maxScroll * 0.53;
+        }, 100);
+      }
     }
 
-    async function loadPDF(arrayBuffer) {
-      pdfDoc = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
-      await renderPDFPages();
-      elements.toolbar.style.display = 'flex';
-    }
-
-    async function loadDOCX(arrayBuffer) {
-      const result = await mammoth.convertToHtml({arrayBuffer: arrayBuffer});
-      elements.documentViewer.innerHTML = `<div class="doc-content">${result.value}</div>`;
-      elements.toolbar.style.display = 'none';
-    }
-
-    function updatePageInfo() {
-      elements.pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
-    }
-
-    function updateZoomLevel() {
-      elements.zoomLevel.textContent = `${Math.round(currentZoom * 100)}%`;
+    async function convertHTMLtoPDF(htmlContent) {
+      const tempDiv = document.createElement('div');
+      tempDiv.style.cssText = 'position:absolute;left:-9999px;width:800px;padding:48px;background:white;';
+      tempDiv.innerHTML = htmlContent;
+      document.body.appendChild(tempDiv);
+      
+      const canvas = await html2canvas(tempDiv, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      });
+      
+      document.body.removeChild(tempDiv);
+      
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pageHeight = 297;
+      let heightLeft = imgHeight;
+      let position = 0;
+      
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      return pdf.output('arraybuffer');
     }
 
     async function processFile(file) {
-      currentFile = file;
-      elements.docTitle.textContent = file.name;
-      elements.uploadSection.style.display = 'none';
-      elements.viewerContainer.classList.add('active');
-      elements.documentViewer.innerHTML = '<div class="loading">A carregar documento...</div>';
-      elements.downloadBtn.style.display = 'flex';
+      el.uploadSection.style.display = 'none';
+      el.viewerContainer.classList.add('active');
+      el.documentViewer.innerHTML = '<div class="loading">A carregar documento...</div>';
 
       const reader = new FileReader();
       reader.onload = async function(event) {
@@ -477,72 +235,33 @@
           const arrayBuffer = event.target.result;
           
           if (file.name.toLowerCase().endsWith('.pdf')) {
-            await loadPDF(arrayBuffer);
+            await renderPDF(arrayBuffer);
           } else if (file.name.toLowerCase().endsWith('.docx') || file.name.toLowerCase().endsWith('.doc')) {
-            await loadDOCX(arrayBuffer);
+            el.documentViewer.innerHTML = '<div class="loading">A converter para PDF...</div>';
+            const result = await mammoth.convertToHtml({arrayBuffer: arrayBuffer});
+            const pdfData = await convertHTMLtoPDF(result.value);
+            await renderPDF(pdfData);
+          } else if (file.name.toLowerCase().endsWith('.html') || file.name.toLowerCase().endsWith('.htm')) {
+            el.documentViewer.innerHTML = '<div class="loading">A converter para PDF...</div>';
+            const text = new TextDecoder().decode(arrayBuffer);
+            const pdfData = await convertHTMLtoPDF(text);
+            await renderPDF(pdfData);
           } else {
             throw new Error('Formato não suportado');
           }
         } catch (error) {
-          elements.documentViewer.innerHTML = `<div class="loading">Erro: ${error.message}</div>`;
+          el.documentViewer.innerHTML = `<div class="loading">Erro: ${error.message}</div>`;
           console.error(error);
         }
       };
       reader.readAsArrayBuffer(file);
     }
 
-    function closeDocument() {
-      currentFile = null;
-      pdfDoc = null;
-      currentZoom = 1.0;
-      currentPage = 1;
-      elements.docTitle.textContent = '📄 Leitor de Documentos';
-      elements.uploadSection.style.display = 'flex';
-      elements.viewerContainer.classList.remove('active');
-      elements.downloadBtn.style.display = 'none';
-      elements.fileInput.value = '';
-      updateZoomLevel();
-    }
-
-    elements.uploadSection.addEventListener('click', () => {
-      elements.fileInput.click();
-    });
-
-    elements.fileInput.addEventListener('change', (e) => {
+    el.uploadSection.addEventListener('click', () => el.fileInput.click());
+    el.fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) processFile(file);
     });
-
-    elements.closeDoc.addEventListener('click', closeDocument);
-
-    elements.zoomIn.addEventListener('click', async () => {
-      if (!pdfDoc) return;
-      currentZoom = Math.min(currentZoom + 0.25, 3.0);
-      updateZoomLevel();
-      await renderPDFPages();
-    });
-
-    elements.zoomOut.addEventListener('click', async () => {
-      if (!pdfDoc) return;
-      currentZoom = Math.max(currentZoom - 0.25, 0.25);
-      updateZoomLevel();
-      await renderPDFPages();
-    });
-
-    elements.downloadBtn.addEventListener('click', () => {
-      if (!currentFile) return;
-      const url = URL.createObjectURL(currentFile);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = currentFile.name;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    elements.themeBtn.addEventListener('click', toggleTheme);
-
-    updateThemeIcon();
-    updateZoomLevel();
   </script>
 </body>
 </html>
