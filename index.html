@@ -39,7 +39,7 @@
       -webkit-touch-callout: none;
     }
     
-    html,body{height:100%;overflow-x:hidden;}
+    html,body{height:100%;overflow:hidden;}
     body{
       font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background:var(--bg);
@@ -49,7 +49,7 @@
     }
 
     .app {
-      min-height:100vh;
+      height:100vh;
       display:flex;
       flex-direction:column;
       background: var(--bg);
@@ -61,9 +61,14 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: relative;
       z-index: 100;
       border-bottom: 1px solid var(--border);
+    }
+
+    .header-left{
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     h1{
@@ -72,7 +77,12 @@
       color: var(--text-primary);
     }
 
-    .theme-btn{
+    .header-actions{
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn{
       width: 40px;
       height: 40px;
       border: none;
@@ -85,39 +95,30 @@
       transition: background 0.2s ease;
     }
 
-    .theme-btn:hover{
+    .icon-btn:hover{
       background: var(--border);
     }
 
-    .theme-btn ion-icon{
+    .icon-btn ion-icon{
       font-size: 24px;
       color: var(--text-primary);
     }
 
     .content{
       flex: 1;
-      padding: 24px;
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      overflow: hidden;
     }
 
     .upload-section{
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 48px 24px;
-      border: 2px dashed var(--border);
-      border-radius: 16px;
-      background: var(--card-bg);
       cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .upload-section:hover{
-      border-color: var(--accent);
-      background: var(--bg);
     }
 
     .upload-section ion-icon{
@@ -142,51 +143,94 @@
       display: none;
     }
 
-    .search-box{
-      padding: 12px 16px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
+    .viewer-container{
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .viewer-container.active{
+      display: flex;
+    }
+
+    .toolbar{
+      padding: 12px 24px;
       background: var(--card-bg);
-      color: var(--text-primary);
-      font-size: 16px;
-      font-family: inherit;
-      outline: none;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .toolbar-left{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-info{
+      font-size: 14px;
+      color: var(--text-secondary);
+      min-width: 100px;
+      text-align: center;
+    }
+
+    .zoom-controls{
+      display: flex;
+      gap: 8px;
+    }
+
+    .zoom-btn{
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
       transition: all 0.2s ease;
-      display: none;
     }
 
-    .search-box.active{
-      display: block;
+    .zoom-btn:hover{
+      background: var(--border);
     }
 
-    .search-box:focus{
-      border-color: var(--accent);
-    }
-
-    .document-container{
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px;
-      min-height: 400px;
-      display: none;
-    }
-
-    .document-container.active{
-      display: block;
-    }
-
-    .document-content{
-      line-height: 1.8;
+    .zoom-btn ion-icon{
+      font-size: 20px;
       color: var(--text-primary);
-      white-space: pre-wrap;
-      font-size: 15px;
     }
 
-    .highlight{
-      background-color: #fbbf24;
-      padding: 2px 4px;
-      border-radius: 2px;
+    .zoom-level{
+      min-width: 60px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .document-viewer{
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: var(--muted);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .page-canvas{
+      background: white;
+      box-shadow: var(--shadow);
+      margin: 0 auto;
+      display: block;
     }
 
     .loading{
@@ -196,86 +240,95 @@
       font-size: 16px;
     }
 
-    .file-info{
-      display: none;
-      align-items: center;
-      gap: 12px;
-      padding: 16px;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      margin-bottom: 16px;
+    .doc-content{
+      background: white;
+      padding: 48px;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: var(--shadow);
+      color: #000;
+      line-height: 1.8;
+      font-size: 16px;
     }
 
-    .file-info.active{
-      display: flex;
+    .doc-content h1{
+      color: #000;
+      font-size: 28px;
+      margin: 24px 0 16px 0;
     }
 
-    .file-info ion-icon{
+    .doc-content h2{
+      color: #000;
       font-size: 24px;
-      color: var(--text-secondary);
+      margin: 20px 0 12px 0;
     }
 
-    .file-details{
-      flex: 1;
-    }
-
-    .file-name{
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-    }
-
-    .file-size{
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-
-    .close-btn{
-      width: 32px;
-      height: 32px;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s ease;
-    }
-
-    .close-btn:hover{
-      background: var(--border);
-    }
-
-    .close-btn ion-icon{
+    .doc-content h3{
+      color: #000;
       font-size: 20px;
-      color: var(--text-secondary);
+      margin: 16px 0 10px 0;
+    }
+
+    .doc-content p{
+      margin-bottom: 12px;
+      color: #000;
+    }
+
+    .doc-content ul, .doc-content ol{
+      margin: 12px 0;
+      padding-left: 32px;
+      color: #000;
+    }
+
+    .doc-content li{
+      margin-bottom: 8px;
+      color: #000;
+    }
+
+    .doc-content strong{
+      font-weight: 600;
+      color: #000;
+    }
+
+    .doc-content em{
+      font-style: italic;
+    }
+
+    .doc-content table{
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+
+    .doc-content table td, .doc-content table th{
+      border: 1px solid #ddd;
+      padding: 8px;
+      color: #000;
+    }
+
+    .doc-content table th{
+      background: #f5f5f5;
+      font-weight: 600;
     }
   </style>
 </head>
 <body data-theme="light">
   <div class="app">
     <header>
-      <h1>📄 Leitor de Documentos</h1>
-      <button class="theme-btn" id="themeBtn">
-        <ion-icon name="sunny-outline" id="themeIcon"></ion-icon>
-      </button>
+      <div class="header-left">
+        <h1 id="docTitle">📄 Leitor de Documentos</h1>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="downloadBtn" style="display:none;">
+          <ion-icon name="download-outline"></ion-icon>
+        </button>
+        <button class="icon-btn" id="themeBtn">
+          <ion-icon name="sunny-outline" id="themeIcon"></ion-icon>
+        </button>
+      </div>
     </header>
 
     <div class="content">
-      <div class="file-info" id="fileInfo">
-        <ion-icon name="document-text-outline"></ion-icon>
-        <div class="file-details">
-          <div class="file-name" id="fileName"></div>
-          <div class="file-size" id="fileSize"></div>
-        </div>
-        <button class="close-btn" id="closeBtn">
-          <ion-icon name="close-outline"></ion-icon>
-        </button>
-      </div>
-
       <div class="upload-section" id="uploadSection">
         <ion-icon name="cloud-upload-outline"></ion-icon>
         <h2>Carregar documento</h2>
@@ -283,10 +336,27 @@
         <input type="file" id="fileInput" accept=".pdf,.doc,.docx">
       </div>
 
-      <input type="text" class="search-box" id="searchBox" placeholder="Procurar no documento...">
-
-      <div class="document-container" id="documentContainer">
-        <div class="document-content" id="documentContent"></div>
+      <div class="viewer-container" id="viewerContainer">
+        <div class="toolbar" id="toolbar">
+          <div class="toolbar-left">
+            <button class="icon-btn" id="closeDoc">
+              <ion-icon name="arrow-back-outline"></ion-icon>
+            </button>
+            <div class="page-info" id="pageInfo">Página 1 de 1</div>
+          </div>
+          <div class="zoom-controls">
+            <button class="zoom-btn" id="zoomOut">
+              <ion-icon name="remove-outline"></ion-icon>
+            </button>
+            <div class="zoom-level" id="zoomLevel">100%</div>
+            <button class="zoom-btn" id="zoomIn">
+              <ion-icon name="add-outline"></ion-icon>
+            </button>
+          </div>
+        </div>
+        <div class="document-viewer" id="documentViewer">
+          <div class="loading">A carregar...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -300,29 +370,33 @@
     }
 
     let currentTheme = localStorage.getItem('theme') || 'light';
-    let originalText = '';
     let currentFile = null;
+    let pdfDoc = null;
+    let currentZoom = 1.0;
+    let currentPage = 1;
+    let totalPages = 1;
 
     document.body.setAttribute('data-theme', currentTheme);
 
-    const themeBtn = document.getElementById('themeBtn');
-    const themeIcon = document.getElementById('themeIcon');
-    const uploadSection = document.getElementById('uploadSection');
-    const fileInput = document.getElementById('fileInput');
-    const fileInfo = document.getElementById('fileInfo');
-    const fileName = document.getElementById('fileName');
-    const fileSize = document.getElementById('fileSize');
-    const closeBtn = document.getElementById('closeBtn');
-    const searchBox = document.getElementById('searchBox');
-    const documentContainer = document.getElementById('documentContainer');
-    const documentContent = document.getElementById('documentContent');
+    const elements = {
+      themeBtn: document.getElementById('themeBtn'),
+      themeIcon: document.getElementById('themeIcon'),
+      uploadSection: document.getElementById('uploadSection'),
+      fileInput: document.getElementById('fileInput'),
+      viewerContainer: document.getElementById('viewerContainer'),
+      documentViewer: document.getElementById('documentViewer'),
+      docTitle: document.getElementById('docTitle'),
+      pageInfo: document.getElementById('pageInfo'),
+      zoomLevel: document.getElementById('zoomLevel'),
+      zoomIn: document.getElementById('zoomIn'),
+      zoomOut: document.getElementById('zoomOut'),
+      closeDoc: document.getElementById('closeDoc'),
+      downloadBtn: document.getElementById('downloadBtn'),
+      toolbar: document.getElementById('toolbar')
+    };
 
     function updateThemeIcon() {
-      if (currentTheme === 'dark') {
-        themeIcon.setAttribute('name', 'moon-outline');
-      } else {
-        themeIcon.setAttribute('name', 'sunny-outline');
-      }
+      elements.themeIcon.setAttribute('name', currentTheme === 'dark' ? 'moon-outline' : 'sunny-outline');
     }
 
     function toggleTheme() {
@@ -332,116 +406,131 @@
       updateThemeIcon();
     }
 
-    function formatFileSize(bytes) {
-      if (bytes < 1024) return bytes + ' B';
-      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-      return (bytes / 1048576).toFixed(1) + ' MB';
+    async function renderPDFPages() {
+      elements.documentViewer.innerHTML = '';
+      
+      for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+        const page = await pdfDoc.getPage(pageNum);
+        const viewport = page.getViewport({ scale: currentZoom * 1.5 });
+        
+        const canvas = document.createElement('canvas');
+        canvas.className = 'page-canvas';
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        
+        elements.documentViewer.appendChild(canvas);
+        
+        await page.render({
+          canvasContext: context,
+          viewport: viewport
+        }).promise;
+      }
+      
+      totalPages = pdfDoc.numPages;
+      updatePageInfo();
     }
 
-    async function readPDF(arrayBuffer) {
-      try {
-        const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
-        let fullText = '';
-        
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const textContent = await page.getTextContent();
-          const pageText = textContent.items.map(item => item.str).join(' ');
-          fullText += pageText + '\n\n';
-        }
-        
-        return fullText;
-      } catch (error) {
-        throw new Error('Erro ao processar PDF');
-      }
+    async function loadPDF(arrayBuffer) {
+      pdfDoc = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+      await renderPDFPages();
+      elements.toolbar.style.display = 'flex';
     }
 
-    async function readDOCX(arrayBuffer) {
-      try {
-        const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
-        return result.value;
-      } catch (error) {
-        throw new Error('Erro ao processar DOCX');
-      }
+    async function loadDOCX(arrayBuffer) {
+      const result = await mammoth.convertToHtml({arrayBuffer: arrayBuffer});
+      elements.documentViewer.innerHTML = `<div class="doc-content">${result.value}</div>`;
+      elements.toolbar.style.display = 'none';
+    }
+
+    function updatePageInfo() {
+      elements.pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+    }
+
+    function updateZoomLevel() {
+      elements.zoomLevel.textContent = `${Math.round(currentZoom * 100)}%`;
     }
 
     async function processFile(file) {
       currentFile = file;
-      fileName.textContent = file.name;
-      fileSize.textContent = formatFileSize(file.size);
-      fileInfo.classList.add('active');
-      
-      documentContent.innerHTML = '<div class="loading">A carregar documento...</div>';
-      documentContainer.classList.add('active');
-      uploadSection.style.display = 'none';
+      elements.docTitle.textContent = file.name;
+      elements.uploadSection.style.display = 'none';
+      elements.viewerContainer.classList.add('active');
+      elements.documentViewer.innerHTML = '<div class="loading">A carregar documento...</div>';
+      elements.downloadBtn.style.display = 'flex';
 
       const reader = new FileReader();
       reader.onload = async function(event) {
         try {
           const arrayBuffer = event.target.result;
-          let text = '';
           
           if (file.name.toLowerCase().endsWith('.pdf')) {
-            text = await readPDF(arrayBuffer);
-          } else if (file.name.toLowerCase().endsWith('.docx')) {
-            text = await readDOCX(arrayBuffer);
+            await loadPDF(arrayBuffer);
+          } else if (file.name.toLowerCase().endsWith('.docx') || file.name.toLowerCase().endsWith('.doc')) {
+            await loadDOCX(arrayBuffer);
           } else {
             throw new Error('Formato não suportado');
           }
-          
-          if (!text || text.trim().length === 0) {
-            throw new Error('Documento vazio');
-          }
-          
-          originalText = text;
-          documentContent.textContent = originalText;
-          searchBox.classList.add('active');
         } catch (error) {
-          documentContent.innerHTML = `<div class="loading">Erro: ${error.message}</div>`;
+          elements.documentViewer.innerHTML = `<div class="loading">Erro: ${error.message}</div>`;
           console.error(error);
         }
       };
       reader.readAsArrayBuffer(file);
     }
 
-    uploadSection.addEventListener('click', () => {
-      fileInput.click();
-    });
-
-    fileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        processFile(file);
-      }
-    });
-
-    closeBtn.addEventListener('click', () => {
+    function closeDocument() {
       currentFile = null;
-      originalText = '';
-      fileInfo.classList.remove('active');
-      documentContainer.classList.remove('active');
-      searchBox.classList.remove('active');
-      searchBox.value = '';
-      uploadSection.style.display = 'flex';
-      fileInput.value = '';
+      pdfDoc = null;
+      currentZoom = 1.0;
+      currentPage = 1;
+      elements.docTitle.textContent = '📄 Leitor de Documentos';
+      elements.uploadSection.style.display = 'flex';
+      elements.viewerContainer.classList.remove('active');
+      elements.downloadBtn.style.display = 'none';
+      elements.fileInput.value = '';
+      updateZoomLevel();
+    }
+
+    elements.uploadSection.addEventListener('click', () => {
+      elements.fileInput.click();
     });
 
-    searchBox.addEventListener('input', (e) => {
-      const searchTerm = e.target.value.toLowerCase();
-      
-      if (!searchTerm) {
-        documentContent.textContent = originalText;
-        return;
-      }
-
-      const regex = new RegExp(`(${searchTerm})`, 'gi');
-      const highlightedText = originalText.replace(regex, '<span class="highlight">$1</span>');
-      documentContent.innerHTML = highlightedText;
+    elements.fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) processFile(file);
     });
 
-    themeBtn.addEventListener('click', toggleTheme);
+    elements.closeDoc.addEventListener('click', closeDocument);
+
+    elements.zoomIn.addEventListener('click', async () => {
+      if (!pdfDoc) return;
+      currentZoom = Math.min(currentZoom + 0.25, 3.0);
+      updateZoomLevel();
+      await renderPDFPages();
+    });
+
+    elements.zoomOut.addEventListener('click', async () => {
+      if (!pdfDoc) return;
+      currentZoom = Math.max(currentZoom - 0.25, 0.5);
+      updateZoomLevel();
+      await renderPDFPages();
+    });
+
+    elements.downloadBtn.addEventListener('click', () => {
+      if (!currentFile) return;
+      const url = URL.createObjectURL(currentFile);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = currentFile.name;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    elements.themeBtn.addEventListener('click', toggleTheme);
 
     updateThemeIcon();
+    updateZoomLevel();
   </script>
 </body>
 </html>
