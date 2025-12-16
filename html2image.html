@@ -104,7 +104,8 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error('Erro na API: ' + response.status);
+                    const errorText = await response.text();
+                    throw new Error('Erro na API: ' + response.status + ' - ' + errorText);
                 }
                 
                 const blob = await response.blob();
@@ -120,6 +121,13 @@
             } catch (error) {
                 status.className = 'status error';
                 status.textContent = '❌ Erro: ' + error.message;
+                console.error('Erro completo:', error);
+                
+                // Tentar pegar detalhes da resposta
+                if (error.response) {
+                    const errorText = await error.response.text();
+                    status.textContent += ' | Detalhes: ' + errorText;
+                }
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Gerar PDF';
