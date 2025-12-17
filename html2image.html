@@ -3,134 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste PDF</title>
+    <title>Debug API PDF</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
+            max-width: 700px;
+            margin: 30px auto;
             padding: 20px;
             background: #f5f5f5;
         }
         .card {
             background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        textarea {
+        h2 { margin-top: 0; color: #333; }
+        input {
             width: 100%;
-            height: 150px;
             padding: 10px;
-            border: 1px solid #ddd;
+            margin: 10px 0;
+            border: 2px solid #ddd;
             border-radius: 5px;
-            font-family: monospace;
-            margin-bottom: 15px;
+            font-size: 14px;
         }
         button {
             background: #0070f3;
             color: white;
             border: none;
-            padding: 12px 30px;
+            padding: 12px 25px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
             width: 100%;
+            margin: 10px 0;
         }
-        button:hover {
-            background: #0051cc;
-        }
+        button:hover { background: #0051cc; }
         button:disabled {
             background: #ccc;
             cursor: not-allowed;
         }
-        .status {
-            margin-top: 15px;
-            padding: 10px;
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
             border-radius: 5px;
-            display: none;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            white-space: pre-wrap;
         }
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-            display: block;
-        }
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            display: block;
-        }
+        .error { color: #ff4444; }
+        .success { color: #44ff44; }
+        .info { color: #4444ff; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h1>🔧 Testar API PDF</h1>
+        <h2>🔍 Debug - API PDF</h2>
         
-        <label>Cole seu HTML aqui:</label>
-        <textarea id="htmlInput"><h1>Olá Mundo!</h1>
-<p>Este é um teste de conversão HTML para PDF.</p>
-<p style="color: blue;">Com formatação e cores!</p></textarea>
+        <label>URL da API:</label>
+        <input type="text" id="apiUrl" value="https://teste-iswnr4qv2-alfredo-s-projects-a4a5754b.vercel.app/api/convert">
         
-        <button onclick="gerarPDF()" id="btnGerar">Gerar PDF</button>
+        <button onclick="testarAPI()">🧪 Testar API</button>
+        <button onclick="gerarPDF()">📄 Gerar PDF</button>
+        <button onclick="limparLog()">🗑️ Limpar Log</button>
         
-        <div id="status" class="status"></div>
+        <div id="log" class="log">Aguardando teste...</div>
     </div>
 
     <script>
-        async function gerarPDF() {
-            const btn = document.getElementById('btnGerar');
-            const status = document.getElementById('status');
-            const html = document.getElementById('htmlInput').value;
+        function addLog(msg, tipo = 'info') {
+            const log = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const classe = tipo === 'error' ? 'error' : tipo === 'success' ? 'success' : 'info';
+            log.innerHTML += `<span class="${classe}">[${timestamp}] ${msg}</span>\n`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function limparLog() {
+            document.getElementById('log').innerHTML = 'Log limpo.\n';
+        }
+
+        async function testarAPI() {
+            limparLog();
+            const url = document.getElementById('apiUrl').value;
             
-            btn.disabled = true;
-            btn.textContent = 'Gerando...';
-            status.className = 'status';
-            status.style.display = 'none';
+            addLog('🔍 Iniciando teste da API...', 'info');
+            addLog('URL: ' + url, 'info');
             
             try {
-                const response = await fetch('https://teste-iswnr4qv2-alfredo-s-projects-a4a5754b.vercel.app/api/convert', {
+                addLog('📡 Fazendo requisição POST...', 'info');
+                
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        html: html,
+                        html: '<h1>Teste</h1><p>Conteúdo de teste</p>'
+                    })
+                });
+                
+                addLog(`📊 Status: ${response.status} ${response.statusText}`, 
+                    response.ok ? 'success' : 'error');
+                addLog(`📋 Headers: ${JSON.stringify([...response.headers.entries()])}`, 'info');
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    addLog(`❌ Erro: ${errorText}`, 'error');
+                    return;
+                }
+                
+                const contentType = response.headers.get('content-type');
+                addLog(`📦 Content-Type: ${contentType}`, 'info');
+                
+                if (contentType && contentType.includes('application/pdf')) {
+                    addLog('✅ API retornou PDF corretamente!', 'success');
+                    addLog('📏 Tamanho: ' + response.headers.get('content-length') + ' bytes', 'success');
+                } else {
+                    addLog('⚠️ API não retornou PDF!', 'error');
+                    const text = await response.text();
+                    addLog('Resposta: ' + text.substring(0, 200), 'error');
+                }
+                
+            } catch (error) {
+                addLog(`💥 Erro na requisição: ${error.message}`, 'error');
+                addLog(`Stack: ${error.stack}`, 'error');
+            }
+        }
+
+        async function gerarPDF() {
+            const url = document.getElementById('apiUrl').value;
+            addLog('📄 Tentando gerar e baixar PDF...', 'info');
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        html: `
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <style>
+                                    body { font-family: Arial; padding: 40px; }
+                                    h1 { color: #0070f3; }
+                                    .box { border: 2px solid #0070f3; padding: 20px; margin: 20px 0; }
+                                </style>
+                            </head>
+                            <body>
+                                <h1>Documento de Teste</h1>
+                                <div class="box">
+                                    <p>Este é um teste de conversão HTML para PDF.</p>
+                                    <p>Se você está lendo isso em PDF, funcionou! 🎉</p>
+                                </div>
+                            </body>
+                            </html>
+                        `,
                         format: 'A4'
                     })
                 });
                 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    throw new Error('Erro na API: ' + response.status + ' - ' + errorText);
+                    addLog(`❌ Erro ${response.status}: ${errorText}`, 'error');
+                    return;
                 }
                 
                 const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'documento.pdf';
-                a.click();
+                addLog(`✅ PDF recebido! Tamanho: ${blob.size} bytes`, 'success');
                 
-                status.className = 'status success';
-                status.textContent = '✅ PDF gerado com sucesso!';
+                const url_blob = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url_blob;
+                a.download = 'teste_' + Date.now() + '.pdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url_blob);
+                
+                addLog('💾 Download iniciado!', 'success');
                 
             } catch (error) {
-                status.className = 'status error';
-                status.textContent = '❌ Erro: ' + error.message;
-                console.error('Erro completo:', error);
-                
-                // Tentar pegar detalhes da resposta
-                if (error.response) {
-                    const errorText = await error.response.text();
-                    status.textContent += ' | Detalhes: ' + errorText;
-                }
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Gerar PDF';
+                addLog(`💥 Erro: ${error.message}`, 'error');
             }
         }
     </script>
