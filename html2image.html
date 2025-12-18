@@ -26,6 +26,7 @@
             border: 2px solid #ddd;
             border-radius: 5px;
             font-size: 14px;
+            box-sizing: border-box;
         }
         button {
             background: #0070f3;
@@ -58,19 +59,20 @@
         .error { color: #ff4444; }
         .success { color: #44ff44; }
         .info { color: #4444ff; }
+        .warning { color: #ffaa00; }
     </style>
 </head>
 <body>
     <div class="card">
         <h2>🔍 Debug - API PDF</h2>
-        
+
         <label>URL da API:</label>
-        <input type="text" id="apiUrl" value="https://SEU-APP.onrender.com/convert">
-        
+        <input type="text" id="apiUrl" value="https://html-to-pdf-api-qmpa.onrender.com/convert">
+
         <button onclick="testarAPI()">🧪 Testar API</button>
         <button onclick="gerarPDF()">📄 Gerar PDF</button>
         <button onclick="limparLog()">🗑️ Limpar Log</button>
-        
+
         <div id="log" class="log">Aguardando teste...</div>
     </div>
 
@@ -78,7 +80,7 @@
         function addLog(msg, tipo = 'info') {
             const log = document.getElementById('log');
             const timestamp = new Date().toLocaleTimeString();
-            const classe = tipo === 'error' ? 'error' : tipo === 'success' ? 'success' : 'info';
+            const classe = tipo === 'error' ? 'error' : tipo === 'success' ? 'success' : tipo === 'warning' ? 'warning' : 'info';
             log.innerHTML += `<span class="${classe}">[${timestamp}] ${msg}</span>\n`;
             log.scrollTop = log.scrollHeight;
         }
@@ -90,13 +92,13 @@
         async function testarAPI() {
             limparLog();
             const url = document.getElementById('apiUrl').value;
-            
+
             addLog('🔍 Iniciando teste da API...', 'info');
             addLog('URL: ' + url, 'info');
-            
+
             try {
                 addLog('📡 Fazendo requisição POST...', 'info');
-                
+
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
@@ -106,29 +108,37 @@
                         html: '<h1>Teste</h1><p>Conteúdo de teste</p>'
                     })
                 });
-                
+
                 addLog(`📊 Status: ${response.status} ${response.statusText}`, 
                     response.ok ? 'success' : 'error');
-                addLog(`📋 Headers: ${JSON.stringify([...response.headers.entries()])}`, 'info');
                 
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                addLog(`📋 Headers: ${JSON.stringify(headers, null, 2)}`, 'info');
+
                 if (!response.ok) {
                     const errorText = await response.text();
                     addLog(`❌ Erro: ${errorText}`, 'error');
                     return;
                 }
-                
+
                 const contentType = response.headers.get('content-type');
                 addLog(`📦 Content-Type: ${contentType}`, 'info');
-                
+
                 if (contentType && contentType.includes('application/pdf')) {
                     addLog('✅ API retornou PDF corretamente!', 'success');
-                    addLog('📏 Tamanho: ' + response.headers.get('content-length') + ' bytes', 'success');
+                    const contentLength = response.headers.get('content-length');
+                    if (contentLength) {
+                        addLog(`📏 Tamanho: ${contentLength} bytes`, 'success');
+                    }
                 } else {
-                    addLog('⚠️ API não retornou PDF!', 'error');
+                    addLog('⚠️ API não retornou PDF!', 'warning');
                     const text = await response.text();
                     addLog('Resposta: ' + text.substring(0, 200), 'error');
                 }
-                
+
             } catch (error) {
                 addLog(`💥 Erro na requisição: ${error.message}`, 'error');
                 addLog(`Stack: ${error.stack}`, 'error');
@@ -138,7 +148,7 @@
         async function gerarPDF() {
             const url = document.getElementById('apiUrl').value;
             addLog('📄 Tentando gerar e baixar PDF...', 'info');
-            
+
             try {
                 const response = await fetch(url, {
                     method: 'POST',
@@ -161,6 +171,7 @@
                                 <div class="box">
                                     <p>Este é um teste de conversão HTML para PDF.</p>
                                     <p>Se você está lendo isso em PDF, funcionou! 🎉</p>
+                                    <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
                                 </div>
                             </body>
                             </html>
@@ -168,16 +179,16 @@
                         format: 'A4'
                     })
                 });
-                
+
                 if (!response.ok) {
                     const errorText = await response.text();
                     addLog(`❌ Erro ${response.status}: ${errorText}`, 'error');
                     return;
                 }
-                
+
                 const blob = await response.blob();
                 addLog(`✅ PDF recebido! Tamanho: ${blob.size} bytes`, 'success');
-                
+
                 const url_blob = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url_blob;
@@ -186,9 +197,9 @@
                 a.click();
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url_blob);
-                
+
                 addLog('💾 Download iniciado!', 'success');
-                
+
             } catch (error) {
                 addLog(`💥 Erro: ${error.message}`, 'error');
             }
