@@ -3,80 +3,48 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Exemplo com Google AdSense</title>
+  <title>Teste AdSense — Exemplo</title>
 
-  <!-- Script AdSense (fornecido por ti) -->
+  <!-- Meta (opcional, mas podes manter) -->
+  <meta name="google-adsense-account" content="ca-pub-6935730350552805">
+
+  <!-- Script AdSense (usa o teu ca-pub) -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6935730350552805"
      crossorigin="anonymous"></script>
 
   <style>
-    /* Estilos simples para demonstração */
-    body {
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      margin: 0;
-      padding: 0;
-      line-height: 1.5;
-      color: #111;
-      background: #f7f7f8;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    header, footer {
-      background: #111;
-      color: #fff;
-      padding: 1rem;
-      text-align: center;
-    }
-    main {
-      flex: 1;
-      max-width: 1000px;
-      margin: 2rem auto;
-      padding: 1rem;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-    }
-    .content p { margin: 0 0 1rem 0; }
-    .ad-wrapper { margin: 1.5rem 0; text-align: center; }
-    /* Força responsividade do bloco de anúncio */
-    .ad-wrapper ins.adsbygoogle { display:block; margin: 0 auto; }
+    body { font-family: system-ui, Arial, sans-serif; margin: 2rem; background:#f4f5f7; color:#111; }
+    .container { max-width:900px; margin:0 auto; background:#fff; padding:1.5rem; border-radius:8px; box-shadow:0 8px 20px rgba(0,0,0,0.05); }
+    .ad { margin:1.25rem 0; text-align:center; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Exemplo de Site com Google AdSense</h1>
-  </header>
+  <div class="container">
+    <h1>Teste AdSense</h1>
+    <p>Este ficheiro verifica se o script AdSense carrega e se o bloco de anúncio responde. O anúncio abaixo está configurado para <strong>adtest=on</strong> (anúncio de teste).</p>
 
-  <main>
-    <section class="content">
-      <h2>Bem-vindo</h2>
-      <p>Este é um exemplo minimalista de página HTML que inclui o script do Google AdSense.</p>
-      <p>Coloca este ficheiro como <code>index.html</code> na raiz do teu repositório para que serviços como Render ou Netlify publiquem correctamente.</p>
-    </section>
-
-    <!-- Bloco de anúncio responsivo (substitui data-ad-slot pelo teu ID real) -->
-    <div class="ad-wrapper">
-      <!-- Atenção: troca "YOUR_AD_SLOT" pelo teu ad slot (número) -->
+    <div class="ad">
+      <!-- Bloco de anúncio de teste (substitui data-ad-slot pelo teu slot real quando for para produção) -->
       <ins class="adsbygoogle"
            style="display:block"
            data-ad-client="ca-pub-6935730350552805"
-           data-ad-slot="YOUR_AD_SLOT"
+           data-ad-slot="1234567890"
            data-ad-format="auto"
-           data-full-width-responsive="true"></ins>
+           data-full-width-responsive="true"
+           data-adtest="on"></ins>
       <script>
         (adsbygoogle = window.adsbygoogle || []).push({});
       </script>
     </div>
 
-    <section class="content">
-      <h3>Conteúdo de exemplo</h3>
-      <p>Adiciona aqui o teu conteúdo real. O bloco de anúncio é responsivo e adapta-se ao espaço disponível.</p>
+    <section>
+      <h2>Notas rápidas</h2>
+      <ul>
+        <li>Quando fizeres deploy, coloca o <code>ads.txt</code> (ve abaixo) na mesma pasta pública (raiz) para que fique acessível em <code>https://SEU-DOMÍNIO/ads.txt</code>.</li>
+        <li>Substitui <code>data-ad-slot="1234567890"</code> pelo teu ID real antes de passar para produção.</li>
+        <li>Se tudo estiver correcto, testes com <code>data-adtest="on"</code> mostram anúncios de teste; remove o atributo para anúncios reais.</li>
+      </ul>
     </section>
-  </main>
-
-  <footer>
-    <small>Exemplo com Google AdSense — substitui o <em>data-ad-slot</em> pelo teu ID.</small>
-  </footer>
+  </div>
 </body>
 </html>
