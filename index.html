@@ -1,452 +1,82 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!doctype html>
+<html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flutter Preview</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .spinner { animation: spin 0.8s linear infinite; }
-        
-        /* Syntax highlighting básico */
-        .code-editor {
-            tab-size: 2;
-            -moz-tab-size: 2;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Exemplo com Google AdSense</title>
+
+  <!-- Script AdSense (fornecido por ti) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6935730350552805"
+     crossorigin="anonymous"></script>
+
+  <style>
+    /* Estilos simples para demonstração */
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      margin: 0;
+      padding: 0;
+      line-height: 1.5;
+      color: #111;
+      background: #f7f7f8;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header, footer {
+      background: #111;
+      color: #fff;
+      padding: 1rem;
+      text-align: center;
+    }
+    main {
+      flex: 1;
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+    .content p { margin: 0 0 1rem 0; }
+    .ad-wrapper { margin: 1.5rem 0; text-align: center; }
+    /* Força responsividade do bloco de anúncio */
+    .ad-wrapper ins.adsbygoogle { display:block; margin: 0 auto; }
+  </style>
 </head>
-<body class="bg-zinc-950 text-white antialiased">
-    <!-- Header -->
-    <header class="bg-zinc-900 border-b border-zinc-800 px-6 py-4">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
-                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14.6 16.6l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4m-5.2 0L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold">Flutter Playground</h1>
-                    <p class="text-xs text-zinc-500">Compile e visualize Flutter Web em tempo real</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-3">
-                <button id="runBtn" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                    </svg>
-                    <span>Run</span>
-                </button>
-                <button id="debugBtn" class="px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg transition-colors text-sm">
-                    Debug
-                </button>
-            </div>
-        </div>
-    </header>
+<body>
+  <header>
+    <h1>Exemplo de Site com Google AdSense</h1>
+  </header>
 
-    <!-- Main Content -->
-    <main class="h-[calc(100vh-88px)]">
-        <!-- Tabs -->
-        <div class="bg-zinc-900 border-b border-zinc-800">
-            <div class="max-w-7xl mx-auto flex items-center gap-1 px-6">
-                <button id="tabEditor" class="tab-button px-6 py-3 font-medium text-sm border-b-2 border-blue-500 text-white transition-colors">
-                    Editor
-                </button>
-                <button id="tabPreview" class="tab-button px-6 py-3 font-medium text-sm border-b-2 border-transparent text-zinc-500 hover:text-white transition-colors">
-                    Preview
-                </button>
-                <div class="flex-1"></div>
-                <button id="clearBtn" class="px-4 py-2 text-sm text-zinc-400 hover:text-white transition-colors">
-                    Clear
-                </button>
-            </div>
-        </div>
+  <main>
+    <section class="content">
+      <h2>Bem-vindo</h2>
+      <p>Este é um exemplo minimalista de página HTML que inclui o script do Google AdSense.</p>
+      <p>Coloca este ficheiro como <code>index.html</code> na raiz do teu repositório para que serviços como Render ou Netlify publiquem correctamente.</p>
+    </section>
 
-        <!-- Tab Content -->
-        <div class="h-full">
-            <!-- Editor Tab -->
-            <div id="editorTab" class="h-full bg-zinc-950">
-                <div class="max-w-7xl mx-auto h-full flex flex-col">
-                    <textarea id="editor" 
-                        class="code-editor flex-1 w-full bg-zinc-950 text-gray-100 p-6 font-mono text-sm leading-relaxed resize-none outline-none border-0"
-                        spellcheck="false"
-                        placeholder="// Digite ou cole seu código Flutter aqui...">class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+    <!-- Bloco de anúncio responsivo (substitui data-ad-slot pelo teu ID real) -->
+    <div class="ad-wrapper">
+      <!-- Atenção: troca "YOUR_AD_SLOT" pelo teu ad slot (número) -->
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-6935730350552805"
+           data-ad-slot="YOUR_AD_SLOT"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    </div>
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(),
-    );
-  }
-}
+    <section class="content">
+      <h3>Conteúdo de exemplo</h3>
+      <p>Adiciona aqui o teu conteúdo real. O bloco de anúncio é responsivo e adapta-se ao espaço disponível.</p>
+    </section>
+  </main>
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Flutter Preview'),
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Você clicou:',
-              style: TextStyle(fontSize: 24),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '$_counter',
-              style: const TextStyle(
-                fontSize: 72,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-}</textarea>
-                </div>
-            </div>
-
-            <!-- Preview Tab -->
-            <div id="previewTab" class="h-full bg-zinc-900 hidden">
-                <div class="max-w-7xl mx-auto h-full relative">
-                    <!-- Loading -->
-                    <div id="loading" class="absolute inset-0 bg-zinc-900 hidden items-center justify-center flex-col gap-6 z-50">
-                        <div class="w-16 h-16 border-4 border-zinc-700 border-t-blue-500 rounded-full spinner"></div>
-                        <div class="text-center">
-                            <div id="loadingText" class="text-white text-lg font-medium mb-2">Compilando Flutter...</div>
-                            <div class="text-zinc-500 text-sm">Isso pode levar 1-3 minutos</div>
-                        </div>
-                        <div class="w-80 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                            <div id="progressFill" class="h-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-300" style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Empty State -->
-                    <div id="emptyState" class="h-full flex items-center justify-center flex-col gap-4">
-                        <div class="w-20 h-20 bg-zinc-800 rounded-2xl flex items-center justify-center">
-                            <svg class="w-10 h-10 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/>
-                            </svg>
-                        </div>
-                        <div class="text-center">
-                            <h3 class="text-xl font-semibold text-white mb-2">Nenhum preview disponível</h3>
-                            <p class="text-zinc-500">Clique em "Run" para compilar seu código Flutter</p>
-                        </div>
-                    </div>
-
-                    <!-- Preview Iframe -->
-                    <iframe id="preview" class="w-full h-full border-0 bg-white hidden"></iframe>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Status Bar -->
-    <footer class="bg-zinc-900 border-t border-zinc-800 px-6 py-2">
-        <div class="max-w-7xl mx-auto flex items-center justify-between text-xs">
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2">
-                    <div id="statusDot" class="w-2 h-2 rounded-full bg-zinc-600"></div>
-                    <span id="status" class="text-zinc-500">Ready</span>
-                </div>
-                <span id="info" class="text-zinc-600"></span>
-            </div>
-            <div class="text-zinc-600">
-                API: <span class="text-zinc-500">testesetd.onrender.com</span>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        const API_URL = 'https://testesetd.onrender.com';
-
-        // Elementos
-        const editor = document.getElementById('editor');
-        const runBtn = document.getElementById('runBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const debugBtn = document.getElementById('debugBtn');
-        const preview = document.getElementById('preview');
-        const loading = document.getElementById('loading');
-        const loadingText = document.getElementById('loadingText');
-        const progressFill = document.getElementById('progressFill');
-        const emptyState = document.getElementById('emptyState');
-        const status = document.getElementById('status');
-        const statusDot = document.getElementById('statusDot');
-        const info = document.getElementById('info');
-        
-        const tabEditor = document.getElementById('tabEditor');
-        const tabPreview = document.getElementById('tabPreview');
-        const editorTab = document.getElementById('editorTab');
-        const previewTab = document.getElementById('previewTab');
-
-        let currentHash = null;
-        let pollInterval = null;
-        let startTime = null;
-
-        // Tabs
-        tabEditor.addEventListener('click', () => switchTab('editor'));
-        tabPreview.addEventListener('click', () => switchTab('preview'));
-
-        function switchTab(tab) {
-            if (tab === 'editor') {
-                tabEditor.classList.add('border-blue-500', 'text-white');
-                tabEditor.classList.remove('border-transparent', 'text-zinc-500');
-                tabPreview.classList.remove('border-blue-500', 'text-white');
-                tabPreview.classList.add('border-transparent', 'text-zinc-500');
-                editorTab.classList.remove('hidden');
-                previewTab.classList.add('hidden');
-            } else {
-                tabPreview.classList.add('border-blue-500', 'text-white');
-                tabPreview.classList.remove('border-transparent', 'text-zinc-500');
-                tabEditor.classList.remove('border-blue-500', 'text-white');
-                tabEditor.classList.add('border-transparent', 'text-zinc-500');
-                previewTab.classList.remove('hidden');
-                editorTab.classList.add('hidden');
-            }
-        }
-
-        // Status colors
-        const statusColors = {
-            ready: { dot: 'bg-zinc-600', text: 'text-zinc-500' },
-            building: { dot: 'bg-blue-500 animate-pulse', text: 'text-blue-400' },
-            success: { dot: 'bg-green-500', text: 'text-green-400' },
-            error: { dot: 'bg-red-500', text: 'text-red-400' },
-            warning: { dot: 'bg-yellow-500', text: 'text-yellow-400' }
-        };
-
-        function log(msg) {
-            const time = new Date().toLocaleTimeString();
-            console.log(`[${time}] ${msg}`);
-        }
-
-        function setStatus(text, type = 'ready', infoText = '') {
-            const colors = statusColors[type] || statusColors.ready;
-            status.textContent = text;
-            status.className = colors.text;
-            statusDot.className = `w-2 h-2 rounded-full ${colors.dot}`;
-            info.textContent = infoText;
-            log(`${text} ${infoText}`);
-        }
-
-        function showLoading(show, text = 'Compilando Flutter...') {
-            loading.classList.toggle('hidden', !show);
-            loading.classList.toggle('flex', show);
-            if (show) loadingText.textContent = text;
-        }
-
-        function updateProgress(percent) {
-            progressFill.style.width = `${Math.min(percent, 100)}%`;
-        }
-
-        // Clear
-        clearBtn.addEventListener('click', () => {
-            if (confirm('Limpar código e preview?')) {
-                editor.value = '';
-                preview.classList.add('hidden');
-                preview.src = '';
-                emptyState.classList.remove('hidden');
-                setStatus('Ready');
-                currentHash = null;
-                updateProgress(0);
-                if (pollInterval) clearInterval(pollInterval);
-            }
-        });
-
-        // Debug
-        debugBtn.addEventListener('click', () => {
-            console.log('=== DEBUG ===');
-            console.log('API:', API_URL);
-            console.log('Hash:', currentHash);
-            console.log('Preview src:', preview.src);
-            
-            if (currentHash) {
-                const url = `${API_URL}/preview/${currentHash}/index.html`;
-                console.log('Opening:', url);
-                window.open(url, '_blank');
-            }
-            
-            fetch(`${API_URL}/health`)
-                .then(r => r.json())
-                .then(d => console.log('Health:', d))
-                .catch(e => console.error('Health error:', e));
-        });
-
-        // Polling
-        async function pollBuildStatus(hash) {
-            return new Promise((resolve, reject) => {
-                let attempts = 0;
-                const maxAttempts = 180;
-                
-                pollInterval = setInterval(async () => {
-                    attempts++;
-                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                    
-                    if (attempts > maxAttempts) {
-                        clearInterval(pollInterval);
-                        reject(new Error('Timeout'));
-                        return;
-                    }
-
-                    updateProgress((attempts / maxAttempts) * 95);
-                    loadingText.textContent = `Compilando... ${elapsed}s`;
-
-                    try {
-                        const res = await fetch(`${API_URL}/status/${hash}`);
-                        const data = await res.json();
-
-                        if (data.status === 'ready') {
-                            clearInterval(pollInterval);
-                            updateProgress(100);
-                            resolve(data);
-                        } else if (data.status === 'not_found' && attempts > 10) {
-                            clearInterval(pollInterval);
-                            reject(new Error('Build not found'));
-                        }
-                    } catch (err) {
-                        log(`Poll error: ${err.message}`);
-                    }
-                }, 1000);
-            });
-        }
-
-        // Run
-        runBtn.addEventListener('click', async () => {
-            const code = editor.value.trim();
-
-            if (!code) {
-                setStatus('Código vazio', 'error');
-                return;
-            }
-
-            if (!code.includes('class MyApp')) {
-                setStatus('Código deve conter "class MyApp"', 'error');
-                return;
-            }
-
-            log('=== Starting build ===');
-            
-            runBtn.disabled = true;
-            showLoading(true);
-            setStatus('Compilando...', 'building');
-            updateProgress(5);
-            startTime = Date.now();
-            switchTab('preview');
-
-            try {
-                const res = await fetch(`${API_URL}/compile`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code })
-                });
-
-                if (!res.ok) {
-                    const err = await res.json().catch(() => ({ error: 'Unknown error' }));
-                    throw new Error(err.error || `HTTP ${res.status}`);
-                }
-
-                const data = await res.json();
-                currentHash = data.hash;
-
-                if (data.cached) {
-                    log('Cache hit!');
-                    updateProgress(100);
-                    loadPreview(currentHash, true);
-                } else {
-                    log('Building...');
-                    await pollBuildStatus(currentHash);
-                    loadPreview(currentHash, false);
-                }
-
-            } catch (error) {
-                log(`Error: ${error.message}`);
-                showLoading(false);
-                setStatus(error.message, 'error');
-            } finally {
-                runBtn.disabled = false;
-                if (pollInterval) clearInterval(pollInterval);
-            }
-        });
-
-        // Load Preview
-        function loadPreview(hash, cached) {
-            const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-            const url = `${API_URL}/preview/${hash}/index.html`;
-            
-            log(`Loading: ${url}`);
-            
-            preview.classList.remove('hidden');
-            emptyState.classList.add('hidden');
-            preview.src = url;
-            
-            preview.onload = () => {
-                log('Preview loaded!');
-                showLoading(false);
-                setStatus('Success', 'success', `${elapsed}s${cached ? ' (cached)' : ''}`);
-            };
-            
-            preview.onerror = () => {
-                log('Preview error');
-                showLoading(false);
-                setStatus('Preview error', 'warning', `${elapsed}s`);
-            };
-            
-            setTimeout(() => {
-                if (!loading.classList.contains('hidden')) {
-                    showLoading(false);
-                    setStatus('Loading...', 'warning', `${elapsed}s`);
-                }
-            }, 8000);
-        }
-
-        // Init
-        window.addEventListener('load', async () => {
-            log('=== Flutter Playground ===');
-            try {
-                const res = await fetch(`${API_URL}/health`);
-                await res.json();
-                log('Backend online');
-            } catch (err) {
-                log('Backend offline');
-                setStatus('Backend offline', 'error');
-            }
-        });
-    </script>
+  <footer>
+    <small>Exemplo com Google AdSense — substitui o <em>data-ad-slot</em> pelo teu ID.</small>
+  </footer>
 </body>
 </html>
