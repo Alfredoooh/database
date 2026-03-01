@@ -1,5 +1,4 @@
 {
-  "url": "https://webtest-oesm.onrender.com",
-  "app_name": "Meu WebView App",
-  "version": "1.0.0"
+  "apiKey": "ydc-sk-0e59b2c500613f92-3KLgGmlfDt2rOrgohRqbXOT2wL4DZDSa-a5897a17",
+  "proxy": "https://corsproxy.io/?"
 }
