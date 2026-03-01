@@ -1,50 +1,95 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Teste AdSense — Exemplo</title>
-
-  <!-- Meta (opcional, mas podes manter) -->
-  <meta name="google-adsense-account" content="ca-pub-6935730350552805">
-
-  <!-- Script AdSense (usa o teu ca-pub) -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6935730350552805"
-     crossorigin="anonymous"></script>
-
-  <style>
-    body { font-family: system-ui, Arial, sans-serif; margin: 2rem; background:#f4f5f7; color:#111; }
-    .container { max-width:900px; margin:0 auto; background:#fff; padding:1.5rem; border-radius:8px; box-shadow:0 8px 20px rgba(0,0,0,0.05); }
-    .ad { margin:1.25rem 0; text-align:center; }
-  </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>You.com API Tester</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="container">
-    <h1>Teste AdSense</h1>
-    <p>Este ficheiro verifica se o script AdSense carrega e se o bloco de anúncio responde. O anúncio abaixo está configurado para <strong>adtest=on</strong> (anúncio de teste).</p>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-6 font-mono">
 
-    <div class="ad">
-      <!-- Bloco de anúncio de teste (substitui data-ad-slot pelo teu slot real quando for para produção) -->
-      <ins class="adsbygoogle"
-           style="display:block"
-           data-ad-client="ca-pub-6935730350552805"
-           data-ad-slot="1234567890"
-           data-ad-format="auto"
-           data-full-width-responsive="true"
-           data-adtest="on"></ins>
-      <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-      </script>
+  <h1 class="text-2xl font-bold text-cyan-400 mb-6">🔍 You.com API Tester</h1>
+
+  <div class="space-y-4 max-w-2xl">
+    <div>
+      <label class="text-xs text-gray-400 block mb-1">QUERY</label>
+      <input id="query" type="text"
+        class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm"
+        value="latest news in Portugal"/>
     </div>
-
-    <section>
-      <h2>Notas rápidas</h2>
-      <ul>
-        <li>Quando fizeres deploy, coloca o <code>ads.txt</code> (ve abaixo) na mesma pasta pública (raiz) para que fique acessível em <code>https://SEU-DOMÍNIO/ads.txt</code>.</li>
-        <li>Substitui <code>data-ad-slot="1234567890"</code> pelo teu ID real antes de passar para produção.</li>
-        <li>Se tudo estiver correcto, testes com <code>data-adtest="on"</code> mostram anúncios de teste; remove o atributo para anúncios reais.</li>
-      </ul>
-    </section>
+    <button onclick="doSearch()"
+      class="bg-cyan-500 hover:bg-cyan-400 text-black font-bold px-6 py-2 rounded">
+      ENVIAR
+    </button>
   </div>
+
+  <div id="loading" class="hidden mt-6 text-cyan-400 text-sm">A carregar...</div>
+  <div id="error" class="hidden mt-6 text-red-400 text-sm"></div>
+  <pre id="result"
+    class="hidden mt-6 bg-gray-800 border border-gray-700 rounded p-4 text-xs overflow-auto max-h-screen text-green-300 whitespace-pre-wrap"></pre>
+
+  <script>
+    const CONFIG_URL = "https://alfredoooh.github.io/database/API/config.json";
+
+    // Proxies que fazem fetch server-side com api_key na URL
+    const PROXIES = [
+      url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+      url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+      url => `https://thingproxy.freeboard.io/fetch/${url}`,
+      url => `https://cors.sh/${url}`,
+    ];
+
+    async function tryFetch(url) {
+      for (let i = 0; i < PROXIES.length; i++) {
+        try {
+          const proxyUrl = PROXIES[i](url);
+          document.getElementById('loading').textContent = `A tentar proxy ${i + 1}/${PROXIES.length}...`;
+          const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
+          const text = await res.text();
+          if (text && !text.includes('error') || text.includes('{')) return text;
+        } catch(e) {
+          console.warn(`Proxy ${i+1} falhou:`, e.message);
+        }
+      }
+      throw new Error('Todos os proxies falharam. A API pode estar bloqueada ou a key inválida.');
+    }
+
+    async function doSearch() {
+      const query = document.getElementById('query').value.trim();
+      const loading = document.getElementById('loading');
+      const errorEl = document.getElementById('error');
+      const result = document.getElementById('result');
+
+      errorEl.classList.add('hidden');
+      result.classList.add('hidden');
+      loading.classList.remove('hidden');
+      loading.textContent = 'A carregar config...';
+
+      try {
+        // 1. Buscar API key
+        const configRes = await fetch(CONFIG_URL);
+        const config = await configRes.json();
+        const apiKey = config.apiKey || config.api_key || config.key;
+        if (!apiKey) throw new Error('Campo apiKey não encontrado no config.json');
+
+        // 2. Endpoint com key na URL
+        const target = `https://api.ydc-index.io/search?query=${encodeURIComponent(query)}&num_web_results=5&api_key=${apiKey}`;
+
+        // 3. Tentar proxies em sequência
+        const text = await tryFetch(target);
+
+        let data;
+        try { data = JSON.parse(text); } catch(e) { data = { raw: text }; }
+
+        result.textContent = JSON.stringify(data, null, 2);
+        result.classList.remove('hidden');
+      } catch(e) {
+        errorEl.textContent = 'Erro: ' + e.message;
+        errorEl.classList.remove('hidden');
+      } finally {
+        loading.classList.add('hidden');
+      }
+    }
+  </script>
 </body>
 </html>
