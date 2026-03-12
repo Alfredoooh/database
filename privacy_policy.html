@@ -2,814 +2,897 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UPSCALE — Image Resolution Enhancer</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>PIXL — Image Toolkit</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { mono: ['DM Mono', 'monospace'], display: ['Bebas Neue', 'sans-serif'] },
+      colors: {
+        ink: '#0a0a0a', paper: '#f7f7f5',
+        mist: '#e8e8e6', fog: '#d0d0ce',
+        ash: '#a0a09e', slate: '#606060',
+      },
+      borderRadius: { xl2: '20px', xl3: '28px' }
+    }
+  }
+}
+</script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; }
+  body { font-family: 'DM Mono', monospace; background: #f7f7f5; color: #0a0a0a; }
 
-  :root {
-    --black: #0a0a0a;
-    --white: #f5f5f5;
-    --gray-100: #e8e8e8;
-    --gray-200: #d0d0d0;
-    --gray-400: #909090;
-    --gray-600: #505050;
-    --radius: 18px;
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #f7f7f5; }
+  ::-webkit-scrollbar-thumb { background: #0a0a0a; border-radius: 2px; }
+
+  /* Tab active */
+  .tab-btn.active { background: #0a0a0a; color: #f7f7f5; }
+  .tab-btn { transition: all .2s; }
+
+  /* Range slider */
+  input[type=range] { -webkit-appearance: none; appearance: none; height: 2px; background: #d0d0ce; border-radius: 1px; outline: none; width: 100%; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: #0a0a0a; border-radius: 50%; cursor: pointer; transition: transform .15s; }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+  /* Checkerboard for transparent bg */
+  .checker { background-image: linear-gradient(45deg, #d0d0ce 25%, transparent 25%), linear-gradient(-45deg, #d0d0ce 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #d0d0ce 75%), linear-gradient(-45deg, transparent 75%, #d0d0ce 75%); background-size: 16px 16px; background-position: 0 0, 0 8px, 8px -8px, -8px 0px; }
+
+  /* Progress bar */
+  .progress-fill { transition: width .15s linear; }
+
+  /* Drop zone hover */
+  .drop-active { border-color: #0a0a0a !important; background: #e8e8e6 !important; }
+
+  /* Panel animation */
+  .tool-panel { display: none; }
+  .tool-panel.active { display: block; }
+
+  /* Select styling */
+  select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%230a0a0a' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px !important; }
+
+  /* Bottom nav mobile */
+  @media (max-width: 640px) {
+    .desktop-tabs { display: none; }
+    .mobile-nav { display: flex; }
+  }
+  @media (min-width: 641px) {
+    .desktop-tabs { display: flex; }
+    .mobile-nav { display: none; }
   }
 
-  body {
-    background: var(--white);
-    color: var(--black);
-    font-family: 'DM Mono', monospace;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 20px 60px;
-  }
-
-  header {
-    width: 100%;
-    max-width: 900px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 48px;
-    padding-bottom: 20px;
-    border-bottom: 1.5px solid var(--black);
-  }
-
-  .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 52px;
-    letter-spacing: 4px;
-    line-height: 1;
-  }
-
-  .tagline {
-    font-size: 11px;
-    color: var(--gray-600);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    text-align: right;
-    line-height: 1.8;
-  }
-
-  .main {
-    width: 100%;
-    max-width: 900px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  /* Drop Zone */
-  .drop-zone {
-    border: 2px dashed var(--gray-200);
-    border-radius: var(--radius);
-    padding: 60px 40px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    background: var(--white);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .drop-zone:hover, .drop-zone.dragging {
-    border-color: var(--black);
-    background: var(--gray-100);
-  }
-
-  .drop-zone input[type="file"] {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-  }
-
-  .drop-icon {
-    width: 52px;
-    height: 52px;
-    margin: 0 auto 16px;
-    border: 2px solid var(--black);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .drop-icon svg { display: block; }
-
-  .drop-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 2px;
-    margin-bottom: 6px;
-  }
-
-  .drop-sub {
-    font-size: 11px;
-    color: var(--gray-400);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-  }
-
-  /* Controls Row */
-  .controls-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 14px;
-  }
-
-  .control-box {
-    background: var(--white);
-    border: 1.5px solid var(--gray-200);
-    border-radius: var(--radius);
-    padding: 18px 20px;
-  }
-
-  .control-label {
-    font-size: 10px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gray-400);
-    margin-bottom: 10px;
-  }
-
-  .control-box select,
-  .control-box input[type="range"] {
-    width: 100%;
-    background: transparent;
-    border: none;
-    outline: none;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    color: var(--black);
-    cursor: pointer;
-    appearance: none;
-  }
-
-  .control-box select {
-    border: 1.5px solid var(--gray-200);
-    border-radius: 8px;
-    padding: 6px 10px;
-    background: var(--white);
-  }
-
-  .control-box select:focus {
-    border-color: var(--black);
-  }
-
-  input[type="range"] {
-    -webkit-appearance: none;
-    height: 3px;
-    background: var(--gray-200);
-    border-radius: 2px;
-    margin-top: 8px;
-  }
-
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
-    background: var(--black);
-    border-radius: 50%;
-    cursor: pointer;
-  }
-
-  .range-val {
-    font-size: 20px;
-    font-family: 'Bebas Neue', sans-serif;
-    letter-spacing: 2px;
-    margin-bottom: 4px;
-  }
-
-  /* Preview Area */
-  .preview-section {
-    display: none;
-    gap: 14px;
-    flex-direction: column;
-  }
-
-  .preview-section.visible { display: flex; }
-
-  .preview-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
-
-  .preview-card {
-    border: 1.5px solid var(--gray-200);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-
-  .preview-card-header {
-    padding: 12px 16px;
-    border-bottom: 1.5px solid var(--gray-200);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .preview-card-title {
-    font-size: 10px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gray-400);
-  }
-
-  .preview-card-dim {
-    font-size: 12px;
-    letter-spacing: 1px;
-    color: var(--black);
-  }
-
-  .preview-card canvas,
-  .preview-card img {
-    width: 100%;
-    height: 260px;
-    object-fit: contain;
-    display: block;
-    background: var(--gray-100);
-  }
-
-  /* Progress */
-  .progress-wrap {
-    border: 1.5px solid var(--gray-200);
-    border-radius: var(--radius);
-    padding: 20px 24px;
-    display: none;
-  }
-
-  .progress-wrap.visible { display: block; }
-
-  .progress-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-  }
-
-  .progress-label {
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gray-600);
-  }
-
-  .progress-pct {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 2px;
-  }
-
-  .progress-bar-bg {
-    height: 3px;
-    background: var(--gray-200);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-
-  .progress-bar-fill {
-    height: 100%;
-    background: var(--black);
-    border-radius: 2px;
-    width: 0%;
-    transition: width 0.1s linear;
-  }
-
-  /* Action Button */
-  .btn-upscale {
-    width: 100%;
-    padding: 18px;
-    background: var(--black);
-    color: var(--white);
-    border: none;
-    border-radius: var(--radius);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    letter-spacing: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: none;
-  }
-
-  .btn-upscale:hover { background: var(--gray-600); }
-  .btn-upscale.visible { display: block; }
-  .btn-upscale:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .btn-download {
-    width: 100%;
-    padding: 15px;
-    background: var(--white);
-    color: var(--black);
-    border: 1.5px solid var(--black);
-    border-radius: var(--radius);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    letter-spacing: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: none;
-    text-align: center;
-    text-decoration: none;
-  }
-
-  .btn-download:hover { background: var(--black); color: var(--white); }
-  .btn-download.visible { display: block; }
-
-  /* Info strip */
-  .info-strip {
-    border: 1.5px solid var(--gray-200);
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    display: none;
-    gap: 0;
-  }
-
-  .info-strip.visible { display: grid; grid-template-columns: repeat(4, 1fr); }
-
-  .info-item { text-align: center; }
-  .info-item + .info-item { border-left: 1.5px solid var(--gray-200); }
-
-  .info-key {
-    font-size: 9px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--gray-400);
-    margin-bottom: 4px;
-  }
-
-  .info-val {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    letter-spacing: 1px;
-  }
-
-  /* Hidden canvas for processing */
-  #work-canvas { display: none; }
-
-  .algo-note {
-    font-size: 10px;
-    color: var(--gray-400);
-    letter-spacing: 1px;
-    text-align: center;
-    margin-top: 4px;
-  }
+  /* Comparison slider */
+  .compare-wrap { position: relative; overflow: hidden; cursor: ew-resize; user-select: none; }
+  .compare-after { position: absolute; top: 0; left: 0; width: 50%; overflow: hidden; }
+  .compare-line { position: absolute; top: 0; bottom: 0; width: 2px; background: #0a0a0a; cursor: ew-resize; z-index: 10; transform: translateX(-50%); }
+  .compare-handle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 32px; height: 32px; background: #0a0a0a; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 </style>
 </head>
-<body>
+<body class="min-h-screen pb-24 sm:pb-8">
 
-<header>
-  <div class="logo">UPSCALE</div>
-  <div class="tagline">
-    Image Resolution Enhancer<br>
-    Lanczos · Bicubic · 4K Ready
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-paper border-b border-fog">
+  <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="font-display text-3xl tracking-widest">PIXL</div>
+    <div class="text-[10px] tracking-[0.2em] text-ash uppercase text-right leading-relaxed hidden sm:block">
+      Image Toolkit<br>100% Client-Side
+    </div>
+    <!-- Desktop tabs -->
+    <nav class="desktop-tabs gap-1">
+      <button onclick="switchTool('upscale')" id="tab-upscale" class="tab-btn active font-mono text-[10px] tracking-[0.15em] uppercase px-3 py-1.5 rounded-xl border border-fog">Upscale</button>
+      <button onclick="switchTool('bgremove')" id="tab-bgremove" class="tab-btn font-mono text-[10px] tracking-[0.15em] uppercase px-3 py-1.5 rounded-xl border border-fog">Remove BG</button>
+      <button onclick="switchTool('compress')" id="tab-compress" class="tab-btn font-mono text-[10px] tracking-[0.15em] uppercase px-3 py-1.5 rounded-xl border border-fog">Compress</button>
+      <button onclick="switchTool('convert')" id="tab-convert" class="tab-btn font-mono text-[10px] tracking-[0.15em] uppercase px-3 py-1.5 rounded-xl border border-fog">Convert</button>
+      <button onclick="switchTool('filters')" id="tab-filters" class="tab-btn font-mono text-[10px] tracking-[0.15em] uppercase px-3 py-1.5 rounded-xl border border-fog">Filters</button>
+    </nav>
   </div>
 </header>
 
-<div class="main">
+<!-- Main -->
+<main class="max-w-3xl mx-auto px-4 pt-5">
 
-  <!-- Drop Zone -->
-  <div class="drop-zone" id="dropZone">
-    <input type="file" id="fileInput" accept="image/*">
-    <div class="drop-icon">
-      <svg width="24" height="24" fill="none" stroke="#0a0a0a" stroke-width="1.5" viewBox="0 0 24 24">
-        <path d="M4 16l4-4 4 4 4-6 4 6"/>
-        <rect x="2" y="3" width="20" height="18" rx="3"/>
-      </svg>
-    </div>
-    <div class="drop-title">DROP IMAGE HERE</div>
-    <div class="drop-sub">PNG · JPG · WEBP · BMP — up to 50MB</div>
-  </div>
-
-  <!-- Controls -->
-  <div class="controls-row">
-    <div class="control-box">
-      <div class="control-label">Target Size</div>
-      <select id="targetSize">
-        <option value="2x">2× (Double)</option>
-        <option value="3x">3× (Triple)</option>
-        <option value="4x">4× (Quad)</option>
-        <option value="4k">4K — 3840×2160</option>
-        <option value="2k">2K — 2560×1440</option>
-        <option value="1080p">1080p — 1920×1080</option>
-        <option value="custom">Custom…</option>
-      </select>
-    </div>
-    <div class="control-box">
-      <div class="control-label">Algorithm</div>
-      <select id="algorithm">
-        <option value="lanczos">Lanczos (Sharp)</option>
-        <option value="bicubic">Bicubic (Smooth)</option>
-        <option value="bilinear">Bilinear (Fast)</option>
-      </select>
-    </div>
-    <div class="control-box">
-      <div class="control-label">Sharpening — <span id="sharpVal">0.5</span></div>
-      <div class="range-val" id="sharpDisplay">50%</div>
-      <input type="range" id="sharpSlider" min="0" max="1" step="0.05" value="0.5">
-    </div>
-  </div>
-
-  <!-- Custom size row (hidden by default) -->
-  <div class="controls-row" id="customRow" style="display:none; grid-template-columns: 1fr 1fr;">
-    <div class="control-box">
-      <div class="control-label">Custom Width (px)</div>
-      <input type="number" id="customW" min="1" max="7680" placeholder="e.g. 3840" style="width:100%;border:1.5px solid var(--gray-200);border-radius:8px;padding:6px 10px;font-family:'DM Mono',monospace;font-size:13px;outline:none;background:var(--white);">
-    </div>
-    <div class="control-box">
-      <div class="control-label">Custom Height (px)</div>
-      <input type="number" id="customH" min="1" max="4320" placeholder="e.g. 2160" style="width:100%;border:1.5px solid var(--gray-200);border-radius:8px;padding:6px 10px;font-family:'DM Mono',monospace;font-size:13px;outline:none;background:var(--white);">
-    </div>
-  </div>
-
-  <!-- Info Strip -->
-  <div class="info-strip" id="infoStrip">
-    <div class="info-item"><div class="info-key">Original</div><div class="info-val" id="infoOrig">—</div></div>
-    <div class="info-item"><div class="info-key">Output</div><div class="info-val" id="infoOut">—</div></div>
-    <div class="info-item"><div class="info-key">Scale</div><div class="info-val" id="infoScale">—</div></div>
-    <div class="info-item"><div class="info-key">Format</div><div class="info-val" id="infoFmt">—</div></div>
-  </div>
-
-  <!-- Upscale Button -->
-  <button class="btn-upscale" id="btnUpscale">UPSCALE IMAGE</button>
-
-  <!-- Progress -->
-  <div class="progress-wrap" id="progressWrap">
-    <div class="progress-top">
-      <span class="progress-label" id="progressLabel">Processing…</span>
-      <span class="progress-pct" id="progressPct">0%</span>
-    </div>
-    <div class="progress-bar-bg">
-      <div class="progress-bar-fill" id="progressFill"></div>
-    </div>
-  </div>
-
-  <!-- Preview Grid -->
-  <div class="preview-section" id="previewSection">
-    <div class="preview-grid">
-      <div class="preview-card">
-        <div class="preview-card-header">
-          <span class="preview-card-title">Original</span>
-          <span class="preview-card-dim" id="dimOrig">—</span>
-        </div>
-        <img id="origPreview" alt="Original">
+  <!-- Drop Zone (shared) -->
+  <div id="dropZone" class="border-2 border-dashed border-fog rounded-xl2 px-6 py-10 text-center cursor-pointer relative transition-all duration-200 mb-4 bg-paper" onclick="document.getElementById('fileInput').click()">
+    <input type="file" id="fileInput" accept="image/*" class="hidden">
+    <div id="dzContent">
+      <div class="w-12 h-12 border-2 border-ink rounded-xl mx-auto mb-3 flex items-center justify-center">
+        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 16l4-4 4 4 4-6 4 6"/><rect x="2" y="3" width="20" height="18" rx="3"/></svg>
       </div>
-      <div class="preview-card">
-        <div class="preview-card-header">
-          <span class="preview-card-title">Upscaled</span>
-          <span class="preview-card-dim" id="dimOut">—</span>
-        </div>
-        <canvas id="resultCanvas"></canvas>
+      <p class="font-display text-lg tracking-widest mb-1">DROP IMAGE HERE</p>
+      <p class="text-[11px] tracking-widest text-ash uppercase">PNG · JPG · WEBP · BMP</p>
+    </div>
+    <div id="dzLoaded" class="hidden items-center gap-4">
+      <img id="dzThumb" class="w-14 h-14 object-cover rounded-lg border border-fog" alt="">
+      <div class="text-left">
+        <p id="dzName" class="font-mono text-sm truncate max-w-[180px]"></p>
+        <p id="dzMeta" class="text-[11px] text-ash mt-0.5"></p>
+      </div>
+      <button onclick="clearImage(event)" class="ml-auto text-[10px] tracking-widest uppercase border border-fog rounded-lg px-3 py-1.5 hover:border-ink transition-colors">Clear</button>
+    </div>
+  </div>
+
+  <!-- ── UPSCALE PANEL ──────────────────────────────────────── -->
+  <div id="panel-upscale" class="tool-panel active space-y-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div class="border border-fog rounded-xl2 p-4">
+        <p class="text-[10px] tracking-widest uppercase text-ash mb-2">Target</p>
+        <select id="us-target" class="w-full font-mono text-sm bg-paper border border-fog rounded-lg py-1.5 px-2.5 focus:border-ink outline-none">
+          <option value="2x">2× Double</option>
+          <option value="3x">3× Triple</option>
+          <option value="4x">4× Quad</option>
+          <option value="4k">4K — 3840×2160</option>
+          <option value="8k">8K — 7680×4320</option>
+          <option value="2k">2K — 2560×1440</option>
+          <option value="1080p">1080p</option>
+          <option value="custom">Custom…</option>
+        </select>
+      </div>
+      <div class="border border-fog rounded-xl2 p-4">
+        <p class="text-[10px] tracking-widest uppercase text-ash mb-2">Algorithm</p>
+        <select id="us-algo" class="w-full font-mono text-sm bg-paper border border-fog rounded-lg py-1.5 px-2.5 focus:border-ink outline-none">
+          <option value="lanczos">Lanczos-3</option>
+          <option value="bicubic">Bicubic</option>
+          <option value="bilinear">Bilinear</option>
+        </select>
+      </div>
+      <div class="border border-fog rounded-xl2 p-4 col-span-2 sm:col-span-1">
+        <p class="text-[10px] tracking-widest uppercase text-ash mb-1">Sharpen — <span id="us-sharp-val">50%</span></p>
+        <p class="font-display text-2xl tracking-wider mb-2" id="us-sharp-display">50</p>
+        <input type="range" id="us-sharp" min="0" max="100" value="50">
       </div>
     </div>
-    <a class="btn-download" id="btnDownload" download="upscaled.png">DOWNLOAD RESULT</a>
-    <div class="algo-note" id="algoNote"></div>
+    <div id="us-custom-row" class="hidden grid-cols-2 gap-3">
+      <div class="border border-fog rounded-xl2 p-4">
+        <p class="text-[10px] tracking-widest uppercase text-ash mb-2">Width (px)</p>
+        <input type="number" id="us-cw" placeholder="3840" class="w-full font-mono text-sm bg-paper border border-fog rounded-lg py-1.5 px-2.5 focus:border-ink outline-none">
+      </div>
+      <div class="border border-fog rounded-xl2 p-4">
+        <p class="text-[10px] tracking-widest uppercase text-ash mb-2">Height (px)</p>
+        <input type="number" id="us-ch" placeholder="2160" class="w-full font-mono text-sm bg-paper border border-fog rounded-lg py-1.5 px-2.5 focus:border-ink outline-none">
+      </div>
+    </div>
+    <button onclick="runUpscale()" id="us-btn" class="w-full bg-ink text-paper font-display text-lg tracking-widest py-4 rounded-xl2 hover:bg-slate transition-colors disabled:opacity-40">UPSCALE IMAGE</button>
+    <!-- progress -->
+    <div id="us-progress" class="hidden border border-fog rounded-xl2 p-4">
+      <div class="flex justify-between items-center mb-2">
+        <span id="us-prog-label" class="text-[11px] tracking-widest uppercase text-ash">Processing…</span>
+        <span id="us-prog-pct" class="font-display text-xl tracking-wider">0%</span>
+      </div>
+      <div class="h-0.5 bg-mist rounded overflow-hidden"><div id="us-prog-fill" class="progress-fill h-full bg-ink" style="width:0%"></div></div>
+    </div>
+    <!-- result -->
+    <div id="us-result" class="hidden space-y-3">
+      <div class="border border-fog rounded-xl2 overflow-hidden">
+        <div class="grid grid-cols-2">
+          <div class="border-r border-fog">
+            <div class="px-4 py-2.5 border-b border-fog flex justify-between items-center">
+              <span class="text-[10px] tracking-widest uppercase text-ash">Original</span>
+              <span id="us-orig-dim" class="text-xs font-mono">—</span>
+            </div>
+            <div class="bg-mist h-40 sm:h-56 flex items-center justify-center p-2"><img id="us-orig-img" class="max-w-full max-h-full object-contain" alt=""></div>
+          </div>
+          <div>
+            <div class="px-4 py-2.5 border-b border-fog flex justify-between items-center">
+              <span class="text-[10px] tracking-widest uppercase text-ash">Upscaled</span>
+              <span id="us-out-dim" class="text-xs font-mono">—</span>
+            </div>
+            <div class="bg-mist h-40 sm:h-56 flex items-center justify-center p-2"><canvas id="us-canvas" class="max-w-full max-h-full object-contain"></canvas></div>
+          </div>
+        </div>
+      </div>
+      <a id="us-dl" class="block w-full text-center border-2 border-ink text-ink font-display text-lg tracking-widest py-3.5 rounded-xl2 hover:bg-ink hover:text-paper transition-all">DOWNLOAD</a>
+      <p id="us-info" class="text-[10px] tracking-widest text-center text-ash uppercase"></p>
+    </div>
   </div>
 
-</div>
+  <!-- ── BACKGROUND REMOVE PANEL ─────────────────────────────── -->
+  <div id="panel-bgremove" class="tool-panel space-y-3">
+    <div class="border border-fog rounded-xl2 p-4">
+      <p class="text-[10px] tracking-widest uppercase text-ash mb-3">Background Replacement</p>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <button onclick="setBgMode('transparent')" id="bgm-transparent" class="tab-btn active border border-fog rounded-xl text-[10px] tracking-widest uppercase py-2 px-2">Transparent</button>
+        <button onclick="setBgMode('white')" id="bgm-white" class="tab-btn border border-fog rounded-xl text-[10px] tracking-widest uppercase py-2 px-2">White</button>
+        <button onclick="setBgMode('black')" id="bgm-black" class="tab-btn border border-fog rounded-xl text-[10px] tracking-widest uppercase py-2 px-2">Black</button>
+        <button onclick="setBgMode('color')" id="bgm-color" class="tab-btn border border-fog rounded-xl text-[10px] tracking-widest uppercase py-2 px-2 flex items-center justify-center gap-1.5">
+          <span id="bgm-color-swatch" class="w-3 h-3 rounded-sm border border-fog inline-block" style="background:#4a90d9"></span>Custom
+        </button>
+      </div>
+      <input type="color" id="bgm-color-picker" value="#4a90d9" class="hidden mt-2 w-full h-8 rounded cursor-pointer border border-fog">
+    </div>
+    <div class="border border-fog rounded-xl2 p-4 text-[11px] text-ash leading-relaxed tracking-wide">
+      Powered by <strong class="text-ink">@imgly/background-removal</strong> — runs 100% in-browser via WebAssembly. First run downloads the AI model (~50MB, cached after).
+    </div>
+    <button onclick="runBgRemove()" id="bg-btn" class="w-full bg-ink text-paper font-display text-lg tracking-widest py-4 rounded-xl2 hover:bg-slate transition-colors">REMOVE BACKGROUND</button>
+    <div id="bg-progress" class="hidden border border-fog rounded-xl2 p-4">
+      <div class="flex justify-between items-center mb-2">
+        <span id="bg-prog-label" class="text-[11px] tracking-widest uppercase text-ash">Loading model…</span>
+        <span id="bg-prog-pct" class="font-display text-xl tracking-wider">0%</span>
+      </div>
+      <div class="h-0.5 bg-mist rounded overflow-hidden"><div id="bg-prog-fill" class="progress-fill h-full bg-ink" style="width:0%"></div></div>
+    </div>
+    <div id="bg-result" class="hidden space-y-3">
+      <div class="border border-fog rounded-xl2 overflow-hidden">
+        <div class="grid grid-cols-2">
+          <div class="border-r border-fog">
+            <div class="px-4 py-2.5 border-b border-fog"><span class="text-[10px] tracking-widest uppercase text-ash">Original</span></div>
+            <div class="h-48 sm:h-64 flex items-center justify-center p-2 bg-mist"><img id="bg-orig-img" class="max-w-full max-h-full object-contain" alt=""></div>
+          </div>
+          <div>
+            <div class="px-4 py-2.5 border-b border-fog"><span class="text-[10px] tracking-widest uppercase text-ash">Result</span></div>
+            <div class="checker h-48 sm:h-64 flex items-center justify-center p-2" id="bg-result-wrap"><img id="bg-out-img" class="max-w-full max-h-full object-contain" alt=""></div>
+          </div>
+        </div>
+      </div>
+      <a id="bg-dl" class="block w-full text-center border-2 border-ink text-ink font-display text-lg tracking-widest py-3.5 rounded-xl2 hover:bg-ink hover:text-paper transition-all">DOWNLOAD PNG</a>
+    </div>
+  </div>
 
-<canvas id="work-canvas"></canvas>
+  <!-- ── COMPRESS PANEL ─────────────────────────────────────── -->
+  <div id="panel-compress" class="tool-panel space-y-3">
+    <div class="grid grid-cols-2 gap-3">
+      <div class="border border-fog rounded-xl2 p-4">
+        <p class="text-[10px] tracking-widest uppercase text-ash mb-1">Quality — <span id="cmp-q-val">85%</span></p>
+        <p class="font-display text-2xl tracking-wider mb-2" id="cmp-q-display">85</p>
+        <input type="range" id="cmp-quality" min="1" max="100" value="85" oninput="updateCompressUI()">
+      </div>
+      <div class="border border-fog rounded-xl2 p-4">
+        <p class="text-[10px] tracking-widest uppercase text-ash mb-2">Output Format</p>
+        <select id="cmp-format" class="w-full font-mono text-sm bg-paper border border-fog rounded-lg py-1.5 px-2.5 focus:border-ink outline-none" onchange="updateCompressUI()">
+          <option value="image/jpeg">JPEG</option>
+          <option value="image/webp">WEBP</option>
+          <option value="image/png">PNG (lossless)</option>
+        </select>
+      </div>
+    </div>
+    <div id="cmp-stats" class="hidden border border-fog rounded-xl2 overflow-hidden">
+      <div class="grid grid-cols-3 divide-x divide-fog">
+        <div class="p-4 text-center"><p class="text-[10px] tracking-widest uppercase text-ash mb-1">Original</p><p class="font-display text-xl" id="cmp-orig-size">—</p></div>
+        <div class="p-4 text-center"><p class="text-[10px] tracking-widest uppercase text-ash mb-1">Compressed</p><p class="font-display text-xl" id="cmp-new-size">—</p></div>
+        <div class="p-4 text-center"><p class="text-[10px] tracking-widest uppercase text-ash mb-1">Saved</p><p class="font-display text-xl" id="cmp-saved">—</p></div>
+      </div>
+    </div>
+    <button onclick="runCompress()" id="cmp-btn" class="w-full bg-ink text-paper font-display text-lg tracking-widest py-4 rounded-xl2 hover:bg-slate transition-colors">COMPRESS IMAGE</button>
+    <div id="cmp-result" class="hidden space-y-3">
+      <div class="border border-fog rounded-xl2 overflow-hidden">
+        <div class="grid grid-cols-2">
+          <div class="border-r border-fog">
+            <div class="px-4 py-2.5 border-b border-fog"><span class="text-[10px] tracking-widest uppercase text-ash">Original</span></div>
+            <div class="h-44 sm:h-56 bg-mist flex items-center justify-center p-2"><img id="cmp-orig-img" class="max-w-full max-h-full object-contain"></div>
+          </div>
+          <div>
+            <div class="px-4 py-2.5 border-b border-fog"><span class="text-[10px] tracking-widest uppercase text-ash">Compressed</span></div>
+            <div class="h-44 sm:h-56 bg-mist flex items-center justify-center p-2"><img id="cmp-out-img" class="max-w-full max-h-full object-contain"></div>
+          </div>
+        </div>
+      </div>
+      <a id="cmp-dl" class="block w-full text-center border-2 border-ink text-ink font-display text-lg tracking-widest py-3.5 rounded-xl2 hover:bg-ink hover:text-paper transition-all">DOWNLOAD</a>
+    </div>
+  </div>
+
+  <!-- ── CONVERT PANEL ──────────────────────────────────────── -->
+  <div id="panel-convert" class="tool-panel space-y-3">
+    <div class="border border-fog rounded-xl2 p-4">
+      <p class="text-[10px] tracking-widest uppercase text-ash mb-3">Convert To</p>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <button onclick="setConvertFmt('image/png')" id="cvt-png" class="tab-btn active border border-fog rounded-xl font-display tracking-widest text-base py-3">PNG</button>
+        <button onclick="setConvertFmt('image/jpeg')" id="cvt-jpeg" class="tab-btn border border-fog rounded-xl font-display tracking-widest text-base py-3">JPEG</button>
+        <button onclick="setConvertFmt('image/webp')" id="cvt-webp" class="tab-btn border border-fog rounded-xl font-display tracking-widest text-base py-3">WEBP</button>
+        <button onclick="setConvertFmt('image/bmp')" id="cvt-bmp" class="tab-btn border border-fog rounded-xl font-display tracking-widest text-base py-3">BMP</button>
+      </div>
+    </div>
+    <div id="cvt-jpg-opts" class="hidden border border-fog rounded-xl2 p-4">
+      <p class="text-[10px] tracking-widest uppercase text-ash mb-1">JPEG Quality — <span id="cvt-q-val">92%</span></p>
+      <input type="range" id="cvt-quality" min="1" max="100" value="92" oninput="document.getElementById('cvt-q-val').textContent=this.value+'%'">
+    </div>
+    <div class="border border-fog rounded-xl2 p-4">
+      <p class="text-[10px] tracking-widest uppercase text-ash mb-2">Background (for transparency → JPEG)</p>
+      <div class="flex gap-2">
+        <button onclick="setCvtBg('white')" id="cvtbg-white" class="tab-btn active border border-fog rounded-xl text-[10px] tracking-widest uppercase py-2 px-4">White</button>
+        <button onclick="setCvtBg('black')" id="cvtbg-black" class="tab-btn border border-fog rounded-xl text-[10px] tracking-widest uppercase py-2 px-4">Black</button>
+        <button onclick="setCvtBg('custom')" id="cvtbg-custom" class="tab-btn border border-fog rounded-xl text-[10px] tracking-widest uppercase py-2 px-4">Custom</button>
+        <input type="color" id="cvtbg-picker" value="#ffffff" class="w-10 h-9 rounded-xl border border-fog cursor-pointer">
+      </div>
+    </div>
+    <button onclick="runConvert()" class="w-full bg-ink text-paper font-display text-lg tracking-widest py-4 rounded-xl2 hover:bg-slate transition-colors">CONVERT IMAGE</button>
+    <div id="cvt-result" class="hidden space-y-3">
+      <div class="border border-fog rounded-xl2 p-4">
+        <div class="flex justify-between items-center">
+          <span class="text-[10px] tracking-widest uppercase text-ash">Converted</span>
+          <span id="cvt-info" class="text-xs font-mono text-ash"></span>
+        </div>
+        <div class="mt-3 bg-mist rounded-xl h-44 flex items-center justify-center p-2"><img id="cvt-out-img" class="max-w-full max-h-full object-contain"></div>
+      </div>
+      <a id="cvt-dl" class="block w-full text-center border-2 border-ink text-ink font-display text-lg tracking-widest py-3.5 rounded-xl2 hover:bg-ink hover:text-paper transition-all">DOWNLOAD</a>
+    </div>
+  </div>
+
+  <!-- ── FILTERS PANEL ──────────────────────────────────────── -->
+  <div id="panel-filters" class="tool-panel space-y-3">
+    <div class="border border-fog rounded-xl2 p-4 space-y-4">
+      <p class="text-[10px] tracking-widest uppercase text-ash">Adjustments</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <div class="flex justify-between mb-1"><span class="text-[11px] tracking-widest uppercase text-ash">Brightness</span><span id="f-br-val" class="text-xs font-mono">100</span></div>
+          <input type="range" id="f-brightness" min="0" max="200" value="100" oninput="updateFilter('brightness',this.value)">
+        </div>
+        <div>
+          <div class="flex justify-between mb-1"><span class="text-[11px] tracking-widest uppercase text-ash">Contrast</span><span id="f-co-val" class="text-xs font-mono">100</span></div>
+          <input type="range" id="f-contrast" min="0" max="200" value="100" oninput="updateFilter('contrast',this.value)">
+        </div>
+        <div>
+          <div class="flex justify-between mb-1"><span class="text-[11px] tracking-widest uppercase text-ash">Saturation</span><span id="f-sa-val" class="text-xs font-mono">100</span></div>
+          <input type="range" id="f-saturation" min="0" max="200" value="100" oninput="updateFilter('saturation',this.value)">
+        </div>
+        <div>
+          <div class="flex justify-between mb-1"><span class="text-[11px] tracking-widest uppercase text-ash">Hue Rotate</span><span id="f-hu-val" class="text-xs font-mono">0°</span></div>
+          <input type="range" id="f-hue" min="0" max="360" value="0" oninput="updateFilter('hue',this.value)">
+        </div>
+        <div>
+          <div class="flex justify-between mb-1"><span class="text-[11px] tracking-widest uppercase text-ash">Blur</span><span id="f-bl-val" class="text-xs font-mono">0px</span></div>
+          <input type="range" id="f-blur" min="0" max="20" value="0" step="0.5" oninput="updateFilter('blur',this.value)">
+        </div>
+        <div>
+          <div class="flex justify-between mb-1"><span class="text-[11px] tracking-widest uppercase text-ash">Sepia</span><span id="f-se-val" class="text-xs font-mono">0%</span></div>
+          <input type="range" id="f-sepia" min="0" max="100" value="0" oninput="updateFilter('sepia',this.value)">
+        </div>
+        <div>
+          <div class="flex justify-between mb-1"><span class="text-[11px] tracking-widest uppercase text-ash">Grayscale</span><span id="f-gr-val" class="text-xs font-mono">0%</span></div>
+          <input type="range" id="f-grayscale" min="0" max="100" value="0" oninput="updateFilter('grayscale',this.value)">
+        </div>
+        <div>
+          <div class="flex justify-between mb-1"><span class="text-[11px] tracking-widest uppercase text-ash">Invert</span><span id="f-in-val" class="text-xs font-mono">0%</span></div>
+          <input type="range" id="f-invert" min="0" max="100" value="0" oninput="updateFilter('invert',this.value)">
+        </div>
+      </div>
+    </div>
+    <!-- Presets -->
+    <div class="border border-fog rounded-xl2 p-4">
+      <p class="text-[10px] tracking-widest uppercase text-ash mb-3">Presets</p>
+      <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+        <button onclick="applyPreset('original')" class="border border-fog rounded-xl text-[10px] tracking-widest uppercase py-2 hover:border-ink transition-colors">Reset</button>
+        <button onclick="applyPreset('bw')" class="border border-fog rounded-xl text-[10px] tracking-widest uppercase py-2 hover:border-ink transition-colors">B&W</button>
+        <button onclick="applyPreset('vintage')" class="border border-fog rounded-xl text-[10px] tracking-widest uppercase py-2 hover:border-ink transition-colors">Vintage</button>
+        <button onclick="applyPreset('vivid')" class="border border-fog rounded-xl text-[10px] tracking-widest uppercase py-2 hover:border-ink transition-colors">Vivid</button>
+        <button onclick="applyPreset('cool')" class="border border-fog rounded-xl text-[10px] tracking-widest uppercase py-2 hover:border-ink transition-colors">Cool</button>
+        <button onclick="applyPreset('dramatic')" class="border border-fog rounded-xl text-[10px] tracking-widest uppercase py-2 hover:border-ink transition-colors">Drama</button>
+      </div>
+    </div>
+    <!-- Live preview -->
+    <div id="f-preview-wrap" class="hidden border border-fog rounded-xl2 overflow-hidden">
+      <div class="px-4 py-2.5 border-b border-fog flex justify-between items-center">
+        <span class="text-[10px] tracking-widest uppercase text-ash">Live Preview</span>
+        <span id="f-css-filter" class="text-[10px] font-mono text-ash truncate max-w-[200px]"></span>
+      </div>
+      <div class="bg-mist h-48 sm:h-64 flex items-center justify-center p-3">
+        <img id="f-preview-img" class="max-w-full max-h-full object-contain" alt="">
+      </div>
+    </div>
+    <button onclick="runFilters()" class="w-full bg-ink text-paper font-display text-lg tracking-widest py-4 rounded-xl2 hover:bg-slate transition-colors">APPLY & DOWNLOAD</button>
+    <a id="f-dl" class="hidden block w-full text-center border-2 border-ink text-ink font-display text-lg tracking-widest py-3.5 rounded-xl2 hover:bg-ink hover:text-paper transition-all">DOWNLOAD FILTERED</a>
+  </div>
+
+</main>
+
+<!-- Mobile Bottom Nav -->
+<nav class="mobile-nav fixed bottom-0 left-0 right-0 bg-paper border-t border-fog z-50 grid grid-cols-5">
+  <button onclick="switchTool('upscale')" id="mob-upscale" class="tab-btn active flex flex-col items-center py-3 gap-0.5">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+    <span class="text-[9px] tracking-widest uppercase">Upscale</span>
+  </button>
+  <button onclick="switchTool('bgremove')" id="mob-bgremove" class="tab-btn flex flex-col items-center py-3 gap-0.5">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m-8-4l8 4m0 0v10"/></svg>
+    <span class="text-[9px] tracking-widest uppercase">BG</span>
+  </button>
+  <button onclick="switchTool('compress')" id="mob-compress" class="tab-btn flex flex-col items-center py-3 gap-0.5">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3M16 3l-4 4-4-4M12 3v10"/></svg>
+    <span class="text-[9px] tracking-widest uppercase">Compress</span>
+  </button>
+  <button onclick="switchTool('convert')" id="mob-convert" class="tab-btn flex flex-col items-center py-3 gap-0.5">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 4v6h6M20 20v-6h-6M20 10A8 8 0 006.34 7M4 14a8 8 0 0013.66 3"/></svg>
+    <span class="text-[9px] tracking-widest uppercase">Convert</span>
+  </button>
+  <button onclick="switchTool('filters')" id="mob-filters" class="tab-btn flex flex-col items-center py-3 gap-0.5">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="9" cy="9" r="2"/><circle cx="15" cy="15" r="2"/><path d="M3 9h4M11 9h10M3 15h10M17 15h4"/></svg>
+    <span class="text-[9px] tracking-widest uppercase">Filters</span>
+  </button>
+</nav>
+
+<!-- Hidden work canvas -->
+<canvas id="work-canvas" class="hidden"></canvas>
+
+<script type="module">
+// ─── BG Removal import ─────────────────────────────────────────────────────
+let bgRemoveFn = null;
+async function loadBgLib() {
+  if (bgRemoveFn) return bgRemoveFn;
+  try {
+    const mod = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/index.browser.mjs');
+    bgRemoveFn = mod.removeBackground;
+    return bgRemoveFn;
+  } catch(e) {
+    console.error('BG lib load failed:', e);
+    return null;
+  }
+}
+
+// Expose to global for onclick handlers
+window._bgRemove = async (imgSrc, onProgress) => {
+  const fn = await loadBgLib();
+  if (!fn) throw new Error('Could not load background removal library');
+  const blob = await fn(imgSrc, {
+    progress: (key, current, total) => {
+      if (onProgress) onProgress(key, current, total);
+    },
+    publicPath: 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/',
+  });
+  return blob;
+};
+
+// Preload on bgremove tab hover
+document.getElementById('tab-bgremove')?.addEventListener('mouseenter', loadBgLib);
+document.getElementById('mob-bgremove')?.addEventListener('touchstart', loadBgLib, {passive:true});
+</script>
 
 <script>
-// ─── State ───────────────────────────────────────────────────────────────────
+// ─── State ────────────────────────────────────────────────────────────────
 let srcImage = null;
 let srcFile  = null;
+let currentTool = 'upscale';
+let filterValues = { brightness:100, contrast:100, saturation:100, hue:0, blur:0, sepia:0, grayscale:0, invert:0 };
+let bgMode = 'transparent';
+let convertFmt = 'image/png';
+let cvtBgMode = 'white';
 
-// ─── Elements ────────────────────────────────────────────────────────────────
-const dropZone     = document.getElementById('dropZone');
-const fileInput    = document.getElementById('fileInput');
-const targetSize   = document.getElementById('targetSize');
-const algorithm    = document.getElementById('algorithm');
-const sharpSlider  = document.getElementById('sharpSlider');
-const sharpVal     = document.getElementById('sharpVal');
-const sharpDisplay = document.getElementById('sharpDisplay');
-const btnUpscale   = document.getElementById('btnUpscale');
-const progressWrap = document.getElementById('progressWrap');
-const progressFill = document.getElementById('progressFill');
-const progressPct  = document.getElementById('progressPct');
-const progressLabel= document.getElementById('progressLabel');
-const previewSection=document.getElementById('previewSection');
-const origPreview  = document.getElementById('origPreview');
-const resultCanvas = document.getElementById('resultCanvas');
-const btnDownload  = document.getElementById('btnDownload');
-const infoStrip    = document.getElementById('infoStrip');
-const customRow    = document.getElementById('customRow');
-const workCanvas   = document.getElementById('work-canvas');
-const algoNote     = document.getElementById('algoNote');
+const workCanvas = document.getElementById('work-canvas');
+const wCtx = workCanvas.getContext('2d');
 
-// ─── Events ──────────────────────────────────────────────────────────────────
-sharpSlider.addEventListener('input', () => {
-  sharpVal.textContent    = sharpSlider.value;
-  sharpDisplay.textContent = Math.round(sharpSlider.value * 100) + '%';
-});
+// ─── Tool Switching ───────────────────────────────────────────────────────
+window.switchTool = function(tool) {
+  document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tool).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const ids = ['tab-' + tool, 'mob-' + tool];
+  ids.forEach(id => { const el = document.getElementById(id); if(el) el.classList.add('active'); });
+  currentTool = tool;
+};
 
-targetSize.addEventListener('change', () => {
-  customRow.style.display = targetSize.value === 'custom' ? 'grid' : 'none';
-  if (srcImage) updateInfo();
-});
+// ─── File Loading ─────────────────────────────────────────────────────────
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
 
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragging'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragging'));
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drop-active'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drop-active'));
 dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('dragging');
+  e.preventDefault(); dropZone.classList.remove('drop-active');
   const f = e.dataTransfer.files[0];
   if (f && f.type.startsWith('image/')) loadFile(f);
 });
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadFile(fileInput.files[0]); });
 
-fileInput.addEventListener('change', () => {
-  if (fileInput.files[0]) loadFile(fileInput.files[0]);
-});
-
-btnUpscale.addEventListener('click', runUpscale);
-
-// ─── Load File ───────────────────────────────────────────────────────────────
 function loadFile(file) {
   srcFile = file;
   const url = URL.createObjectURL(file);
   const img = new Image();
   img.onload = () => {
     srcImage = img;
-    origPreview.src = url;
-    document.getElementById('dimOrig').textContent = img.naturalWidth + '×' + img.naturalHeight;
-    document.getElementById('infoFmt').textContent  = file.type.split('/')[1].toUpperCase();
-    updateInfo();
-    infoStrip.classList.add('visible');
-    btnUpscale.classList.add('visible');
-    previewSection.classList.remove('visible');
-    // reset result canvas
-    const ctx2 = resultCanvas.getContext('2d');
-    ctx2.clearRect(0, 0, resultCanvas.width, resultCanvas.height);
+    // Show loaded state in drop zone
+    document.getElementById('dzContent').classList.add('hidden');
+    const loaded = document.getElementById('dzLoaded');
+    loaded.classList.remove('hidden');
+    loaded.classList.add('flex');
+    document.getElementById('dzThumb').src = url;
+    document.getElementById('dzName').textContent = file.name;
+    document.getElementById('dzMeta').textContent = img.naturalWidth + '×' + img.naturalHeight + '  ·  ' + fmtBytes(file.size) + '  ·  ' + file.type.split('/')[1].toUpperCase();
+    // Reset results
+    document.getElementById('us-result').classList.add('hidden');
+    document.getElementById('bg-result').classList.add('hidden');
+    document.getElementById('cmp-result').classList.add('hidden');
+    document.getElementById('cvt-result').classList.add('hidden');
+    document.getElementById('f-dl').classList.add('hidden');
+    // Set filter preview src
+    document.getElementById('f-preview-img').src = url;
+    document.getElementById('f-preview-wrap').classList.remove('hidden');
+    // Set compare images
+    document.getElementById('us-orig-img').src = url;
+    document.getElementById('bg-orig-img').src = url;
+    document.getElementById('cmp-orig-img').src = url;
+    // Update compress stats display
+    document.getElementById('cmp-stats').classList.remove('hidden');
+    document.getElementById('cmp-orig-size').textContent = fmtBytes(file.size);
+    updateCompressUI();
   };
   img.src = url;
 }
 
-// ─── Compute output dimensions ────────────────────────────────────────────────
-function getOutputDims() {
-  if (!srcImage) return { w: 0, h: 0 };
-  const W = srcImage.naturalWidth, H = srcImage.naturalHeight;
-  const mode = targetSize.value;
-  let ow, oh;
+window.clearImage = function(e) {
+  e.stopPropagation();
+  srcImage = null; srcFile = null;
+  document.getElementById('dzContent').classList.remove('hidden');
+  const loaded = document.getElementById('dzLoaded');
+  loaded.classList.add('hidden'); loaded.classList.remove('flex');
+  fileInput.value = '';
+};
 
-  if      (mode === '2x') { ow = W * 2; oh = H * 2; }
-  else if (mode === '3x') { ow = W * 3; oh = H * 3; }
-  else if (mode === '4x') { ow = W * 4; oh = H * 4; }
-  else if (mode === '4k') { const r = Math.min(3840/W, 2160/H); ow = Math.round(W*r); oh = Math.round(H*r); }
-  else if (mode === '2k') { const r = Math.min(2560/W, 1440/H); ow = Math.round(W*r); oh = Math.round(H*r); }
-  else if (mode === '1080p'){ const r = Math.min(1920/W, 1080/H); ow = Math.round(W*r); oh = Math.round(H*r); }
-  else if (mode === 'custom') {
-    ow = parseInt(document.getElementById('customW').value) || W * 2;
-    oh = parseInt(document.getElementById('customH').value) || H * 2;
-  }
-  return { w: ow, h: oh };
-}
+// ─── UPSCALE ─────────────────────────────────────────────────────────────
+document.getElementById('us-sharp').addEventListener('input', function() {
+  document.getElementById('us-sharp-val').textContent = this.value + '%';
+  document.getElementById('us-sharp-display').textContent = this.value;
+});
 
-function updateInfo() {
-  if (!srcImage) return;
-  const W = srcImage.naturalWidth, H = srcImage.naturalHeight;
-  const { w, h } = getOutputDims();
-  const scale = (w / W).toFixed(2);
-  document.getElementById('infoOrig').textContent  = W + '×' + H;
-  document.getElementById('infoOut').textContent   = w + '×' + h;
-  document.getElementById('infoScale').textContent = scale + '×';
-}
+document.getElementById('us-target').addEventListener('change', function() {
+  document.getElementById('us-custom-row').style.display = this.value === 'custom' ? 'grid' : 'none';
+});
 
-// ─── Lanczos kernel ──────────────────────────────────────────────────────────
-function lanczos(x, a) {
-  if (x === 0) return 1;
-  if (Math.abs(x) >= a) return 0;
-  const px = Math.PI * x;
-  return (a * Math.sin(px) * Math.sin(px / a)) / (px * px);
-}
+window.runUpscale = async function() {
+  if (!srcImage) { alert('Please load an image first.'); return; }
+  const { w: dstW, h: dstH } = getUpscaleDims();
+  const srcW = srcImage.naturalWidth, srcH = srcImage.naturalHeight;
+  const algo = document.getElementById('us-algo').value;
+  const sharpAmt = parseFloat(document.getElementById('us-sharp').value) / 100 * 1.5;
 
-// ─── Bilinear interp helper ───────────────────────────────────────────────────
-function bilinearInterp(src, srcW, srcH, dx, dy) {
-  const x0 = Math.floor(dx), y0 = Math.floor(dy);
-  const x1 = Math.min(x0 + 1, srcW - 1), y1 = Math.min(y0 + 1, srcH - 1);
-  const wx = dx - x0, wy = dy - y0;
-  const base = (y0 * srcW + x0) * 4;
-  const b10  = (y0 * srcW + x1) * 4;
-  const b01  = (y1 * srcW + x0) * 4;
-  const b11  = (y1 * srcW + x1) * 4;
-  const r = [], out = [];
-  for (let c = 0; c < 4; c++) {
-    const top    = src[base + c] * (1 - wx) + src[b10 + c] * wx;
-    const bottom = src[b01 + c]  * (1 - wx) + src[b11 + c] * wx;
-    out.push(top * (1 - wy) + bottom * wy);
-  }
-  return out;
-}
-
-// ─── Bicubic weight ───────────────────────────────────────────────────────────
-function cubicWeight(t) {
-  const a = -0.5;
-  t = Math.abs(t);
-  if (t <= 1) return (a + 2) * t * t * t - (a + 3) * t * t + 1;
-  if (t < 2)  return a * t * t * t - 5 * a * t * t + 8 * a * t - 4 * a;
-  return 0;
-}
-
-// ─── Unsharp mask ────────────────────────────────────────────────────────────
-function unsharpMask(data, w, h, amount) {
-  if (amount <= 0) return;
-  const radius = 2;
-  const blurred = new Uint8ClampedArray(data.length);
-  // Simple box blur
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      let r = 0, g = 0, b = 0, cnt = 0;
-      for (let dy = -radius; dy <= radius; dy++) {
-        for (let dx = -radius; dx <= radius; dx++) {
-          const nx = Math.min(Math.max(x + dx, 0), w - 1);
-          const ny = Math.min(Math.max(y + dy, 0), h - 1);
-          const i = (ny * w + nx) * 4;
-          r += data[i]; g += data[i+1]; b += data[i+2]; cnt++;
-        }
-      }
-      const i = (y * w + x) * 4;
-      blurred[i]   = r / cnt;
-      blurred[i+1] = g / cnt;
-      blurred[i+2] = b / cnt;
-      blurred[i+3] = data[i+3];
-    }
-  }
-  for (let i = 0; i < data.length; i += 4) {
-    data[i]   = Math.min(255, Math.max(0, data[i]   + amount * (data[i]   - blurred[i])));
-    data[i+1] = Math.min(255, Math.max(0, data[i+1] + amount * (data[i+1] - blurred[i+1])));
-    data[i+2] = Math.min(255, Math.max(0, data[i+2] + amount * (data[i+2] - blurred[i+2])));
-  }
-}
-
-// ─── Main upscale ────────────────────────────────────────────────────────────
-async function runUpscale() {
-  if (!srcImage) return;
-
-  const { w: dstW, h: dstH } = getOutputDims();
-  const srcW = srcImage.naturalWidth;
-  const srcH = srcImage.naturalHeight;
-  const algo = algorithm.value;
-  const sharpAmt = parseFloat(sharpSlider.value) * 1.5;
-
-  // Get source pixels
-  workCanvas.width  = srcW;
-  workCanvas.height = srcH;
-  const wCtx = workCanvas.getContext('2d');
+  workCanvas.width = srcW; workCanvas.height = srcH;
   wCtx.drawImage(srcImage, 0, 0);
   const srcData = wCtx.getImageData(0, 0, srcW, srcH).data;
-
-  // Prepare destination
   const dstData = new Uint8ClampedArray(dstW * dstH * 4);
 
-  btnUpscale.disabled = true;
-  progressWrap.classList.add('visible');
-  previewSection.classList.remove('visible');
+  document.getElementById('us-btn').disabled = true;
+  document.getElementById('us-progress').classList.remove('hidden');
+  document.getElementById('us-result').classList.add('hidden');
 
-  setProgress(0, 'Analysing image…');
-  await sleep(50);
+  setUSProgress(5, 'Initializing…');
+  await sleep(40);
 
-  const scaleX = srcW / dstW;
-  const scaleY = srcH / dstH;
+  const scaleX = srcW / dstW, scaleY = srcH / dstH;
 
   if (algo === 'bilinear') {
-    setProgress(10, 'Bilinear upscaling…');
-    await sleep(20);
     for (let y = 0; y < dstH; y++) {
       for (let x = 0; x < dstW; x++) {
-        const sx = x * scaleX, sy = y * scaleY;
-        const px = bilinearInterp(srcData, srcW, srcH, sx, sy);
+        const px = bilinear(srcData, srcW, srcH, x * scaleX, y * scaleY);
         const i = (y * dstW + x) * 4;
-        dstData[i]   = px[0];
-        dstData[i+1] = px[1];
-        dstData[i+2] = px[2];
-        dstData[i+3] = px[3];
+        dstData[i]=px[0]; dstData[i+1]=px[1]; dstData[i+2]=px[2]; dstData[i+3]=px[3];
       }
-      if (y % 200 === 0) {
-        setProgress(10 + Math.round(70 * y / dstH), 'Bilinear upscaling…');
-        await sleep(0);
-      }
+      if (y % 150 === 0) { setUSProgress(5 + Math.round(75*y/dstH), 'Bilinear…'); await sleep(0); }
     }
-
   } else if (algo === 'bicubic') {
-    setProgress(10, 'Bicubic upscaling…');
-    await sleep(20);
     for (let y = 0; y < dstH; y++) {
       for (let x = 0; x < dstW; x++) {
-        const sx = x * scaleX, sy = y * scaleY;
-        const x0 = Math.floor(sx), y0 = Math.floor(sy);
-        const rgba = [0, 0, 0, 0];
-        let totalW = 0;
-        for (let ky = -1; ky <= 2; ky++) {
-          for (let kx = -1; kx <= 2; kx++) {
-            const nx = Math.min(Math.max(x0 + kx, 0), srcW - 1);
-            const ny = Math.min(Math.max(y0 + ky, 0), srcH - 1);
-            const w  = cubicWeight(sx - (x0 + kx)) * cubicWeight(sy - (y0 + ky));
-            const si = (ny * srcW + nx) * 4;
-            rgba[0] += srcData[si]   * w;
-            rgba[1] += srcData[si+1] * w;
-            rgba[2] += srcData[si+2] * w;
-            rgba[3] += srcData[si+3] * w;
-            totalW += w;
-          }
+        const sx=x*scaleX, sy=y*scaleY, x0=Math.floor(sx), y0=Math.floor(sy);
+        let r=0,g=0,b=0,a=0,tw=0;
+        for (let ky=-1;ky<=2;ky++) for(let kx=-1;kx<=2;kx++){
+          const nx=clamp(x0+kx,0,srcW-1), ny=clamp(y0+ky,0,srcH-1);
+          const wt=cubicW(sx-(x0+kx))*cubicW(sy-(y0+ky)), si=(ny*srcW+nx)*4;
+          r+=srcData[si]*wt;g+=srcData[si+1]*wt;b+=srcData[si+2]*wt;a+=srcData[si+3]*wt;tw+=wt;
         }
-        const di = (y * dstW + x) * 4;
-        dstData[di]   = Math.min(255, Math.max(0, rgba[0] / totalW));
-        dstData[di+1] = Math.min(255, Math.max(0, rgba[1] / totalW));
-        dstData[di+2] = Math.min(255, Math.max(0, rgba[2] / totalW));
-        dstData[di+3] = Math.min(255, Math.max(0, rgba[3] / totalW));
+        const i=(y*dstW+x)*4;
+        dstData[i]=clamp(r/tw,0,255);dstData[i+1]=clamp(g/tw,0,255);dstData[i+2]=clamp(b/tw,0,255);dstData[i+3]=clamp(a/tw,0,255);
       }
-      if (y % 100 === 0) {
-        setProgress(10 + Math.round(70 * y / dstH), 'Bicubic upscaling…');
-        await sleep(0);
-      }
+      if(y%80===0){setUSProgress(5+Math.round(75*y/dstH),'Bicubic…');await sleep(0);}
     }
-
   } else {
-    // Lanczos-3
-    const a = 3;
-    setProgress(10, 'Lanczos upscaling…');
-    await sleep(20);
-    for (let y = 0; y < dstH; y++) {
-      for (let x = 0; x < dstW; x++) {
-        const sx = x * scaleX, sy = y * scaleY;
-        const x0 = Math.floor(sx), y0 = Math.floor(sy);
-        let r = 0, g = 0, b = 0, aa = 0, totalW = 0;
-        for (let ky = -a + 1; ky <= a; ky++) {
-          for (let kx = -a + 1; kx <= a; kx++) {
-            const nx = Math.min(Math.max(x0 + kx, 0), srcW - 1);
-            const ny = Math.min(Math.max(y0 + ky, 0), srcH - 1);
-            const wt = lanczos(sx - (x0 + kx), a) * lanczos(sy - (y0 + ky), a);
-            const si = (ny * srcW + nx) * 4;
-            r += srcData[si]   * wt;
-            g += srcData[si+1] * wt;
-            b += srcData[si+2] * wt;
-            aa+= srcData[si+3] * wt;
-            totalW += wt;
-          }
+    const LA=3;
+    for (let y=0;y<dstH;y++){
+      for(let x=0;x<dstW;x++){
+        const sx=x*scaleX,sy=y*scaleY,x0=Math.floor(sx),y0=Math.floor(sy);
+        let r=0,g=0,b=0,a=0,tw=0;
+        for(let ky=-LA+1;ky<=LA;ky++) for(let kx=-LA+1;kx<=LA;kx++){
+          const nx=clamp(x0+kx,0,srcW-1),ny=clamp(y0+ky,0,srcH-1);
+          const wt=lz(sx-(x0+kx),LA)*lz(sy-(y0+ky),LA),si=(ny*srcW+nx)*4;
+          r+=srcData[si]*wt;g+=srcData[si+1]*wt;b+=srcData[si+2]*wt;a+=srcData[si+3]*wt;tw+=wt;
         }
-        const di = (y * dstW + x) * 4;
-        dstData[di]   = Math.min(255, Math.max(0, r  / totalW));
-        dstData[di+1] = Math.min(255, Math.max(0, g  / totalW));
-        dstData[di+2] = Math.min(255, Math.max(0, b  / totalW));
-        dstData[di+3] = Math.min(255, Math.max(0, aa / totalW));
+        const i=(y*dstW+x)*4;
+        dstData[i]=clamp(r/tw,0,255);dstData[i+1]=clamp(g/tw,0,255);dstData[i+2]=clamp(b/tw,0,255);dstData[i+3]=clamp(a/tw,0,255);
       }
-      if (y % 80 === 0) {
-        setProgress(10 + Math.round(70 * y / dstH), 'Lanczos upscaling…');
-        await sleep(0);
-      }
+      if(y%60===0){setUSProgress(5+Math.round(75*y/dstH),'Lanczos-3…');await sleep(0);}
     }
   }
 
-  setProgress(82, 'Applying sharpening…');
-  await sleep(30);
-  unsharpMask(dstData, dstW, dstH, sharpAmt);
+  setUSProgress(82,'Sharpening…'); await sleep(30);
+  if (sharpAmt > 0) unsharpMask(dstData, dstW, dstH, sharpAmt);
 
-  setProgress(95, 'Rendering output…');
-  await sleep(30);
+  setUSProgress(94,'Rendering…'); await sleep(20);
 
-  // Draw to result canvas
-  resultCanvas.width  = dstW;
-  resultCanvas.height = dstH;
-  const rCtx = resultCanvas.getContext('2d');
-  const imgData = new ImageData(dstData, dstW, dstH);
-  rCtx.putImageData(imgData, 0, 0);
+  const rc = document.getElementById('us-canvas');
+  rc.width=dstW; rc.height=dstH;
+  const rCtx = rc.getContext('2d');
+  rCtx.putImageData(new ImageData(dstData, dstW, dstH), 0, 0);
 
-  // Set download
-  const ext    = (srcFile.type === 'image/jpeg') ? 'jpg' : 'png';
-  const mime   = (srcFile.type === 'image/jpeg') ? 'image/jpeg' : 'image/png';
-  const quality= (mime === 'image/jpeg') ? 0.95 : 1;
-  const dataUrl= resultCanvas.toDataURL(mime, quality);
-  btnDownload.href     = dataUrl;
-  btnDownload.download = 'upscaled_' + dstW + 'x' + dstH + '.' + ext;
-  btnDownload.classList.add('visible');
+  const mime = srcFile.type === 'image/jpeg' ? 'image/jpeg' : 'image/png';
+  const ext  = mime === 'image/jpeg' ? 'jpg' : 'png';
+  const dl = document.getElementById('us-dl');
+  dl.href = rc.toDataURL(mime, 0.95);
+  dl.download = 'upscaled_' + dstW + 'x' + dstH + '.' + ext;
+  dl.textContent = 'DOWNLOAD ' + dstW + '×' + dstH + '  ' + ext.toUpperCase();
 
-  document.getElementById('dimOut').textContent = dstW + '×' + dstH;
+  document.getElementById('us-orig-dim').textContent = srcW + '×' + srcH;
+  document.getElementById('us-out-dim').textContent  = dstW + '×' + dstH;
+  document.getElementById('us-info').textContent     = algo + ' · ' + dstW + '×' + dstH + ' · sharpen ' + Math.round(sharpAmt/1.5*100) + '%';
 
-  algoNote.textContent = `Algorithm: ${algo.charAt(0).toUpperCase()+algo.slice(1)} · Output: ${dstW}×${dstH} · Sharpening: ${Math.round(sharpAmt/1.5*100)}%`;
+  setUSProgress(100,'Done!'); await sleep(200);
+  document.getElementById('us-progress').classList.add('hidden');
+  document.getElementById('us-result').classList.remove('hidden');
+  document.getElementById('us-btn').disabled = false;
+};
 
-  setProgress(100, 'Done!');
-  await sleep(300);
-
-  progressWrap.classList.remove('visible');
-  previewSection.classList.add('visible');
-  btnUpscale.disabled = false;
+function setUSProgress(p, lbl) {
+  document.getElementById('us-prog-fill').style.width = p + '%';
+  document.getElementById('us-prog-pct').textContent  = p + '%';
+  document.getElementById('us-prog-label').textContent = lbl;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-function setProgress(pct, label) {
-  progressFill.style.width = pct + '%';
-  progressPct.textContent  = pct + '%';
-  progressLabel.textContent = label;
+function getUpscaleDims() {
+  if (!srcImage) return {w:0,h:0};
+  const W=srcImage.naturalWidth, H=srcImage.naturalHeight, m=document.getElementById('us-target').value;
+  if(m==='2x') return {w:W*2,h:H*2};
+  if(m==='3x') return {w:W*3,h:H*3};
+  if(m==='4x') return {w:W*4,h:H*4};
+  if(m==='8k') { const r=Math.min(7680/W,4320/H); return {w:Math.round(W*r),h:Math.round(H*r)}; }
+  if(m==='4k') { const r=Math.min(3840/W,2160/H); return {w:Math.round(W*r),h:Math.round(H*r)}; }
+  if(m==='2k') { const r=Math.min(2560/W,1440/H); return {w:Math.round(W*r),h:Math.round(H*r)}; }
+  if(m==='1080p'){ const r=Math.min(1920/W,1080/H); return {w:Math.round(W*r),h:Math.round(H*r)}; }
+  if(m==='custom') return {w:parseInt(document.getElementById('us-cw').value)||W*2, h:parseInt(document.getElementById('us-ch').value)||H*2};
+  return {w:W*2,h:H*2};
 }
 
-function sleep(ms) {
-  return new Promise(r => setTimeout(r, ms));
+// ─── BG REMOVE ────────────────────────────────────────────────────────────
+window.setBgMode = function(mode) {
+  bgMode = mode;
+  document.querySelectorAll('[id^="bgm-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('bgm-' + mode)?.classList.add('active');
+  document.getElementById('bgm-color-picker').style.display = mode === 'color' ? 'block' : 'none';
+};
+
+document.getElementById('bgm-color-picker').addEventListener('input', function() {
+  document.getElementById('bgm-color-swatch').style.background = this.value;
+});
+
+window.runBgRemove = async function() {
+  if (!srcImage) { alert('Please load an image first.'); return; }
+  document.getElementById('bg-btn').disabled = true;
+  document.getElementById('bg-progress').classList.remove('hidden');
+  document.getElementById('bg-result').classList.add('hidden');
+
+  setBGProgress(5, 'Loading AI model…');
+  try {
+    const url = URL.createObjectURL(srcFile);
+    const resultBlob = await window._bgRemove(url, (key, current, total) => {
+      const pct = total > 0 ? Math.round((current / total) * 85) + 5 : 50;
+      const label = key.includes('fetch') ? 'Downloading model…' : key.includes('inference') ? 'AI processing…' : 'Processing…';
+      setBGProgress(pct, label);
+    });
+
+    setBGProgress(92, 'Applying background…');
+    await sleep(30);
+
+    // Apply bg to result
+    const img = new Image();
+    img.onload = async () => {
+      let finalUrl;
+      if (bgMode === 'transparent') {
+        finalUrl = URL.createObjectURL(resultBlob);
+      } else {
+        const c = document.createElement('canvas');
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        const ctx = c.getContext('2d');
+        if (bgMode === 'white') ctx.fillStyle = '#ffffff';
+        else if (bgMode === 'black') ctx.fillStyle = '#000000';
+        else ctx.fillStyle = document.getElementById('bgm-color-picker').value;
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0);
+        finalUrl = c.toDataURL('image/png');
+      }
+      const outImg = document.getElementById('bg-out-img');
+      outImg.src = finalUrl;
+      // Update checker background visibility
+      document.getElementById('bg-result-wrap').className = (bgMode === 'transparent')
+        ? 'checker h-48 sm:h-64 flex items-center justify-center p-2'
+        : 'h-48 sm:h-64 flex items-center justify-center p-2 bg-mist';
+
+      const dl = document.getElementById('bg-dl');
+      dl.href = finalUrl;
+      dl.download = 'nobg_' + (srcFile.name.replace(/\.[^.]+$/, '')) + '.png';
+
+      setBGProgress(100, 'Done!');
+      await sleep(200);
+      document.getElementById('bg-progress').classList.add('hidden');
+      document.getElementById('bg-result').classList.remove('hidden');
+      document.getElementById('bg-btn').disabled = false;
+    };
+    img.src = URL.createObjectURL(resultBlob);
+  } catch(e) {
+    alert('Background removal failed: ' + e.message);
+    document.getElementById('bg-progress').classList.add('hidden');
+    document.getElementById('bg-btn').disabled = false;
+  }
+};
+
+function setBGProgress(p, lbl) {
+  document.getElementById('bg-prog-fill').style.width = p + '%';
+  document.getElementById('bg-prog-pct').textContent  = p + '%';
+  document.getElementById('bg-prog-label').textContent = lbl;
 }
+
+// ─── COMPRESS ─────────────────────────────────────────────────────────────
+window.updateCompressUI = function() {
+  const q = document.getElementById('cmp-quality').value;
+  document.getElementById('cmp-q-val').textContent = q + '%';
+  document.getElementById('cmp-q-display').textContent = q;
+  if (!srcImage) return;
+  const fmt = document.getElementById('cmp-format').value;
+  workCanvas.width = srcImage.naturalWidth; workCanvas.height = srcImage.naturalHeight;
+  wCtx.drawImage(srcImage, 0, 0);
+  const dataUrl = workCanvas.toDataURL(fmt, parseInt(q)/100);
+  const bytes = Math.round((dataUrl.length - 22) * 3 / 4);
+  document.getElementById('cmp-new-size').textContent = fmtBytes(bytes);
+  const saved = srcFile ? Math.round((1 - bytes/srcFile.size)*100) : 0;
+  document.getElementById('cmp-saved').textContent = saved > 0 ? '-' + saved + '%' : '+' + Math.abs(saved) + '%';
+};
+
+window.runCompress = function() {
+  if (!srcImage) { alert('Please load an image first.'); return; }
+  const q = parseInt(document.getElementById('cmp-quality').value) / 100;
+  const fmt = document.getElementById('cmp-format').value;
+  const ext = fmt.split('/')[1];
+  workCanvas.width = srcImage.naturalWidth; workCanvas.height = srcImage.naturalHeight;
+  wCtx.drawImage(srcImage, 0, 0);
+  const dataUrl = workCanvas.toDataURL(fmt, q);
+  document.getElementById('cmp-out-img').src = dataUrl;
+  const dl = document.getElementById('cmp-dl');
+  dl.href = dataUrl;
+  dl.download = 'compressed_' + srcFile.name.replace(/\.[^.]+$/, '') + '.' + ext;
+  dl.textContent = 'DOWNLOAD ' + ext.toUpperCase();
+  document.getElementById('cmp-result').classList.remove('hidden');
+};
+
+// ─── CONVERT ─────────────────────────────────────────────────────────────
+window.setConvertFmt = function(fmt) {
+  convertFmt = fmt;
+  ['png','jpeg','webp','bmp'].forEach(f => document.getElementById('cvt-'+f)?.classList.remove('active'));
+  const key = fmt.split('/')[1];
+  document.getElementById('cvt-' + key)?.classList.add('active');
+  document.getElementById('cvt-jpg-opts').style.display = (fmt === 'image/jpeg' || fmt === 'image/webp') ? 'block' : 'none';
+};
+
+window.setCvtBg = function(mode) {
+  cvtBgMode = mode;
+  ['white','black','custom'].forEach(m => document.getElementById('cvtbg-'+m)?.classList.remove('active'));
+  document.getElementById('cvtbg-'+mode)?.classList.add('active');
+};
+
+window.runConvert = function() {
+  if (!srcImage) { alert('Please load an image first.'); return; }
+  const fmt = convertFmt;
+  const q   = parseInt(document.getElementById('cvt-quality').value) / 100;
+  const ext = fmt === 'image/jpeg' ? 'jpg' : fmt === 'image/webp' ? 'webp' : fmt === 'image/bmp' ? 'bmp' : 'png';
+  workCanvas.width = srcImage.naturalWidth; workCanvas.height = srcImage.naturalHeight;
+  if (fmt === 'image/jpeg') {
+    const bgColor = cvtBgMode === 'black' ? '#000' : cvtBgMode === 'custom' ? document.getElementById('cvtbg-picker').value : '#fff';
+    wCtx.fillStyle = bgColor;
+    wCtx.fillRect(0, 0, workCanvas.width, workCanvas.height);
+  } else {
+    wCtx.clearRect(0, 0, workCanvas.width, workCanvas.height);
+  }
+  wCtx.drawImage(srcImage, 0, 0);
+  const dataUrl = workCanvas.toDataURL(fmt, q);
+  document.getElementById('cvt-out-img').src = dataUrl;
+  const bytes = Math.round((dataUrl.length - 22) * 3 / 4);
+  document.getElementById('cvt-info').textContent = ext.toUpperCase() + '  ·  ' + srcImage.naturalWidth + '×' + srcImage.naturalHeight + '  ·  ~' + fmtBytes(bytes);
+  const dl = document.getElementById('cvt-dl');
+  dl.href = dataUrl;
+  dl.download = (srcFile.name.replace(/\.[^.]+$/, '')) + '.' + ext;
+  dl.textContent = 'DOWNLOAD ' + ext.toUpperCase();
+  document.getElementById('cvt-result').classList.remove('hidden');
+};
+
+// ─── FILTERS ─────────────────────────────────────────────────────────────
+const filterMeta = {
+  brightness: { id:'f-brightness', label:'f-br-val', unit:'', css: v => 'brightness('+v+'%)' },
+  contrast:   { id:'f-contrast',   label:'f-co-val', unit:'', css: v => 'contrast('+v+'%)' },
+  saturation: { id:'f-saturation', label:'f-sa-val', unit:'', css: v => 'saturate('+v+'%)' },
+  hue:        { id:'f-hue',        label:'f-hu-val', unit:'°', css: v => 'hue-rotate('+v+'deg)' },
+  blur:       { id:'f-blur',       label:'f-bl-val', unit:'px', css: v => 'blur('+v+'px)' },
+  sepia:      { id:'f-sepia',      label:'f-se-val', unit:'%', css: v => 'sepia('+v+'%)' },
+  grayscale:  { id:'f-grayscale',  label:'f-gr-val', unit:'%', css: v => 'grayscale('+v+'%)' },
+  invert:     { id:'f-invert',     label:'f-in-val', unit:'%', css: v => 'invert('+v+'%)' },
+};
+
+window.updateFilter = function(key, val) {
+  filterValues[key] = parseFloat(val);
+  document.getElementById(filterMeta[key].label).textContent = val + filterMeta[key].unit;
+  applyFilterPreview();
+};
+
+function buildFilterCSS() {
+  return Object.entries(filterMeta).map(([k,m]) => m.css(filterValues[k])).join(' ');
+}
+
+function applyFilterPreview() {
+  const css = buildFilterCSS();
+  document.getElementById('f-preview-img').style.filter = css;
+  document.getElementById('f-css-filter').textContent = css.substring(0, 60) + (css.length > 60 ? '…' : '');
+}
+
+window.applyPreset = function(name) {
+  const presets = {
+    original:  { brightness:100, contrast:100, saturation:100, hue:0, blur:0, sepia:0, grayscale:0, invert:0 },
+    bw:        { brightness:100, contrast:110, saturation:0,   hue:0, blur:0, sepia:0, grayscale:100, invert:0 },
+    vintage:   { brightness:90,  contrast:95,  saturation:60,  hue:0, blur:0, sepia:50, grayscale:0, invert:0 },
+    vivid:     { brightness:105, contrast:120, saturation:160, hue:0, blur:0, sepia:0, grayscale:0, invert:0 },
+    cool:      { brightness:105, contrast:100, saturation:90,  hue:200, blur:0, sepia:0, grayscale:0, invert:0 },
+    dramatic:  { brightness:85,  contrast:160, saturation:80,  hue:0, blur:0, sepia:20, grayscale:0, invert:0 },
+  };
+  const p = presets[name] || presets.original;
+  Object.entries(p).forEach(([k,v]) => {
+    filterValues[k] = v;
+    const el = document.getElementById(filterMeta[k].id);
+    if (el) el.value = v;
+    document.getElementById(filterMeta[k].label).textContent = v + filterMeta[k].unit;
+  });
+  applyFilterPreview();
+};
+
+window.runFilters = function() {
+  if (!srcImage) { alert('Please load an image first.'); return; }
+  const c = document.createElement('canvas');
+  c.width = srcImage.naturalWidth; c.height = srcImage.naturalHeight;
+  const ctx = c.getContext('2d');
+  ctx.filter = buildFilterCSS();
+  ctx.drawImage(srcImage, 0, 0);
+  const dataUrl = c.toDataURL('image/png');
+  const dl = document.getElementById('f-dl');
+  dl.href = dataUrl;
+  dl.download = 'filtered_' + (srcFile?.name || 'image') + '.png';
+  dl.classList.remove('hidden');
+};
+
+// ─── Math Helpers ─────────────────────────────────────────────────────────
+function lz(x, a) {
+  if (x === 0) return 1; if (Math.abs(x) >= a) return 0;
+  const px = Math.PI * x;
+  return (a * Math.sin(px) * Math.sin(px/a)) / (px*px);
+}
+function cubicW(t) {
+  const a=-0.5; t=Math.abs(t);
+  if(t<=1) return(a+2)*t*t*t-(a+3)*t*t+1;
+  if(t<2) return a*t*t*t-5*a*t*t+8*a*t-4*a;
+  return 0;
+}
+function bilinear(src, srcW, srcH, dx, dy) {
+  const x0=Math.floor(dx), y0=Math.floor(dy);
+  const x1=Math.min(x0+1,srcW-1), y1=Math.min(y0+1,srcH-1);
+  const wx=dx-x0, wy=dy-y0;
+  const b00=(y0*srcW+x0)*4, b10=(y0*srcW+x1)*4, b01=(y1*srcW+x0)*4, b11=(y1*srcW+x1)*4;
+  return [0,1,2,3].map(c => (src[b00+c]*(1-wx)+src[b10+c]*wx)*(1-wy)+(src[b01+c]*(1-wx)+src[b11+c]*wx)*wy);
+}
+function unsharpMask(data, w, h, amt) {
+  if(amt<=0) return;
+  const blurred = new Uint8ClampedArray(data.length);
+  const r=2;
+  for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+    let rv=0,gv=0,bv=0,cnt=0;
+    for(let dy=-r;dy<=r;dy++) for(let dx=-r;dx<=r;dx++){
+      const nx=clamp(x+dx,0,w-1),ny=clamp(y+dy,0,h-1),i=(ny*w+nx)*4;
+      rv+=data[i];gv+=data[i+1];bv+=data[i+2];cnt++;
+    }
+    const i=(y*w+x)*4;
+    blurred[i]=rv/cnt;blurred[i+1]=gv/cnt;blurred[i+2]=bv/cnt;blurred[i+3]=data[i+3];
+  }
+  for(let i=0;i<data.length;i+=4){
+    data[i]=clamp(data[i]+amt*(data[i]-blurred[i]),0,255);
+    data[i+1]=clamp(data[i+1]+amt*(data[i+1]-blurred[i+1]),0,255);
+    data[i+2]=clamp(data[i+2]+amt*(data[i+2]-blurred[i+2]),0,255);
+  }
+}
+function clamp(v,mn,mx){return Math.min(mx,Math.max(mn,v));}
+function fmtBytes(b) {
+  if(b<1024) return b+'B';
+  if(b<1024*1024) return (b/1024).toFixed(1)+'KB';
+  return (b/1024/1024).toFixed(2)+'MB';
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 </script>
 </body>
 </html>
