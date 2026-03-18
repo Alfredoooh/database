@@ -1,80 +1,596 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Termos de Serviço</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      color: #333;
-      padding: 20px;
-      line-height: 1.6;
-    }
-    h1, h2 {
-      color: #111;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    p {
-      margin-bottom: 15px;
-    }
-    ul {
-      margin-left: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trabalho Investigativo - Ponto de Exclamação</title>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            color: #333;
+            background-color: white;
+        }
+
+        .page {
+            min-height: 297mm;
+            max-height: 297mm;
+            width: 210mm;
+            page-break-after: always;
+            padding: 65px 40px 60px 40px;
+            background-color: white;
+            position: relative;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        .page-header {
+            position: absolute;
+            top: 12px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 8px;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .page-header .header-titulo {
+            font-style: italic;
+        }
+
+        .page-header .header-pagina {
+            font-weight: bold;
+        }
+
+        .page[data-no-header="true"] {
+            padding-top: 35px;
+        }
+
+        .page:last-child {
+            page-break-after: auto;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 3px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 35px;
+        }
+
+        h1 {
+            font-family: 'Anton', sans-serif;
+            font-size: 2.4em;
+            margin-bottom: 12px;
+            color: #222;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .titulo-secao {
+            font-family: 'Anton', sans-serif;
+            font-size: 2em;
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #222;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 12px;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: #444;
+            border-left: 4px solid #666;
+            padding-left: 15px;
+            page-break-after: avoid;
+        }
+
+        h3 {
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 12px;
+            color: #555;
+            page-break-after: avoid;
+        }
+
+        h4 {
+            font-size: 1.05em;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            color: #555;
+            font-weight: 600;
+            page-break-after: avoid;
+        }
+
+        p {
+            margin-bottom: 14px;
+            text-align: justify;
+            font-size: 0.98em;
+        }
+
+        .subtitle {
+            font-size: 1.15em;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 5px;
+        }
+
+        .school-info {
+            font-size: 0.95em;
+            color: #555;
+        }
+
+        .indice {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .indice ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .indice li {
+            margin: 8px 0;
+            font-size: 1em;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .indice li::after {
+            content: attr(data-page);
+            font-weight: bold;
+        }
+
+        .indice .sub-item {
+            margin-left: 30px;
+        }
+
+        .exemplo-box {
+            background-color: #f5f5f5;
+            border-left: 4px solid #888;
+            padding: 15px;
+            margin: 18px 0;
+            font-size: 0.95em;
+            page-break-inside: avoid;
+        }
+
+        .exemplo-box strong {
+            color: #444;
+        }
+
+        ul, ol {
+            margin-left: 35px;
+            margin-bottom: 15px;
+        }
+
+        ul li, ol li {
+            margin: 8px 0;
+            font-size: 0.96em;
+        }
+
+        .atividade {
+            background-color: #e8f4f8;
+            border: 2px solid #5a9fb8;
+            padding: 18px;
+            margin: 20px 0;
+            page-break-inside: avoid;
+        }
+
+        .atividade h4 {
+            color: #2c5f7a;
+            margin-top: 0;
+        }
+
+        .criterios {
+            background-color: #fff9e6;
+            border: 2px solid #d4af37;
+            padding: 18px;
+            margin: 20px 0;
+            page-break-inside: avoid;
+        }
+
+        .criterios h4 {
+            color: #8b7012;
+            margin-top: 0;
+        }
+
+        footer {
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 2px solid #ddd;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .destaque-vermelho {
+            color: #c41e3a;
+            font-weight: bold;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+            }
+            
+            .page {
+                page-break-after: always;
+                margin: 0;
+            }
+
+            .page:last-child {
+                page-break-after: auto;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Termos de Serviço</h1>
-    <p>Bem-vindo ao nosso app de dashboard TikTok! Ao utilizar este serviço, você concorda com os termos abaixo. Leia atentamente antes de usar.</p>
+    <!-- CAPA E ÍNDICE (não contados) -->
+    <div class="page" data-no-header="true">
+        <header>
+            <h1>Ponto de Exclamação</h1>
+            <p class="subtitle">Trabalho Investigativo de Língua Portuguesa</p>
+            <p class="school-info">Liceu Duque de Chiazi — Cabinda &nbsp;|&nbsp; 2026</p>
+        </header>
 
-    <h2>1. Uso do serviço</h2>
-    <p>O app permite que os usuários:</p>
-    <ul>
-      <li>Analisem métricas de sua própria conta TikTok, incluindo seguidores, engajamento, likes e vídeos.</li>
-      <li>Visualizem crescimento, quedas e outras estatísticas no dashboard.</li>
-      <li>Publiquem vídeos diretamente pelo app, caso autorizem via TikTok Login.</li>
-    </ul>
+        <h1 class="titulo-secao">Índice</h1>
 
-    <h2>2. Responsabilidades do usuário</h2>
-    <p>O usuário concorda em:</p>
-    <ul>
-      <li>Fornecer informações corretas e manter a conta TikTok autenticada.</li>
-      <li>Não utilizar o app para atividades ilegais, violar direitos de terceiros ou gerar spam.</li>
-      <li>Respeitar limites impostos pelo TikTok e pelas APIs oficiais.</li>
-    </ul>
+        <div class="indice">
+            <ul>
+                <li data-page="1">1. Introdução</li>
+                <li data-page="2">2. Desenvolvimento</li>
+                <li class="sub-item" data-page="2">2.1 Definição e Origem</li>
+                <li class="sub-item" data-page="2">2.2 Contextos de Uso</li>
+                <li class="sub-item" data-page="3">2.3 Regras de Pontuação Relevantes</li>
+                <li class="sub-item" data-page="3">2.4 Uso Estilístico e Efeitos de Sentido</li>
+                <li class="sub-item" data-page="3">2.5 Problemas e Cuidados Pedagógicos</li>
+                <li class="sub-item" data-page="4">2.6 Exemplos de Análise</li>
+                <li data-page="4">3. Conclusão</li>
+                <li data-page="5">4. Sugestões de Atividades</li>
+                <li data-page="6">5. Critérios de Avaliação</li>
+            </ul>
+        </div>
+    </div>
 
-    <h2>3. Limitação de responsabilidade</h2>
-    <p>O app é fornecido “como está”. Não garantimos que:</p>
-    <ul>
-      <li>As análises estejam 100% corretas ou completas.</li>
-      <li>Não haverá interrupções no serviço ou indisponibilidade da API TikTok.</li>
-      <li>Dados do TikTok estejam sempre atualizados.</li>
-    </ul>
+    <!-- PÁGINA 2: INTRODUÇÃO -->
+    <div class="page">
+        <h1 class="titulo-secao">1. Introdução</h1>
 
-    <h2>4. Direitos do app</h2>
-    <p>O app reserva-se o direito de:</p>
-    <ul>
-      <li>Modificar funcionalidades, limites ou métricas exibidas a qualquer momento.</li>
-      <li>Suspender ou encerrar contas de usuários que violem estes termos.</li>
-      <li>Atualizar os termos de serviço sem aviso prévio, notificando os usuários quando relevante.</li>
-    </ul>
+        <p>
+            A pontuação é um dos elementos fundamentais da língua escrita, responsável por organizar 
+            o discurso e transmitir nuances de significado e emoção. Entre os sinais de pontuação, 
+            o ponto de exclamação ocupa um lugar especial pela sua capacidade de expressar sentimentos 
+            intensos e estados emocionais elevados.
+        </p>
 
-    <h2>5. Privacidade</h2>
-    <p>O uso dos dados do usuário é regido pela nossa <a href="privacy.html">Política de Privacidade</a>. É responsabilidade do usuário ler e concordar com ela.</p>
+        <p>
+            Este trabalho investigativo tem como objetivo explorar o ponto de exclamação (<span class="destaque-vermelho">!</span>) 
+            na língua portuguesa, analisando a sua origem, as suas funções gramaticais e os seus efeitos 
+            comunicativos em diferentes contextos textuais.
+        </p>
 
-    <h2>6. Contato</h2>
-    <p>Para dúvidas ou sugestões sobre os Termos de Serviço, entre em contato: <strong>contato@seudominio.com</strong></p>
+        <p>
+            Ao longo desta investigação, serão abordados os contextos adequados para o uso do ponto de 
+            exclamação, as regras que orientam a sua aplicação e os cuidados necessários para evitar 
+            o seu uso excessivo ou inadequado.
+        </p>
 
-    <p><em>Última atualização: 09 de janeiro de 2026</em></p>
-  </div>
+        <p>
+            A compreensão deste sinal de pontuação é essencial para o desenvolvimento da competência 
+            comunicativa escrita, permitindo ao aluno expressar-se com precisão e eficácia em diferentes 
+            situações e registos linguísticos.
+        </p>
+
+
+    </div>
+
+    <!-- PÁGINA 3: DESENVOLVIMENTO - PARTE 1 -->
+    <div class="page">
+        <h1 class="titulo-secao">2. Desenvolvimento</h1>
+
+        <h2 style="margin-top: 0;">2.1 Definição e Origem</h2>
+
+        <p>
+            O ponto de exclamação (<span class="destaque-vermelho">!</span>) é um sinal de pontuação usado para indicar 
+            entonação exclamativa, marcando frases que expressam emoção intensa, surpresa, admiração, 
+            ordem enérgica ou interjeição.
+        </p>
+
+        <p>
+            Historicamente, acredita-se que o sinal surgiu na Idade Média a partir das letras 
+            <em>io</em> — forma latina de expressar alegria — escritas verticalmente, sendo 
+            o <em>i</em> sobreposto ao <em>o</em>, que com o tempo se transformou no ponto inferior.
+        </p>
+
+        <p>
+            Em português, o ponto de exclamação integra o sistema de pontuação desde a consolidação 
+            das gramáticas normativas, sendo considerado indispensável tanto para a expressão escrita 
+            quanto para a representação da oralidade em textos literários.
+        </p>
+
+        <h2>2.2 Contextos de Uso</h2>
+
+        <h3>a) Interjeições e Vocativos</h3>
+        <p>
+            Palavras ou expressões que representam reações imediatas do falante frequentemente 
+            requerem o uso do ponto de exclamação para transmitir adequadamente a intensidade emocional.
+        </p>
+        <div class="exemplo-box">
+            <strong>Exemplo:</strong> "Ai<span class="destaque-vermelho">!</span> Que dor<span class="destaque-vermelho">!</span>"
+        </div>
+
+        <h3>b) Ordens e Pedidos Fortes</h3>
+        <p>
+            Verbos no imperativo quando a intenção é intensa ou urgente requerem o uso do ponto de exclamação.
+        </p>
+        <div class="exemplo-box">
+            <strong>Exemplo:</strong> "Pare já<span class="destaque-vermelho">!</span>"
+        </div>
+
+        <h3>c) Frases Exclamativas</h3>
+        <p>
+            Estruturas que exprimem admiração, surpresa ou emoção profunda.
+        </p>
+        <div class="exemplo-box">
+            <strong>Exemplo:</strong> "Como cresceu esta cidade<span class="destaque-vermelho">!</span>"
+        </div>
+
+        <h3>d) Diálogo/Discurso Direto</h3>
+        <p>
+            Para representar fala alterada, emocionada ou exultante em narrativas.
+        </p>
+        <div class="exemplo-box">
+            <strong>Exemplo:</strong> — "Não acredito<span class="destaque-vermelho">!</span>", disse ela, ofegante.
+        </div>
+
+    </div>
+
+    <!-- PÁGINA 4: DESENVOLVIMENTO - PARTE 2 -->
+    <div class="page">
+        <h2 style="margin-top: 0;">2.3 Regras de Pontuação Relevantes</h2>
+
+        <h3>a) Uso Único</h3>
+        <p>
+            Em textos formais, recomenda-se usar apenas um ponto de exclamação por frase. O uso de vários 
+            pontos de exclamação ("!!!") é aceito em contextos informais (mensagens, redes sociais) para 
+            aumentar intensidade, mas deve ser evitado em redações formais.
+        </p>
+
+        <h3>b) Combinação com Outros Sinais</h3>
+        <p>
+            Não se usa, em geral, ponto de exclamação + ponto final ao mesmo tempo. Em textos mais livres, 
+            pode aparecer junto de reticências para indicar emoção prolongada: "Ai...!" — porém cuide para 
+            não exagerar.
+        </p>
+
+        <h3>c) Com Travessão e Aspas</h3>
+        <p>
+            Quando a fala termina em exclamação e é seguida de comentário do narrador, mantém-se o ponto 
+            de exclamação dentro da fala e não se acrescenta ponto final antes do comentário.
+        </p>
+        <div class="exemplo-box">
+            <strong>Exemplo:</strong> — "Que absurdo<span class="destaque-vermelho">!</span>" — disse ele, incrédulo.
+        </div>
+
+        <h3>d) Maiúsculas Após Exclamação</h3>
+        <p>
+            Se a exclamação encerra a oração e há continuidade do texto, a palavra seguinte começa em 
+            maiúscula apenas se for início de nova frase (como em qualquer pontuação que encerre frase).
+        </p>
+
+        <h2>2.4 Uso Estilístico e Efeitos de Sentido</h2>
+
+        <h3>a) Ritmo e Entonação</h3>
+        <p>
+            Na literatura, o ponto de exclamação interfere no ritmo da leitura, acelerando-a ou criando 
+            impacto. Autores experientes utilizam este recurso para controlar a cadência do texto e 
+            enfatizar momentos cruciais da narrativa.
+        </p>
+
+        <h3>b) Ironia e Sarcasmo</h3>
+        <p>
+            Em alguns contextos, o ponto de exclamação pode realçar ironia ("Que ótimo!" quando o falante 
+            quer dizer o contrário), especialmente se sustentado por contexto. A ironia depende fortemente 
+            da capacidade do leitor de interpretar o contexto situacional.
+        </p>
+
+        <h3>c) Efeitos Gráficos</h3>
+        <p>
+            Em textos publicitários e manchetes, o ponto de exclamação chama atenção e transmite urgência. 
+            É uma ferramenta persuasiva poderosa quando bem utilizada.
+        </p>
+
+        <h2>2.5 Problemas e Cuidados Pedagógicos</h2>
+
+        <h3>a) Exagero</h3>
+        <p>
+            Alunos tendem a usar exclamações em excesso; ensinar a dosagem é importante para clareza e 
+            formalidade. O uso excessivo pode tornar o texto infantil ou diminuir o impacto das exclamações 
+            realmente necessárias.
+        </p>
+
+        <h3>b) Ambiguidade Emocional</h3>
+        <p>
+            Sem entonação vocal, o leitor pode interpretar uma exclamação de formas distintas; o contexto 
+            textual deve ser claro. É responsabilidade do escritor fornecer pistas contextuais suficientes 
+            para orientar a interpretação correta.
+        </p>
+
+    </div>
+
+    <!-- PÁGINA 5: DESENVOLVIMENTO - PARTE 3 E CONCLUSÃO -->
+    <div class="page">
+        <h2 style="margin-top: 0;">2.6 Exemplos de Análise</h2>
+
+        <div class="exemplo-box">
+            <p><strong>"Que dia maravilhoso<span class="destaque-vermelho">!</span>"</strong></p>
+            <p style="margin-left: 20px;">
+                <em>Análise:</em> Expressa admiração; entonação ascendente no final. A exclamação intensifica 
+                o sentimento positivo em relação ao dia.
+            </p>
+        </div>
+
+        <div class="exemplo-box">
+            <p><strong>"Cale a boca<span class="destaque-vermelho">!</span>"</strong></p>
+            <p style="margin-left: 20px;">
+                <em>Análise:</em> Ordem enfática; tom imperativo. A exclamação marca a urgência e firmeza 
+                do comando.
+            </p>
+        </div>
+
+        <div class="exemplo-box">
+            <p><strong>— "Você vem agora<span class="destaque-vermelho">!</span>"</strong></p>
+            <p style="margin-left: 20px;">
+                <em>Análise:</em> Diálogo com urgência; contexto pode indicar preocupação ou raiva. A 
+                interpretação dependerá do contexto narrativo envolvente.
+            </p>
+        </div>
+
+        <div class="exemplo-box">
+            <p><strong>"Surpresa<span class="destaque-vermelho">!</span>"</strong></p>
+            <p style="margin-left: 20px;">
+                <em>Análise:</em> Uso nominal exclamativo: a palavra sozinha transmite o sentimento. 
+                Exemplo de economia linguística com máximo impacto.
+            </p>
+        </div>
+
+        <h1 class="titulo-secao" style="margin-top: 50px;">3. Conclusão</h1>
+
+        <p>
+            O ponto de exclamação é um recurso poderoso para transmitir emoção e intensidade na escrita. 
+            Seu uso correto depende do efeito desejado e do registro textual: enquanto enriquece narrativas 
+            e diálogos, deve ser moderado em textos formais.
+        </p>
+
+        <p>
+            Na sala de aula, trabalhar exemplos, contraste entre registros e exercícios de reescrita ajuda 
+            o aluno a compreender quando a exclamação é apropriada e como ela muda o sentido de uma frase. 
+            A competência no uso deste sinal de pontuação desenvolve-se através da prática constante e da 
+            reflexão sobre os efeitos comunicativos desejados.
+        </p>
+
+        <p>
+            É fundamental que os estudantes compreendam que a pontuação não é um elemento decorativo, mas 
+            sim uma ferramenta essencial de comunicação que permite transmitir nuances de significado e 
+            emoção que seriam perdidas numa escrita desprovida de sinais adequados.
+        </p>
+
+        <p>
+            O domínio consciente do ponto de exclamação, assim como dos demais sinais de pontuação, 
+            contribui significativamente para a formação de escritores competentes, capazes de adaptar 
+            o seu discurso a diferentes contextos e públicos.
+        </p>
+
+    </div>
+
+    <!-- PÁGINA 6: ATIVIDADES -->
+    <div class="page">
+        <h1 class="titulo-secao" style="margin-top: 0;">4. Sugestões de Atividades</h1>
+
+        <div class="atividade">
+            <h4>Atividade 1: Identificação</h4>
+            <p>
+                Colecione 10 frases de jornais, livros ou mensagens e classifique o motivo da exclamação 
+                (admiração, ordem, interjeição, ironia). Justifique cada classificação com base no contexto.
+            </p>
+        </div>
+
+        <div class="atividade">
+            <h4>Atividade 2: Reescrita Formal</h4>
+            <p>
+                Peça para transformar 5 frases exclamativas de linguagem coloquial em frases formais, 
+                mantendo o sentido (reduzir o uso de "!" quando necessário). Por exemplo:
+            </p>
+            <p style="margin-left: 20px;">
+                Informal: "Isso é demais!!!"<br>
+                Formal: "Isto é notável."
+            </p>
+        </div>
+
+        <div class="atividade">
+            <h4>Atividade 3: Criação Literária</h4>
+            <p>
+                Escreva um pequeno diálogo de 8 linhas em que pelo menos três falas terminem com ponto de 
+                exclamação e explique o efeito emocional criado. Identifique a emoção transmitida em cada 
+                caso (surpresa, alegria, raiva, medo, etc.).
+            </p>
+        </div>
+
+        <div class="atividade">
+            <h4>Atividade 4: Avaliação Crítica</h4>
+            <p>
+                Analise um trecho publicitário e discuta se o uso de "!" é persuasivo ou excessivo. 
+                Considere o público-alvo, o produto anunciado e o contexto comunicativo. Proponha 
+                alterações, caso necessário.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- PÁGINA 7: CRITÉRIOS DE AVALIAÇÃO -->
+    <div class="page">
+        <h1 class="titulo-secao" style="margin-top: 0;">5. Critérios de Avaliação</h1>
+
+        <div class="criterios">
+            <h4>Distribuição de Pontuação (Sugestão)</h4>
+            <ul style="margin-top: 10px;">
+                <li><strong>Compreensão Teórica (30%):</strong> Demonstra entendimento da definição, 
+                    funções e regras do ponto de exclamação</li>
+                <li><strong>Aplicação Prática (40%):</strong> Consegue identificar, criar e analisar 
+                    exemplos adequadamente</li>
+                <li><strong>Originalidade e Clareza (20%):</strong> Apresenta pensamento crítico e 
+                    expressa ideias de forma clara e organizada</li>
+                <li><strong>Apresentação (10%):</strong> Ortografia, pontuação e formatação corretas</li>
+            </ul>
+        </div>
+
+        <footer style="margin-top: 60px;">
+            <p><strong>Liceu Duque de Chiazi - Cabinda</strong></p>
+            <p>Disciplina: Língua Portuguesa</p>
+            <p>Trabalho Investigativo | 2026</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // Injeta cabeçalho com número apenas nas páginas que não têm data-no-header
+        const pages = document.querySelectorAll('.page');
+        let pageNum = 1;
+        pages.forEach(page => {
+            if (page.hasAttribute('data-no-header')) return;
+            const header = document.createElement('div');
+            header.className = 'page-header';
+            header.innerHTML = `
+                <span class="header-titulo">Ponto de Exclamação — Liceu Duque de Chiazi</span>
+                <span class="header-pagina">${pageNum}</span>
+            `;
+            page.insertBefore(header, page.firstChild);
+            pageNum++;
+        });
+    </script>
 </body>
 </html>
