@@ -1,598 +1,1183 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trabalho Investigativo - Ponto de Exclamação</title>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+    <title>Android Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        @page {
-            size: A4;
-            margin: 2cm;
-        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #0e0e0e;
+            --surface: #161616;
+            --surface2: #1f1f1f;
+            --border: #2a2a2a;
+            --border-hover: #444;
+            --text: #e8e8e8;
+            --text-muted: #666;
+            --text-dim: #999;
+            --accent: #f0f0f0;
+            --green: #4ade80;
+            --green-dim: #1a3a24;
+            --red: #f87171;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.7;
-            color: #333;
-            background-color: white;
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 40px 20px;
         }
 
-        .page {
-            min-height: 297mm;
-            max-height: 297mm;
-            width: 210mm;
-            page-break-after: always;
-            padding: 65px 40px 60px 40px;
-            background-color: white;
-            position: relative;
+        .wrap {
+            max-width: 560px;
             margin: 0 auto;
-            box-sizing: border-box;
         }
 
-        .page-header {
-            position: absolute;
-            top: 12px;
-            left: 0;
-            right: 0;
+        /* Header */
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .header-top {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 0 40px;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 8px;
-            font-size: 0.85em;
-            color: #666;
+            justify-content: space-between;
+            margin-bottom: 6px;
         }
 
-        .page-header .header-titulo {
-            font-style: italic;
-        }
-
-        .page-header .header-pagina {
-            font-weight: bold;
-        }
-
-        .page[data-no-header="true"] {
-            padding-top: 35px;
-        }
-
-        .page:last-child {
-            page-break-after: auto;
-        }
-
-        header {
-            text-align: center;
-            border-bottom: 3px solid #333;
-            padding-bottom: 20px;
-            margin-bottom: 35px;
-        }
-
-        h1 {
-            font-family: 'Anton', sans-serif;
-            font-size: 2.4em;
-            margin-bottom: 12px;
-            color: #222;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-        }
-
-        .titulo-secao {
-            font-family: 'Anton', sans-serif;
-            font-size: 2em;
-            margin-top: 0;
-            margin-bottom: 25px;
-            color: #222;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 12px;
-        }
-
-        h2 {
-            font-size: 1.5em;
-            margin-top: 25px;
-            margin-bottom: 15px;
-            color: #444;
-            border-left: 4px solid #666;
-            padding-left: 15px;
-            page-break-after: avoid;
-        }
-
-        h3 {
-            font-size: 1.2em;
-            margin-top: 20px;
-            margin-bottom: 12px;
-            color: #555;
-            page-break-after: avoid;
-        }
-
-        h4 {
-            font-size: 1.05em;
-            margin-top: 15px;
-            margin-bottom: 10px;
-            color: #555;
+        .header h1 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 18px;
             font-weight: 600;
-            page-break-after: avoid;
+            letter-spacing: -0.3px;
+            color: var(--accent);
         }
 
-        p {
-            margin-bottom: 14px;
-            text-align: justify;
-            font-size: 0.98em;
+        .header-tag {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
         }
 
-        .subtitle {
-            font-size: 1.15em;
-            color: #666;
-            font-style: italic;
-            margin-bottom: 5px;
+        .header p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
         }
 
-        .school-info {
-            font-size: 0.95em;
-            color: #555;
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 28px 0;
         }
 
-        .indice {
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            padding: 25px;
-            margin: 30px 0;
+        /* Section label */
+        .section-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 16px;
         }
 
-        .indice ul {
-            list-style: none;
-            margin-left: 0;
+        /* Form groups */
+        .form-group {
+            margin-bottom: 20px;
         }
 
-        .indice li {
-            margin: 8px 0;
-            font-size: 1em;
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-dim);
+            margin-bottom: 7px;
+            letter-spacing: 0.2px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 13px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--text);
+            transition: border-color 0.15s;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--border-hover);
+        }
+
+        input[type="text"]::placeholder {
+            color: var(--text-muted);
+        }
+
+        .error {
+            font-size: 11px;
+            color: var(--red);
+            margin-top: 5px;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* Two cols */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        /* Upload zones */
+        .upload-zone {
+            position: relative;
+            border: 1px dashed var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+            transition: border-color 0.15s, background 0.15s;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--border-hover);
+            background: var(--surface2);
+        }
+
+        .upload-zone.has-file {
+            border-color: #2d6a40;
+            border-style: solid;
+            background: var(--green-dim);
+        }
+
+        .upload-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .upload-inner {
+            padding: 22px 16px;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .upload-icon {
+            width: 28px;
+            height: 28px;
+            margin: 0 auto 10px;
+            opacity: 0.35;
+        }
+
+        .upload-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .upload-text strong {
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .upload-zone.has-file .upload-icon { opacity: 0.7; }
+        .upload-zone.has-file .upload-text { color: #86efac; }
+        .upload-zone.has-file .upload-text strong { color: #86efac; }
+
+        /* Preview thumb */
+        .thumb-container {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .thumb-container.visible { display: flex; }
+
+        .thumb-container img {
+            width: 36px;
+            height: 36px;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+
+        .thumb-info { flex: 1; }
+        .thumb-name { font-size: 11px; color: var(--text-dim); font-family: 'IBM Plex Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+        .thumb-size { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+        /* Actions row */
+        .actions {
             display: flex;
+            gap: 10px;
+            margin-top: 32px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 11px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.15s, transform 0.1s;
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        .btn:active { transform: scale(0.98); }
+        .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #0e0e0e;
+        }
+
+        .btn-primary:hover:not(:disabled) { opacity: 0.88; }
+
+        .btn-secondary {
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover:not(:disabled) { border-color: var(--border-hover); }
+
+        /* Progress */
+        .progress-bar {
+            display: none;
+            margin-top: 16px;
+            padding: 12px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--text-dim);
+        }
+
+        .progress-bar.success {
+            border-color: #2d6a40;
+            color: var(--green);
+            background: var(--green-dim);
+        }
+
+        /* ===== PREVIEW MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 100;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 30px 20px;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 620px;
+            margin: auto;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: color 0.15s;
+        }
+        .modal-close:hover { color: var(--text); }
+
+        .modal-body {
+            padding: 16px 20px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .file-tree {
+            list-style: none;
+        }
+
+        .tree-folder {
+            margin-bottom: 2px;
+        }
+
+        .tree-folder-name {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--text-dim);
+            padding: 4px 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .tree-folder-name:hover { color: var(--text); }
+
+        .tree-folder-icon {
+            font-size: 11px;
+            transition: transform 0.15s;
+            color: var(--text-muted);
+        }
+
+        .tree-folder.open > .tree-folder-name .tree-folder-icon {
+            transform: rotate(90deg);
+        }
+
+        .tree-children {
+            display: none;
+            padding-left: 20px;
+            border-left: 1px solid var(--border);
+            margin-left: 5px;
+        }
+
+        .tree-folder.open > .tree-children { display: block; }
+
+        .tree-file {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            padding: 3px 0;
+        }
+
+        .tree-file-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--border-hover);
+            flex-shrink: 0;
+        }
+
+        .modal-footer {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
             justify-content: space-between;
         }
 
-        .indice li::after {
-            content: attr(data-page);
-            font-weight: bold;
+        .file-count {
+            font-size: 11px;
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--text-muted);
         }
 
-        .indice .sub-item {
-            margin-left: 30px;
+        /* Info note */
+        .note {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            padding: 10px 13px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-family: 'IBM Plex Mono', monospace;
         }
 
-        .exemplo-box {
-            background-color: #f5f5f5;
-            border-left: 4px solid #888;
-            padding: 15px;
-            margin: 18px 0;
-            font-size: 0.95em;
-            page-break-inside: avoid;
-        }
+        .note span { color: #facc15; }
 
-        .exemplo-box strong {
-            color: #444;
-        }
-
-        ul, ol {
-            margin-left: 35px;
-            margin-bottom: 15px;
-        }
-
-        ul li, ol li {
-            margin: 8px 0;
-            font-size: 0.96em;
-        }
-
-        .atividade {
-            background-color: #e8f4f8;
-            border: 2px solid #5a9fb8;
-            padding: 18px;
-            margin: 20px 0;
-            page-break-inside: avoid;
-        }
-
-        .atividade h4 {
-            color: #2c5f7a;
-            margin-top: 0;
-        }
-
-        .criterios {
-            background-color: #fff9e6;
-            border: 2px solid #d4af37;
-            padding: 18px;
-            margin: 20px 0;
-            page-break-inside: avoid;
-        }
-
-        .criterios h4 {
-            color: #8b7012;
-            margin-top: 0;
-        }
-
-        footer {
-            margin-top: 40px;
-            padding-top: 15px;
-            border-top: 2px solid #ddd;
-            text-align: center;
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .destaque-vermelho {
-            color: #c41e3a;
-            font-weight: bold;
-        }
-
-        @media print {
-            body {
-                background-color: white;
-            }
-            
-            .page {
-                page-break-after: always;
-                margin: 0;
-            }
-
-            .page:last-child {
-                page-break-after: auto;
-            }
-        }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     </style>
 </head>
 <body>
-    <!-- CAPA E ÍNDICE (não contados) -->
-    <div class="page" data-no-header="true">
-        <header>
-            <h1>Ponto de Exclamação</h1>
-            <p class="subtitle">Trabalho Investigativo de Língua Portuguesa</p>
-            <p class="school-info">Liceu Duque de Chiazi — Cabinda &nbsp;|&nbsp; 2026</p>
-        </header>
+<div class="wrap">
 
-        <h1 class="titulo-secao">Índice</h1>
+    <div class="header">
+        <div class="header-top">
+            <h1>Android Generator</h1>
+            <span class="header-tag">Flutter / Android</span>
+        </div>
+        <p>Gera toda a estrutura <code style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#888">/android</code> do seu projeto Flutter pronta para uso.</p>
+    </div>
 
-        <div class="indice">
-            <ul>
-                <li data-page="1">1. Introdução</li>
-                <li data-page="2">2. Desenvolvimento</li>
-                <li class="sub-item" data-page="2">2.1 Definição e Origem</li>
-                <li class="sub-item" data-page="2">2.2 Contextos de Uso</li>
-                <li class="sub-item" data-page="3">2.3 Regras de Pontuação Relevantes</li>
-                <li class="sub-item" data-page="3">2.4 Uso Estilístico e Efeitos de Sentido</li>
-                <li class="sub-item" data-page="3">2.5 Problemas e Cuidados Pedagógicos</li>
-                <li class="sub-item" data-page="4">2.6 Exemplos de Análise</li>
-                <li data-page="4">3. Conclusão</li>
-                <li data-page="5">4. Sugestões de Atividades</li>
-                <li data-page="6">5. Critérios de Avaliação</li>
-            </ul>
+    <div class="note">
+        <span>↑</span> Faça upload de imagens em <strong>512×512 px</strong>. O gerador cria automaticamente todos os tamanhos necessários (mdpi → xxxhdpi).
+    </div>
+
+    <div class="section-label">Identificação</div>
+
+    <div class="form-group">
+        <label>Nome do App</label>
+        <input type="text" id="appName" placeholder="Meu App">
+    </div>
+
+    <div class="two-col">
+        <div class="form-group">
+            <label>Package Name</label>
+            <input type="text" id="packageName" placeholder="com.exemplo.app">
+            <div class="error" id="packageError"></div>
+        </div>
+        <div class="form-group">
+            <label>Nome do Ícone <span style="color:var(--text-muted);font-weight:400">(launcher)</span></label>
+            <input type="text" id="iconLabel" placeholder="ic_launcher">
         </div>
     </div>
 
-    <!-- PÁGINA 2: INTRODUÇÃO -->
-    <div class="page">
-        <h1 class="titulo-secao">1. Introdução</h1>
+    <div class="divider"></div>
+    <div class="section-label">Ícones</div>
 
-        <p>
-            A pontuação é um dos elementos fundamentais da língua escrita, responsável por organizar 
-            o discurso e transmitir nuances de significado e emoção. Entre os sinais de pontuação, 
-            o ponto de exclamação ocupa um lugar especial pela sua capacidade de expressar sentimentos 
-            intensos e estados emocionais elevados.
-        </p>
+    <div class="two-col" style="margin-bottom:20px">
+        <div>
+            <label style="margin-bottom:8px">Ícone Principal</label>
+            <div class="upload-zone" id="appIconZone">
+                <input type="file" id="appIcon" accept="image/png,image/jpeg">
+                <div class="upload-inner">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="4"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <div class="upload-text"><strong>Clique para upload</strong><br>512×512 px</div>
+                </div>
+            </div>
+            <div class="thumb-container" id="appIconThumb">
+                <img id="appIconThumbImg" src="" alt="">
+                <div class="thumb-info">
+                    <div class="thumb-name" id="appIconThumbName"></div>
+                    <div class="thumb-size" id="appIconThumbSize"></div>
+                </div>
+            </div>
+        </div>
 
-        <p>
-            Este trabalho investigativo tem como objetivo explorar o ponto de exclamação (<span class="destaque-vermelho">!</span>) 
-            na língua portuguesa, analisando a sua origem, as suas funções gramaticais e os seus efeitos 
-            comunicativos em diferentes contextos textuais.
-        </p>
-
-        <p>
-            Ao longo desta investigação, serão abordados os contextos adequados para o uso do ponto de 
-            exclamação, as regras que orientam a sua aplicação e os cuidados necessários para evitar 
-            o seu uso excessivo ou inadequado.
-        </p>
-
-        <p>
-            A compreensão deste sinal de pontuação é essencial para o desenvolvimento da competência 
-            comunicativa escrita, permitindo ao aluno expressar-se com precisão e eficácia em diferentes 
-            situações e registos linguísticos.
-        </p>
-
-
+        <div>
+            <label style="margin-bottom:8px">Ícone Monocromático</label>
+            <div class="upload-zone" id="monoIconZone">
+                <input type="file" id="monoIcon" accept="image/png,image/jpeg">
+                <div class="upload-inner">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="4"/>
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 3v18M3 12h18" stroke-width="1"/>
+                    </svg>
+                    <div class="upload-text"><strong>Clique para upload</strong><br>512×512 px</div>
+                </div>
+            </div>
+            <div class="thumb-container" id="monoIconThumb">
+                <img id="monoIconThumbImg" src="" alt="">
+                <div class="thumb-info">
+                    <div class="thumb-name" id="monoIconThumbName"></div>
+                    <div class="thumb-size" id="monoIconThumbSize"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- PÁGINA 3: DESENVOLVIMENTO - PARTE 1 -->
-    <div class="page">
-        <h1 class="titulo-secao">2. Desenvolvimento</h1>
-
-        <h2 style="margin-top: 0;">2.1 Definição e Origem</h2>
-
-        <p>
-            O ponto de exclamação (<span class="destaque-vermelho">!</span>) é um sinal de pontuação usado para indicar 
-            entonação exclamativa, marcando frases que expressam emoção intensa, surpresa, admiração, 
-            ordem enérgica ou interjeição.
-        </p>
-
-        <p>
-            Historicamente, acredita-se que o sinal surgiu na Idade Média a partir das letras 
-            <em>io</em> — forma latina de expressar alegria — escritas verticalmente, sendo 
-            o <em>i</em> sobreposto ao <em>o</em>, que com o tempo se transformou no ponto inferior.
-        </p>
-
-        <p>
-            Em português, o ponto de exclamação integra o sistema de pontuação desde a consolidação 
-            das gramáticas normativas, sendo considerado indispensável tanto para a expressão escrita 
-            quanto para a representação da oralidade em textos literários.
-        </p>
-
-        <h2>2.2 Contextos de Uso</h2>
-
-        <h3>a) Interjeições e Vocativos</h3>
-        <p>
-            Palavras ou expressões que representam reações imediatas do falante frequentemente 
-            requerem o uso do ponto de exclamação para transmitir adequadamente a intensidade emocional.
-        </p>
-        <div class="exemplo-box">
-            <strong>Exemplo:</strong> "Ai<span class="destaque-vermelho">!</span> Que dor<span class="destaque-vermelho">!</span>"
-        </div>
-
-        <h3>b) Ordens e Pedidos Fortes</h3>
-        <p>
-            Verbos no imperativo quando a intenção é intensa ou urgente requerem o uso do ponto de exclamação.
-        </p>
-        <div class="exemplo-box">
-            <strong>Exemplo:</strong> "Pare já<span class="destaque-vermelho">!</span>"
-        </div>
-
-        <h3>c) Frases Exclamativas</h3>
-        <p>
-            Estruturas que exprimem admiração, surpresa ou emoção profunda.
-        </p>
-        <div class="exemplo-box">
-            <strong>Exemplo:</strong> "Como cresceu esta cidade<span class="destaque-vermelho">!</span>"
-        </div>
-
-        <h3>d) Diálogo/Discurso Direto</h3>
-        <p>
-            Para representar fala alterada, emocionada ou exultante em narrativas.
-        </p>
-        <div class="exemplo-box">
-            <strong>Exemplo:</strong> — "Não acredito<span class="destaque-vermelho">!</span>", disse ela, ofegante.
-        </div>
-
+    <div class="actions">
+        <button class="btn btn-secondary" id="previewBtn" style="flex:0 0 auto;padding:11px 20px">
+            Preview
+        </button>
+        <button class="btn btn-primary" id="generateBtn">
+            Gerar estrutura Android
+        </button>
     </div>
 
-    <!-- PÁGINA 4: DESENVOLVIMENTO - PARTE 2 -->
-    <div class="page">
-        <h2 style="margin-top: 0;">2.3 Regras de Pontuação Relevantes</h2>
+    <div class="progress-bar" id="progress">Gerando estrutura...</div>
+</div>
 
-        <h3>a) Uso Único</h3>
-        <p>
-            Em textos formais, recomenda-se usar apenas um ponto de exclamação por frase. O uso de vários 
-            pontos de exclamação ("!!!") é aceito em contextos informais (mensagens, redes sociais) para 
-            aumentar intensidade, mas deve ser evitado em redações formais.
-        </p>
-
-        <h3>b) Combinação com Outros Sinais</h3>
-        <p>
-            Não se usa, em geral, ponto de exclamação + ponto final ao mesmo tempo. Em textos mais livres, 
-            pode aparecer junto de reticências para indicar emoção prolongada: "Ai...!" — porém cuide para 
-            não exagerar.
-        </p>
-
-        <h3>c) Com Travessão e Aspas</h3>
-        <p>
-            Quando a fala termina em exclamação e é seguida de comentário do narrador, mantém-se o ponto 
-            de exclamação dentro da fala e não se acrescenta ponto final antes do comentário.
-        </p>
-        <div class="exemplo-box">
-            <strong>Exemplo:</strong> — "Que absurdo<span class="destaque-vermelho">!</span>" — disse ele, incrédulo.
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">Ficheiros gerados</span>
+            <button class="modal-close" id="modalClose">✕</button>
         </div>
-
-        <h3>d) Maiúsculas Após Exclamação</h3>
-        <p>
-            Se a exclamação encerra a oração e há continuidade do texto, a palavra seguinte começa em 
-            maiúscula apenas se for início de nova frase (como em qualquer pontuação que encerre frase).
-        </p>
-
-        <h2>2.4 Uso Estilístico e Efeitos de Sentido</h2>
-
-        <h3>a) Ritmo e Entonação</h3>
-        <p>
-            Na literatura, o ponto de exclamação interfere no ritmo da leitura, acelerando-a ou criando 
-            impacto. Autores experientes utilizam este recurso para controlar a cadência do texto e 
-            enfatizar momentos cruciais da narrativa.
-        </p>
-
-        <h3>b) Ironia e Sarcasmo</h3>
-        <p>
-            Em alguns contextos, o ponto de exclamação pode realçar ironia ("Que ótimo!" quando o falante 
-            quer dizer o contrário), especialmente se sustentado por contexto. A ironia depende fortemente 
-            da capacidade do leitor de interpretar o contexto situacional.
-        </p>
-
-        <h3>c) Efeitos Gráficos</h3>
-        <p>
-            Em textos publicitários e manchetes, o ponto de exclamação chama atenção e transmite urgência. 
-            É uma ferramenta persuasiva poderosa quando bem utilizada.
-        </p>
-
-        <h2>2.5 Problemas e Cuidados Pedagógicos</h2>
-
-        <h3>a) Exagero</h3>
-        <p>
-            Alunos tendem a usar exclamações em excesso; ensinar a dosagem é importante para clareza e 
-            formalidade. O uso excessivo pode tornar o texto infantil ou diminuir o impacto das exclamações 
-            realmente necessárias.
-        </p>
-
-        <h3>b) Ambiguidade Emocional</h3>
-        <p>
-            Sem entonação vocal, o leitor pode interpretar uma exclamação de formas distintas; o contexto 
-            textual deve ser claro. É responsabilidade do escritor fornecer pistas contextuais suficientes 
-            para orientar a interpretação correta.
-        </p>
-
+        <div class="modal-body">
+            <ul class="file-tree" id="fileTree"></ul>
+        </div>
+        <div class="modal-footer">
+            <span class="file-count" id="fileCount"></span>
+            <button class="btn btn-secondary" id="modalGenerate" style="flex:0;padding:8px 16px;font-size:12px">Gerar ZIP agora</button>
+        </div>
     </div>
+</div>
 
-    <!-- PÁGINA 5: DESENVOLVIMENTO - PARTE 3 E CONCLUSÃO -->
-    <div class="page">
-        <h2 style="margin-top: 0;">2.6 Exemplos de Análise</h2>
+<script>
+// ── Helpers ──────────────────────────────────────────────────────────
+function setupUpload(inputId, zoneId, thumbId, thumbImgId, thumbNameId, thumbSizeId) {
+    const input = document.getElementById(inputId);
+    const zone  = document.getElementById(zoneId);
+    const thumb = document.getElementById(thumbId);
 
-        <div class="exemplo-box">
-            <p><strong>"Que dia maravilhoso<span class="destaque-vermelho">!</span>"</strong></p>
-            <p style="margin-left: 20px;">
-                <em>Análise:</em> Expressa admiração; entonação ascendente no final. A exclamação intensifica 
-                o sentimento positivo em relação ao dia.
-            </p>
-        </div>
+    input.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        zone.classList.add('has-file');
+        zone.querySelector('.upload-text').innerHTML = `<strong>${file.name}</strong><br>carregado`;
 
-        <div class="exemplo-box">
-            <p><strong>"Cale a boca<span class="destaque-vermelho">!</span>"</strong></p>
-            <p style="margin-left: 20px;">
-                <em>Análise:</em> Ordem enfática; tom imperativo. A exclamação marca a urgência e firmeza 
-                do comando.
-            </p>
-        </div>
+        const reader = new FileReader();
+        reader.onload = ev => {
+            const img = new Image();
+            img.onload = () => {
+                document.getElementById(thumbImgId).src = ev.target.result;
+                document.getElementById(thumbNameId).textContent = file.name;
+                document.getElementById(thumbSizeId).textContent = `${img.width}×${img.height}`;
+                thumb.classList.add('visible');
+            };
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
 
-        <div class="exemplo-box">
-            <p><strong>— "Você vem agora<span class="destaque-vermelho">!</span>"</strong></p>
-            <p style="margin-left: 20px;">
-                <em>Análise:</em> Diálogo com urgência; contexto pode indicar preocupação ou raiva. A 
-                interpretação dependerá do contexto narrativo envolvente.
-            </p>
-        </div>
+setupUpload('appIcon',  'appIconZone',  'appIconThumb',  'appIconThumbImg',  'appIconThumbName',  'appIconThumbSize');
+setupUpload('monoIcon', 'monoIconZone', 'monoIconThumb', 'monoIconThumbImg', 'monoIconThumbName', 'monoIconThumbSize');
 
-        <div class="exemplo-box">
-            <p><strong>"Surpresa<span class="destaque-vermelho">!</span>"</strong></p>
-            <p style="margin-left: 20px;">
-                <em>Análise:</em> Uso nominal exclamativo: a palavra sozinha transmite o sentimento. 
-                Exemplo de economia linguística com máximo impacto.
-            </p>
-        </div>
+// ── Package validation ────────────────────────────────────────────────
+document.getElementById('packageName').addEventListener('input', e => {
+    const val = e.target.value;
+    const err = document.getElementById('packageError');
+    const ok  = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(val);
+    err.textContent = val && !ok ? 'Formato inválido: com.exemplo.app' : '';
+});
 
-        <h1 class="titulo-secao" style="margin-top: 50px;">3. Conclusão</h1>
+// ── Resize helper ─────────────────────────────────────────────────────
+function resizeImage(file, w, h) {
+    return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = new Image();
+            img.onload = () => {
+                const c = document.createElement('canvas');
+                c.width = w; c.height = h;
+                c.getContext('2d').drawImage(img, 0, 0, w, h);
+                c.toBlob(resolve, 'image/png');
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
 
-        <p>
-            O ponto de exclamação é um recurso poderoso para transmitir emoção e intensidade na escrita. 
-            Seu uso correto depende do efeito desejado e do registro textual: enquanto enriquece narrativas 
-            e diálogos, deve ser moderado em textos formais.
-        </p>
+// ── File list builder ─────────────────────────────────────────────────
+function buildFileList(appName, packageName, iconName) {
+    const pkg = packageName || 'com.exemplo.app';
+    const pkgPath = pkg.replace(/\./g, '/');
+    const icon = iconName || 'ic_launcher';
+    const densities = ['mdpi','hdpi','xhdpi','xxhdpi','xxxhdpi'];
 
-        <p>
-            Na sala de aula, trabalhar exemplos, contraste entre registros e exercícios de reescrita ajuda 
-            o aluno a compreender quando a exclamação é apropriada e como ela muda o sentido de uma frase. 
-            A competência no uso deste sinal de pontuação desenvolve-se através da prática constante e da 
-            reflexão sobre os efeitos comunicativos desejados.
-        </p>
+    const files = [];
 
-        <p>
-            É fundamental que os estudantes compreendam que a pontuação não é um elemento decorativo, mas 
-            sim uma ferramenta essencial de comunicação que permite transmitir nuances de significado e 
-            emoção que seriam perdidas numa escrita desprovida de sinais adequados.
-        </p>
+    densities.forEach(d => {
+        files.push(`app/src/main/res/mipmap-${d}/${icon}.png`);
+        files.push(`app/src/main/res/mipmap-${d}/${icon}_round.png`);
+        files.push(`app/src/main/res/mipmap-${d}/${icon}_foreground.png`);
+        files.push(`app/src/main/res/mipmap-${d}/${icon}_monochrome.png`);
+    });
 
-        <p>
-            O domínio consciente do ponto de exclamação, assim como dos demais sinais de pontuação, 
-            contribui significativamente para a formação de escritores competentes, capazes de adaptar 
-            o seu discurso a diferentes contextos e públicos.
-        </p>
+    files.push(`app/src/main/res/mipmap-anydpi-v26/${icon}.xml`);
+    files.push(`app/src/main/res/mipmap-anydpi-v26/${icon}_round.xml`);
+    files.push('app/src/main/res/drawable/ic_launcher_foreground.png');
+    files.push('app/src/main/res/drawable/ic_launcher_background.xml');
+    files.push('app/src/main/res/drawable/splash_icon_light.png');
+    files.push('app/src/main/res/drawable/splash_icon_dark.png');
+    files.push('app/src/main/res/drawable/ic_splash.xml');
+    files.push('app/src/main/res/drawable/ic_splash_circle.xml');
+    files.push('app/src/main/res/drawable/launch_background.xml');
+    files.push('app/src/main/res/drawable/launch_background_dark.xml');
+    files.push('app/src/main/res/drawable-v21/launch_background.xml');
+    files.push('app/src/main/res/drawable/splash_background_light.png');
+    files.push('app/src/main/res/drawable/splash_background_dark.png');
+    files.push('app/src/main/res/values/strings.xml');
+    files.push('app/src/main/res/values/colors.xml');
+    files.push('app/src/main/res/values/styles.xml');
+    files.push('app/src/main/res/values-night/styles.xml');
+    files.push('app/src/main/res/values-v31/styles.xml');
+    files.push('app/src/main/res/values-night-v31/styles.xml');
+    files.push('app/src/main/res/xml/file_provider_paths.xml');
+    files.push('app/src/main/res/xml/network_security_config.xml');
+    files.push(`app/src/main/kotlin/${pkgPath}/MainActivity.kt`);
+    files.push('app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java');
+    files.push('app/src/main/AndroidManifest.xml');
+    files.push('app/src/debug/AndroidManifest.xml');
+    files.push('app/src/profile/AndroidManifest.xml');
+    files.push('app/build.gradle.kts');
+    files.push('build.gradle.kts');
+    files.push('settings.gradle.kts');
+    files.push('gradle.properties');
+    files.push('gradle/wrapper/gradle-wrapper.properties');
+    files.push('app/proguard_rules.pro');
 
-    </div>
+    return files;
+}
 
-    <!-- PÁGINA 6: ATIVIDADES -->
-    <div class="page">
-        <h1 class="titulo-secao" style="margin-top: 0;">4. Sugestões de Atividades</h1>
-
-        <div class="atividade">
-            <h4>Atividade 1: Identificação</h4>
-            <p>
-                Colecione 10 frases de jornais, livros ou mensagens e classifique o motivo da exclamação 
-                (admiração, ordem, interjeição, ironia). Justifique cada classificação com base no contexto.
-            </p>
-        </div>
-
-        <div class="atividade">
-            <h4>Atividade 2: Reescrita Formal</h4>
-            <p>
-                Peça para transformar 5 frases exclamativas de linguagem coloquial em frases formais, 
-                mantendo o sentido (reduzir o uso de "!" quando necessário). Por exemplo:
-            </p>
-            <p style="margin-left: 20px;">
-                Informal: "Isso é demais!!!"<br>
-                Formal: "Isto é notável."
-            </p>
-        </div>
-
-        <div class="atividade">
-            <h4>Atividade 3: Criação Literária</h4>
-            <p>
-                Escreva um pequeno diálogo de 8 linhas em que pelo menos três falas terminem com ponto de 
-                exclamação e explique o efeito emocional criado. Identifique a emoção transmitida em cada 
-                caso (surpresa, alegria, raiva, medo, etc.).
-            </p>
-        </div>
-
-        <div class="atividade">
-            <h4>Atividade 4: Avaliação Crítica</h4>
-            <p>
-                Analise um trecho publicitário e discuta se o uso de "!" é persuasivo ou excessivo. 
-                Considere o público-alvo, o produto anunciado e o contexto comunicativo. Proponha 
-                alterações, caso necessário.
-            </p>
-        </div>
-
-    </div>
-
-    <!-- PÁGINA 7: CRITÉRIOS DE AVALIAÇÃO -->
-    <div class="page">
-        <h1 class="titulo-secao" style="margin-top: 0;">5. Critérios de Avaliação</h1>
-
-        <div class="criterios">
-            <h4>Distribuição de Pontuação (Sugestão)</h4>
-            <ul style="margin-top: 10px;">
-                <li><strong>Compreensão Teórica (30%):</strong> Demonstra entendimento da definição, 
-                    funções e regras do ponto de exclamação</li>
-                <li><strong>Aplicação Prática (40%):</strong> Consegue identificar, criar e analisar 
-                    exemplos adequadamente</li>
-                <li><strong>Originalidade e Clareza (20%):</strong> Apresenta pensamento crítico e 
-                    expressa ideias de forma clara e organizada</li>
-                <li><strong>Apresentação (10%):</strong> Ortografia, pontuação e formatação corretas</li>
-            </ul>
-        </div>
-
-        <footer style="margin-top: 60px;">
-            <p><strong>Liceu Duque de Chiazi - Cabinda</strong></p>
-            <p>Disciplina: Língua Portuguesa</p>
-            <p>Trabalho Investigativo | 2026</p>
-        </footer>
-
-    </div>
-
-    <script>
-        // Injeta cabeçalho com número apenas nas páginas que não têm data-no-header
-        const pages = document.querySelectorAll('.page');
-        let pageNum = 1;
-        pages.forEach(page => {
-            if (page.hasAttribute('data-no-header')) return;
-            const header = document.createElement('div');
-            header.className = 'page-header';
-            header.innerHTML = `
-                <span class="header-titulo">Ponto de Exclamação — Liceu Duque de Chiazi</span>
-                <span class="header-pagina">${pageNum}</span>
-            `;
-            page.insertBefore(header, page.firstChild);
-            pageNum++;
+// ── Build tree ────────────────────────────────────────────────────────
+function buildTree(files) {
+    const root = {};
+    files.forEach(f => {
+        const parts = f.split('/');
+        let node = root;
+        parts.forEach((p, i) => {
+            if (i === parts.length - 1) {
+                node.__files = node.__files || [];
+                node.__files.push(p);
+            } else {
+                node[p] = node[p] || {};
+                node = node[p];
+            }
         });
-    </script>
+    });
+    return root;
+}
+
+function renderTree(node, depth) {
+    let html = '';
+    const folders = Object.keys(node).filter(k => k !== '__files').sort();
+    const files   = (node.__files || []).sort();
+
+    folders.forEach(folder => {
+        html += `<li class="tree-folder ${depth === 0 ? 'open' : ''}">
+            <div class="tree-folder-name" onclick="this.parentElement.classList.toggle('open')">
+                <span class="tree-folder-icon">▶</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.5"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                ${folder}
+            </div>
+            <ul class="tree-children file-tree">${renderTree(node[folder], depth + 1)}</ul>
+        </li>`;
+    });
+
+    files.forEach(file => {
+        const ext = file.split('.').pop();
+        const colors = { kt: '#f97316', java: '#f97316', xml: '#60a5fa', kts: '#a78bfa', png: '#34d399', properties: '#facc15', pro: '#fb7185' };
+        const col = colors[ext] || '#888';
+        html += `<li class="tree-file">
+            <span class="tree-file-dot" style="background:${col}"></span>
+            ${file}
+        </li>`;
+    });
+
+    return html;
+}
+
+// ── Preview modal ─────────────────────────────────────────────────────
+document.getElementById('previewBtn').addEventListener('click', () => {
+    const appName     = document.getElementById('appName').value.trim() || 'MyApp';
+    const packageName = document.getElementById('packageName').value.trim() || 'com.exemplo.app';
+    const iconName    = document.getElementById('iconLabel').value.trim() || 'ic_launcher';
+
+    const files = buildFileList(appName, packageName, iconName);
+    const tree  = buildTree(files);
+
+    document.getElementById('fileTree').innerHTML = renderTree(tree, 0);
+    document.getElementById('fileCount').textContent = `${files.length} ficheiros`;
+    document.getElementById('modalOverlay').classList.add('open');
+});
+
+document.getElementById('modalClose').addEventListener('click', () => {
+    document.getElementById('modalOverlay').classList.remove('open');
+});
+
+document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('modalOverlay'))
+        document.getElementById('modalOverlay').classList.remove('open');
+});
+
+document.getElementById('modalGenerate').addEventListener('click', () => {
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.getElementById('generateBtn').click();
+});
+
+// ── Generate ZIP ──────────────────────────────────────────────────────
+document.getElementById('generateBtn').addEventListener('click', async () => {
+    const appName     = document.getElementById('appName').value.trim();
+    const packageName = document.getElementById('packageName').value.trim();
+    const iconName    = document.getElementById('iconLabel').value.trim() || 'ic_launcher';
+    const appIconFile = document.getElementById('appIcon').files[0];
+    const monoIconFile= document.getElementById('monoIcon').files[0];
+
+    if (!appName || !packageName || !appIconFile || !monoIconFile) {
+        alert('Preencha todos os campos e faça upload dos dois ícones.');
+        return;
+    }
+
+    const pattern = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/;
+    if (!pattern.test(packageName)) {
+        alert('Package name inválido.');
+        return;
+    }
+
+    const progress = document.getElementById('progress');
+    const btn = document.getElementById('generateBtn');
+    progress.style.display = 'block';
+    progress.className = 'progress-bar';
+    progress.textContent = 'A gerar estrutura...';
+    btn.disabled = true;
+
+    try {
+        const zip = new JSZip();
+        const sizes = { mdpi:48, hdpi:72, xhdpi:96, xxhdpi:144, xxxhdpi:192 };
+
+        for (const [density, size] of Object.entries(sizes)) {
+            const appR  = await resizeImage(appIconFile, size, size);
+            const monoR = await resizeImage(monoIconFile, size, size);
+            zip.file(`app/src/main/res/mipmap-${density}/${iconName}.png`, appR);
+            zip.file(`app/src/main/res/mipmap-${density}/${iconName}_round.png`, appR);
+            zip.file(`app/src/main/res/mipmap-${density}/${iconName}_foreground.png`, appR);
+            zip.file(`app/src/main/res/mipmap-${density}/${iconName}_monochrome.png`, monoR);
+        }
+
+        const drawableIcon = await resizeImage(appIconFile, 108, 108);
+        zip.file('app/src/main/res/drawable/ic_launcher_foreground.png', drawableIcon);
+
+        const splashIcon = await resizeImage(appIconFile, 288, 288);
+        zip.file('app/src/main/res/drawable/splash_icon_light.png', splashIcon);
+        zip.file('app/src/main/res/drawable/splash_icon_dark.png', splashIcon);
+
+        const packagePath = packageName.replace(/\./g, '/');
+
+        // MainActivity.kt
+        zip.file(`app/src/main/kotlin/${packagePath}/MainActivity.kt`,
+`package ${packageName}
+
+import android.graphics.Color
+import android.os.Bundle
+import android.view.View
+import android.view.WindowManager
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        window.apply {
+            decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            )
+            addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            statusBarColor = Color.TRANSPARENT
+            navigationBarColor = Color.TRANSPARENT
+        }
+    }
+}`);
+
+        // GeneratedPluginRegistrant.java
+        zip.file('app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+`package io.flutter.plugins;
+
+import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
+import io.flutter.Log;
+import io.flutter.embedding.engine.FlutterEngine;
+
+@Keep
+public final class GeneratedPluginRegistrant {
+  private static final String TAG = "GeneratedPluginRegistrant";
+  public static void registerWith(@NonNull FlutterEngine flutterEngine) {
+  }
+}`);
+
+        // AndroidManifest (main)
+        zip.file('app/src/main/AndroidManifest.xml',
+`<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="${packageName}">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <application
+        android:label="${appName}"
+        android:name="\${applicationName}"
+        android:icon="@mipmap/${iconName}"
+        android:enableOnBackInvokedCallback="true">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme"/>
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2"/>
+    </application>
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+    </queries>
+</manifest>`);
+
+        // AndroidManifest (debug)
+        zip.file('app/src/debug/AndroidManifest.xml',
+`<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="${packageName}">
+    <uses-permission android:name="android.permission.INTERNET"/>
+</manifest>`);
+
+        // AndroidManifest (profile)
+        zip.file('app/src/profile/AndroidManifest.xml',
+`<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="${packageName}">
+    <uses-permission android:name="android.permission.INTERNET"/>
+</manifest>`);
+
+        // build.gradle.kts (app)
+        zip.file('app/build.gradle.kts',
+`plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    id("dev.flutter.flutter-gradle-plugin")
+}
+
+android {
+    namespace = "${packageName}"
+    compileSdk = 34
+    ndkVersion = "27.0.12077973"
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
+
+    defaultConfig {
+        applicationId = "${packageName}"
+        minSdk = 21
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0.0"
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("debug")
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}`);
+
+        // build.gradle.kts (root)
+        zip.file('build.gradle.kts',
+`buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.7.3")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21")
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}`);
+
+        // settings.gradle.kts
+        zip.file('settings.gradle.kts',
+`pluginManagement {
+    val flutterSdkPath = {
+        val properties = java.util.Properties()
+        file("local.properties").inputStream().use { properties.load(it) }
+        val flutterSdkPath = properties.getProperty("flutter.sdk")
+        require(flutterSdkPath != null) { "flutter.sdk not set in local.properties" }
+        flutterSdkPath
+    }
+    settings.ext.set("flutterSdkPath", flutterSdkPath())
+
+    includeBuild("\${settings.ext.get("flutterSdkPath")}/packages/flutter_tools/gradle")
+
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+
+    plugins {
+        id("dev.flutter.flutter-plugin-loader") version "1.0.0"
+        id("com.android.application") version "8.7.3" apply false
+        id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+    }
+}
+
+plugins {
+    id("dev.flutter.flutter-plugin-loader")
+}
+
+include(":app")`);
+
+        // gradle.properties
+        zip.file('gradle.properties',
+`org.gradle.jvmargs=-Xmx4G -XX:+HeapDumpOnOutOfMemoryError
+android.useAndroidX=true
+android.enableJetifier=true
+android.defaults.buildfeatures.buildconfig=true
+android.nonTransitiveRClass=false
+android.nonFinalResIds=false`);
+
+        // gradle-wrapper.properties
+        zip.file('gradle/wrapper/gradle-wrapper.properties',
+`distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+distributionUrl=https\\://services.gradle.org/distributions/gradle-8.9-all.zip`);
+
+        // proguard_rules.pro
+        zip.file('app/proguard_rules.pro',
+`# Flutter Wrapper
+-keep class io.flutter.app.** { *; }
+-keep class io.flutter.plugin.** { *; }
+-keep class io.flutter.util.** { *; }
+-keep class io.flutter.view.** { *; }
+-keep class io.flutter.** { *; }
+-keep class io.flutter.plugins.** { *; }
+-dontwarn io.flutter.embedding.**`);
+
+        // XML Resources
+        zip.file('app/src/main/res/values/strings.xml',
+`<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">${appName}</string>
+</resources>`);
+
+        zip.file('app/src/main/res/values/colors.xml',
+`<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#2B2B2B</color>
+</resources>`);
+
+        zip.file('app/src/main/res/values/styles.xml',
+`<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>`);
+
+        zip.file('app/src/main/res/values-night/styles.xml',
+`<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:forceDarkAllowed">true</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>`);
+
+        zip.file('app/src/main/res/values-v31/styles.xml',
+`<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:windowSplashScreenBackground">#2B2B2B</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
+    </style>
+</resources>`);
+
+        zip.file('app/src/main/res/values-night-v31/styles.xml',
+`<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:forceDarkAllowed">true</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:windowSplashScreenBackground">#2B2B2B</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
+    </style>
+</resources>`);
+
+        zip.file('app/src/main/res/xml/file_provider_paths.xml',
+`<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <cache-path name="cache" path="."/>
+    <external-path name="external_files" path="."/>
+</paths>`);
+
+        zip.file('app/src/main/res/xml/network_security_config.xml',
+`<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </base-config>
+</network-security-config>`);
+
+        // Launcher icon XMLs (using iconName)
+        zip.file(`app/src/main/res/mipmap-anydpi-v26/${iconName}.xml`,
+`<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background"/>
+    <foreground android:drawable="@mipmap/${iconName}_foreground"/>
+    <monochrome android:drawable="@mipmap/${iconName}_monochrome"/>
+</adaptive-icon>`);
+
+        zip.file(`app/src/main/res/mipmap-anydpi-v26/${iconName}_round.xml`,
+`<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background"/>
+    <foreground android:drawable="@mipmap/${iconName}_foreground"/>
+    <monochrome android:drawable="@mipmap/${iconName}_monochrome"/>
+</adaptive-icon>`);
+
+        // Drawable XMLs
+        zip.file('app/src/main/res/drawable/ic_launcher_background.xml',
+`<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#2B2B2B" android:pathData="M0,0h108v108h-108z"/>
+</vector>`);
+
+        zip.file('app/src/main/res/drawable/ic_splash.xml',
+`<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <bitmap android:gravity="center" android:src="@drawable/splash_icon_light"/>
+    </item>
+</layer-list>`);
+
+        zip.file('app/src/main/res/drawable/ic_splash_circle.xml',
+`<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:gravity="center">
+        <shape android:shape="oval">
+            <solid android:color="#FFFFFF"/>
+            <size android:width="288dp" android:height="288dp"/>
+        </shape>
+    </item>
+    <item android:gravity="center">
+        <bitmap android:src="@drawable/splash_icon_light"/>
+    </item>
+</layer-list>`);
+
+        zip.file('app/src/main/res/drawable/launch_background.xml',
+`<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@android:color/white"/>
+</layer-list>`);
+
+        zip.file('app/src/main/res/drawable/launch_background_dark.xml',
+`<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@android:color/black"/>
+</layer-list>`);
+
+        zip.file('app/src/main/res/drawable-v21/launch_background.xml',
+`<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="?android:colorBackground"/>
+</layer-list>`);
+
+        // Transparent PNGs
+        const canvas = document.createElement('canvas');
+        canvas.width = 1; canvas.height = 1;
+        const transparentPng = await new Promise(r => canvas.toBlob(r, 'image/png'));
+        zip.file('app/src/main/res/drawable/splash_background_light.png', transparentPng);
+        zip.file('app/src/main/res/drawable/splash_background_dark.png', transparentPng);
+
+        // Download
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${packageName.split('.').pop()}-android.zip`;
+        a.click();
+
+        progress.className = 'progress-bar success';
+        progress.textContent = '✓ Estrutura gerada com sucesso!';
+        setTimeout(() => { progress.style.display = 'none'; btn.disabled = false; }, 3000);
+
+    } catch (err) {
+        console.error(err);
+        alert('Erro: ' + err.message);
+        progress.style.display = 'none';
+        btn.disabled = false;
+    }
+});
+</script>
 </body>
 </html>
-
-*Well-done*
