@@ -1,4 +1,1190 @@
-// JavaScript — runs inside the app preview
+<!DOCTYPE html>
+<html lang="pt" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AppForge — Mobile App Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- CodeMirror -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/eclipse.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/brace-fold.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/xml-fold.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/html-hint.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/search.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/searchcursor.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/jump-to-line.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+
+<style>
+/* ═══════════════════════════════════════════════
+   VARIABLES & THEMES
+═══════════════════════════════════════════════ */
+:root {
+  --font-ui: 'Syne', sans-serif;
+  --font-code: 'JetBrains Mono', monospace;
+
+  /* Sizes */
+  --topbar-h: 48px;
+  --editor-tabs-h: 40px;
+  --device-bar-w: 64px;
+  --resize-w: 5px;
+  --editor-w: 50%;
+}
+
+[data-theme="dark"] {
+  --bg:           #0d0d0f;
+  --surface:      #141416;
+  --surface2:     #1c1c1f;
+  --surface3:     #252528;
+  --border:       rgba(255,255,255,0.07);
+  --border2:      rgba(255,255,255,0.12);
+  --text:         #e8e8ec;
+  --text2:        #9898a8;
+  --text3:        #5a5a6a;
+  --accent:       #7c6dfa;
+  --accent2:      #5b4ee0;
+  --accent-glow:  rgba(124,109,250,0.25);
+  --green:        #3dd68c;
+  --red:          #ff5c6c;
+  --yellow:       #ffc542;
+  --topbar-bg:    rgba(13,13,15,0.95);
+  --editor-bg:    #0d0d0f;
+  --cm-theme:     material-darker;
+  --splash-bg:    #1a1a2e;
+  --device-label: rgba(255,255,255,0.45);
+  --scrollbar:    rgba(255,255,255,0.08);
+  --scrollbar-h:  rgba(255,255,255,0.18);
+}
+
+[data-theme="light"] {
+  --bg:           #f0f0f4;
+  --surface:      #ffffff;
+  --surface2:     #f8f8fc;
+  --surface3:     #ededf2;
+  --border:       rgba(0,0,0,0.07);
+  --border2:      rgba(0,0,0,0.13);
+  --text:         #111118;
+  --text2:        #6b6b7e;
+  --text3:        #aaaabc;
+  --accent:       #5b4ee0;
+  --accent2:      #7c6dfa;
+  --accent-glow:  rgba(91,78,224,0.15);
+  --green:        #1a9e6a;
+  --red:          #d93e4e;
+  --yellow:       #c78a00;
+  --topbar-bg:    rgba(240,240,244,0.95);
+  --editor-bg:    #fafafa;
+  --cm-theme:     eclipse;
+  --splash-bg:    #e8e8f8;
+  --device-label: rgba(0,0,0,0.4);
+  --scrollbar:    rgba(0,0,0,0.07);
+  --scrollbar-h:  rgba(0,0,0,0.2);
+}
+
+/* ═══════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════════════ */
+.topbar {
+  height: var(--topbar-h);
+  background: var(--topbar-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 10px;
+  position: relative;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-right: 8px;
+}
+.logo-mark {
+  width: 28px; height: 28px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+.logo-text {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+.logo-text span { color: var(--accent); }
+
+.topbar-sep {
+  width: 1px; height: 20px;
+  background: var(--border2);
+  margin: 0 4px;
+}
+
+.topbar-btn {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 7px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text2);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: all 150ms ease;
+  white-space: nowrap;
+}
+.topbar-btn:hover {
+  background: var(--surface3);
+  color: var(--text);
+  border-color: var(--border2);
+}
+.topbar-btn.primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+.topbar-btn.primary:hover { background: var(--accent2); }
+.topbar-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+.topbar-spacer { flex: 1; }
+
+/* App name input */
+.app-name-wrap {
+  position: absolute;
+  left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 8px;
+}
+.app-name-input {
+  background: transparent;
+  border: none;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  outline: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  width: 180px;
+  transition: background 150ms;
+}
+.app-name-input:hover { background: var(--surface3); }
+.app-name-input:focus { background: var(--surface3); }
+
+/* Status dot */
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: pulse 2.5s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Theme toggle */
+.theme-toggle {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all 150ms;
+}
+.theme-toggle:hover { background: var(--surface3); color: var(--text); }
+.theme-toggle svg { width: 15px; height: 15px; }
+
+/* ═══════════════════════════════════════════════
+   MAIN LAYOUT
+═══════════════════════════════════════════════ */
+.main {
+  display: flex;
+  height: calc(100vh - var(--topbar-h));
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════
+   EDITOR PANEL
+═══════════════════════════════════════════════ */
+.editor-panel {
+  width: var(--editor-w);
+  min-width: 280px;
+  max-width: calc(100vw - var(--device-bar-w) - 300px);
+  display: flex;
+  flex-direction: column;
+  background: var(--editor-bg);
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* Editor Tabs */
+.editor-tabs {
+  height: var(--editor-tabs-h);
+  display: flex;
+  align-items: stretch;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 8px;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.editor-tab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 150ms;
+  position: relative;
+  user-select: none;
+  font-family: var(--font-ui);
+  letter-spacing: 0.2px;
+}
+.editor-tab:hover { color: var(--text2); }
+.editor-tab.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+.editor-tab svg { width: 13px; height: 13px; }
+.tab-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-left: 2px;
+}
+.tab-dot.html { background: #ff7b6b; }
+.tab-dot.css  { background: #7bc8fb; }
+.tab-dot.js   { background: #ffd76b; }
+
+/* Editor toolbar */
+.editor-toolbar {
+  height: 34px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.toolbar-btn {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text3);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 120ms;
+}
+.toolbar-btn:hover { background: var(--surface3); color: var(--text); }
+.toolbar-btn svg { width: 13px; height: 13px; }
+.toolbar-sep {
+  width: 1px; height: 16px;
+  background: var(--border2);
+  margin: 0 3px;
+}
+.toolbar-label {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: var(--font-code);
+  margin-left: auto;
+}
+
+/* CodeMirror overrides */
+.editor-cm-wrap {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+.editor-cm-wrap .CodeMirror {
+  height: 100%;
+  font-family: var(--font-code);
+  font-size: 13px;
+  line-height: 1.7;
+  background: var(--editor-bg) !important;
+}
+[data-theme="dark"] .editor-cm-wrap .CodeMirror {
+  background: #0d0d0f !important;
+  color: #c9d1d9;
+}
+[data-theme="light"] .editor-cm-wrap .CodeMirror {
+  background: #fafafa !important;
+  color: #24292f;
+}
+.editor-cm-wrap .CodeMirror-scroll { padding-bottom: 40px; }
+.editor-cm-wrap .CodeMirror-gutters {
+  border-right: 1px solid var(--border) !important;
+  background: var(--surface) !important;
+}
+[data-theme="light"] .editor-cm-wrap .CodeMirror-gutters {
+  background: #f0f0f4 !important;
+}
+.editor-cm-wrap .CodeMirror-linenumber { color: var(--text3) !important; }
+.editor-cm-wrap .CodeMirror-activeline-background {
+  background: var(--surface2) !important;
+}
+.editor-cm-wrap .CodeMirror-cursor {
+  border-left: 2px solid var(--accent) !important;
+}
+
+/* Status bar */
+.editor-statusbar {
+  height: 24px;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 12px;
+  font-family: var(--font-code);
+  font-size: 10.5px;
+  color: rgba(255,255,255,0.85);
+  flex-shrink: 0;
+}
+.statusbar-item { display: flex; align-items: center; gap: 5px; }
+.statusbar-item svg { width: 11px; height: 11px; }
+
+/* ═══════════════════════════════════════════════
+   RESIZE HANDLE
+═══════════════════════════════════════════════ */
+.resize-handle {
+  width: var(--resize-w);
+  background: var(--border);
+  cursor: col-resize;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  transition: background 150ms;
+}
+.resize-handle:hover, .resize-handle.dragging {
+  background: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════
+   PREVIEW PANEL
+═══════════════════════════════════════════════ */
+.preview-panel {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Device sidebar */
+.device-sidebar {
+  width: var(--device-bar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 6px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+.device-sidebar::-webkit-scrollbar { display: none; }
+
+.device-chip {
+  width: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 4px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 180ms ease;
+  border: 1px solid transparent;
+  position: relative;
+}
+.device-chip:hover { background: var(--surface2); }
+.device-chip.active {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+}
+.device-chip svg { width: 22px; height: 22px; color: var(--text2); }
+.device-chip.active svg { color: var(--accent); }
+.device-chip-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text3);
+  text-align: center;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+.device-chip.active .device-chip-label { color: var(--accent); }
+
+.device-sidebar-sep {
+  width: 32px; height: 1px;
+  background: var(--border);
+  margin: 3px 0;
+}
+
+/* Preview canvas */
+.preview-canvas {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  padding: 30px 20px;
+  position: relative;
+}
+.preview-canvas::-webkit-scrollbar { width: 6px; height: 6px; }
+.preview-canvas::-webkit-scrollbar-track { background: transparent; }
+.preview-canvas::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 3px; }
+.preview-canvas::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-h); }
+
+/* Device background label */
+.canvas-device-label {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--device-label);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════
+   DEVICE FRAMES
+═══════════════════════════════════════════════ */
+.device-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+/* Generic phone shell */
+.phone-shell {
+  position: relative;
+  flex-shrink: 0;
+}
+.phone-shell .shell-body {
+  border-radius: var(--shell-radius, 44px);
+  background: var(--shell-bg, #1a1a1e);
+  padding: var(--shell-pad, 12px);
+  box-shadow: var(--shell-shadow,
+    0 0 0 1px rgba(255,255,255,0.08),
+    0 40px 120px rgba(0,0,0,0.5),
+    inset 0 0 0 1px rgba(255,255,255,0.03));
+}
+.phone-shell .shell-screen {
+  overflow: hidden;
+  border-radius: var(--screen-radius, 34px);
+  background: #000;
+  position: relative;
+}
+.phone-shell iframe {
+  display: block;
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── iPhone 15 Pro ── */
+.device-iphone15 {
+  --shell-bg: #1c1c1e;
+  --shell-radius: 54px;
+  --shell-pad: 13px;
+  --screen-radius: 44px;
+  --shell-shadow:
+    0 0 0 1px rgba(255,255,255,0.1),
+    0 50px 140px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.device-iphone15 .shell-body { width: 300px; }
+.device-iphone15 .shell-screen { width: 274px; height: 594px; }
+.device-iphone15 .dynamic-island {
+  position: absolute;
+  top: 20px; left: 50%; transform: translateX(-50%);
+  width: 100px; height: 30px;
+  background: #000;
+  border-radius: 20px;
+  z-index: 10;
+  pointer-events: none;
+}
+/* side buttons */
+.device-iphone15::before {
+  content: '';
+  position: absolute;
+  right: -3px; top: 100px;
+  width: 3px; height: 70px;
+  background: #2a2a2c;
+  border-radius: 2px;
+}
+.device-iphone15 .btn-l1, .device-iphone15 .btn-l2, .device-iphone15 .btn-l3 {
+  position: absolute;
+  left: -3px;
+  width: 3px;
+  background: #2a2a2c;
+  border-radius: 2px;
+}
+.device-iphone15 .btn-l1 { top: 85px; height: 28px; }
+.device-iphone15 .btn-l2 { top: 128px; height: 60px; }
+.device-iphone15 .btn-l3 { top: 200px; height: 60px; }
+
+/* ── Samsung Galaxy S24 ── */
+.device-samsung-s24 {
+  --shell-bg: linear-gradient(160deg, #1a1a1f 0%, #0e0e12 100%);
+  --shell-radius: 48px;
+  --shell-pad: 11px;
+  --screen-radius: 40px;
+  --shell-shadow:
+    0 0 0 1px rgba(255,255,255,0.07),
+    0 50px 140px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.device-samsung-s24 .shell-body { width: 285px; }
+.device-samsung-s24 .shell-screen { width: 263px; height: 570px; }
+.device-samsung-s24 .punch-hole {
+  position: absolute;
+  top: 14px; left: 50%; transform: translateX(-50%);
+  width: 11px; height: 11px;
+  background: #000;
+  border-radius: 50%;
+  z-index: 10;
+  pointer-events: none;
+}
+.device-samsung-s24::after {
+  content: '';
+  position: absolute;
+  right: -3px; top: 90px;
+  width: 3px; height: 80px;
+  background: #1a1a1f;
+  border-radius: 2px;
+}
+
+/* ── Samsung Galaxy A55 ── */
+.device-samsung-a55 {
+  --shell-bg: #222228;
+  --shell-radius: 42px;
+  --shell-pad: 10px;
+  --screen-radius: 35px;
+  --shell-shadow:
+    0 0 0 1px rgba(255,255,255,0.06),
+    0 40px 100px rgba(0,0,0,0.45);
+}
+.device-samsung-a55 .shell-body { width: 270px; }
+.device-samsung-a55 .shell-screen { width: 250px; height: 540px; }
+.device-samsung-a55 .punch-hole {
+  position: absolute;
+  top: 13px; left: 50%; transform: translateX(-50%);
+  width: 10px; height: 10px;
+  background: #000; border-radius: 50%;
+  z-index: 10; pointer-events: none;
+}
+
+/* ── iPad Pro 11" ── */
+.device-ipad-pro {
+  --shell-bg: #1c1c1e;
+  --shell-radius: 22px;
+  --shell-pad: 14px;
+  --screen-radius: 12px;
+  --shell-shadow:
+    0 0 0 1px rgba(255,255,255,0.08),
+    0 40px 120px rgba(0,0,0,0.5);
+}
+.device-ipad-pro .shell-body { width: 480px; }
+.device-ipad-pro .shell-screen { width: 452px; height: 620px; }
+.device-ipad-pro .face-cam {
+  position: absolute;
+  top: 50%;transform: translateY(-50%);
+  left: 22px;
+  width: 9px; height: 9px;
+  background: #2a2a2c; border-radius: 50%;
+  z-index: 10; pointer-events: none;
+}
+
+/* ── Samsung Galaxy Tab S9 ── */
+.device-samsung-tab {
+  --shell-bg: #18181c;
+  --shell-radius: 20px;
+  --shell-pad: 12px;
+  --screen-radius: 10px;
+  --shell-shadow:
+    0 0 0 1px rgba(255,255,255,0.06),
+    0 40px 100px rgba(0,0,0,0.45);
+}
+.device-samsung-tab .shell-body { width: 460px; }
+.device-samsung-tab .shell-screen { width: 436px; height: 600px; }
+.device-samsung-tab .punch-hole-tab {
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  left: 20px;
+  width: 8px; height: 8px;
+  background: #000; border-radius: 50%;
+  z-index: 10; pointer-events: none;
+}
+
+/* ── Google Pixel 8 ── */
+.device-pixel8 {
+  --shell-bg: #1e1e22;
+  --shell-radius: 46px;
+  --shell-pad: 12px;
+  --screen-radius: 36px;
+  --shell-shadow:
+    0 0 0 1px rgba(255,255,255,0.07),
+    0 45px 120px rgba(0,0,0,0.5);
+}
+.device-pixel8 .shell-body { width: 278px; }
+.device-pixel8 .shell-screen { width: 254px; height: 550px; }
+/* Pixel camera bar */
+.device-pixel8 .camera-bar {
+  position: absolute;
+  top: -2px; left: 50%; transform: translateX(-50%);
+  width: 120px; height: 10px;
+  background: #2a2a30; border-radius: 0 0 6px 6px;
+  z-index: 5; pointer-events: none;
+}
+.device-pixel8 .punch-hole {
+  position: absolute;
+  top: 17px; left: 50%; transform: translateX(-50%);
+  width: 10px; height: 10px;
+  background: #000; border-radius: 50%;
+  z-index: 10; pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════
+   SPLASH SCREEN
+═══════════════════════════════════════════════ */
+.splash-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--splash-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 20;
+  cursor: pointer;
+  transition: opacity 500ms ease, transform 500ms ease;
+  border-radius: inherit;
+}
+.splash-overlay.hidden {
+  opacity: 0;
+  transform: scale(1.04);
+  pointer-events: none;
+}
+.splash-icon {
+  width: 72px; height: 72px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 32px var(--accent-glow), 0 2px 8px rgba(0,0,0,0.3);
+  animation: splashPop 600ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.splash-icon svg { width: 36px; height: 36px; color: #fff; }
+@keyframes splashPop {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.splash-app-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+.splash-hint {
+  font-size: 11px;
+  color: var(--text3);
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  position: absolute;
+  bottom: 24px;
+  left: 0; right: 0;
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════════
+   DEVICE LABEL BADGE
+═══════════════════════════════════════════════ */
+.device-badge {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text2);
+  letter-spacing: 0.4px;
+  display: flex; align-items: center; gap: 7px;
+}
+.device-badge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════
+   SCROLLBARS
+═══════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-h); }
+
+/* ═══════════════════════════════════════════════
+   RUN INDICATOR
+═══════════════════════════════════════════════ */
+.run-flash {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  animation: runFlash 600ms ease forwards;
+}
+@keyframes runFlash {
+  0%   { opacity: 0; transform: translateX(-100%); }
+  50%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(100%); }
+}
+
+/* Tooltip */
+[data-tip] { position: relative; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 60px; top: 50%; transform: translateY(-50%);
+  background: var(--surface3);
+  color: var(--text);
+  font-size: 10.5px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  border: 1px solid var(--border2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms;
+  z-index: 200;
+}
+[data-tip]:hover::after { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- SVG SPRITE (Lucide-style inline SVGs) -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="ic-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+  </symbol>
+  <symbol id="ic-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+  </symbol>
+  <symbol id="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+  </symbol>
+  <symbol id="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+  </symbol>
+  <symbol id="ic-format" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/>
+  </symbol>
+  <symbol id="ic-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+  </symbol>
+  <symbol id="ic-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 00-4-4H4"/>
+  </symbol>
+  <symbol id="ic-redo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="15 14 20 9 15 4"/><path d="M4 20v-7a4 4 0 014-4h12"/>
+  </symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </symbol>
+  <symbol id="ic-wrap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 6h18M3 12h15a3 3 0 010 6h-4"/><polyline points="16 16 14 18 16 20"/>
+  </symbol>
+  <symbol id="ic-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="ic-tablet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="3" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="ic-maximize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/>
+  </symbol>
+  <symbol id="ic-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+  </symbol>
+  <symbol id="ic-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+  </symbol>
+  <symbol id="ic-rotate" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+  </symbol>
+  <symbol id="ic-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+  </symbol>
+  <symbol id="ic-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2l2.4 7.2H22l-6.2 4.5 2.4 7.3L12 17l-6.2 4 2.4-7.3L2 9.2h7.6z"/>
+  </symbol>
+  <symbol id="ic-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
+  </symbol>
+</svg>
+
+<!-- ═══════════════════ TOPBAR ═══════════════════ -->
+<header class="topbar">
+  <div class="topbar-logo">
+    <div class="logo-mark">
+      <svg width="16" height="16"><use href="#ic-zap" stroke="#fff" stroke-width="2.5"/></svg>
+    </div>
+    <span class="logo-text">App<span>Forge</span></span>
+  </div>
+
+  <div class="topbar-sep"></div>
+
+  <button class="topbar-btn" id="btnUndo" title="Undo">
+    <svg><use href="#ic-undo"/></svg> Undo
+  </button>
+  <button class="topbar-btn" id="btnRedo" title="Redo">
+    <svg><use href="#ic-redo"/></svg> Redo
+  </button>
+
+  <div class="topbar-sep"></div>
+
+  <button class="topbar-btn primary" id="btnRun">
+    <svg><use href="#ic-play"/></svg> Run
+  </button>
+
+  <div class="app-name-wrap">
+    <div class="status-dot" id="statusDot"></div>
+    <input class="app-name-input" id="appNameInput" value="My App" maxlength="30" spellcheck="false"/>
+  </div>
+
+  <div class="topbar-spacer"></div>
+
+  <button class="topbar-btn" id="btnExport">
+    <svg><use href="#ic-download"/></svg> Export
+  </button>
+
+  <div class="theme-toggle" id="themeToggle" title="Toggle theme">
+    <svg><use href="#ic-moon" id="themeIcon"/></svg>
+  </div>
+</header>
+
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<div class="main">
+
+  <!-- ── EDITOR PANEL ── -->
+  <div class="editor-panel" id="editorPanel">
+
+    <!-- Tabs -->
+    <div class="editor-tabs">
+      <div class="editor-tab active" data-tab="html">
+        <span class="tab-dot html"></span> HTML
+      </div>
+      <div class="editor-tab" data-tab="css">
+        <span class="tab-dot css"></span> CSS
+      </div>
+      <div class="editor-tab" data-tab="js">
+        <span class="tab-dot js"></span> JS
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="editor-toolbar">
+      <button class="toolbar-btn" id="tbFormat" data-tip="Format" title="Format">
+        <svg><use href="#ic-format"/></svg>
+      </button>
+      <button class="toolbar-btn" id="tbSearch" data-tip="Search" title="Search (Ctrl+F)">
+        <svg><use href="#ic-search"/></svg>
+      </button>
+      <button class="toolbar-btn" id="tbCopy" data-tip="Copy all" title="Copy all">
+        <svg><use href="#ic-copy"/></svg>
+      </button>
+      <div class="toolbar-sep"></div>
+      <button class="toolbar-btn" id="tbWrap" data-tip="Word wrap" title="Word wrap">
+        <svg><use href="#ic-wrap"/></svg>
+      </button>
+      <div class="toolbar-sep"></div>
+      <span class="toolbar-label" id="cursorPos">Ln 1, Col 1</span>
+    </div>
+
+    <!-- CodeMirror -->
+    <div class="editor-cm-wrap">
+      <textarea id="codeEditor"></textarea>
+    </div>
+
+    <!-- Status bar -->
+    <div class="editor-statusbar">
+      <span class="statusbar-item">
+        <svg><use href="#ic-code" stroke="rgba(255,255,255,0.7)" stroke-width="2"/></svg>
+        <span id="statusLang">HTML</span>
+      </span>
+      <span class="statusbar-item" style="margin-left:auto; opacity:0.7;">
+        UTF-8 · AppForge Editor
+      </span>
+    </div>
+  </div>
+
+  <!-- ── RESIZE HANDLE ── -->
+  <div class="resize-handle" id="resizeHandle"></div>
+
+  <!-- ── PREVIEW PANEL ── -->
+  <div class="preview-panel">
+
+    <!-- Device sidebar -->
+    <div class="device-sidebar">
+      <div class="device-chip active" data-device="iphone15" data-tip="iPhone 15 Pro">
+        <svg><use href="#ic-phone"/></svg>
+        <span class="device-chip-label">iPhone<br>15 Pro</span>
+      </div>
+      <div class="device-chip" data-device="samsung-s24" data-tip="Galaxy S24">
+        <svg><use href="#ic-phone"/></svg>
+        <span class="device-chip-label">Galaxy<br>S24</span>
+      </div>
+      <div class="device-chip" data-device="samsung-a55" data-tip="Galaxy A55">
+        <svg><use href="#ic-phone"/></svg>
+        <span class="device-chip-label">Galaxy<br>A55</span>
+      </div>
+      <div class="device-chip" data-device="pixel8" data-tip="Pixel 8">
+        <svg><use href="#ic-phone"/></svg>
+        <span class="device-chip-label">Pixel<br>8</span>
+      </div>
+      <div class="device-sidebar-sep"></div>
+      <div class="device-chip" data-device="ipad-pro" data-tip="iPad Pro 11"">
+        <svg><use href="#ic-tablet"/></svg>
+        <span class="device-chip-label">iPad<br>Pro</span>
+      </div>
+      <div class="device-chip" data-device="samsung-tab" data-tip="Galaxy Tab S9">
+        <svg><use href="#ic-tablet"/></svg>
+        <span class="device-chip-label">Tab<br>S9</span>
+      </div>
+      <div class="device-sidebar-sep"></div>
+      <div class="device-chip" id="rotatBtn" data-tip="Rotate" style="cursor:pointer;">
+        <svg><use href="#ic-rotate"/></svg>
+        <span class="device-chip-label">Rotate</span>
+      </div>
+    </div>
+
+    <!-- Preview canvas -->
+    <div class="preview-canvas" id="previewCanvas">
+      <div id="runFlashBar"></div>
+      <div class="canvas-device-label" id="deviceLabel">iPhone 15 Pro</div>
+
+      <div class="device-wrapper" id="deviceWrapper">
+        <!-- Device rendered here by JS -->
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+const state = {
+  theme: 'dark',
+  activeTab: 'html',
+  activeDevice: 'iphone15',
+  rotated: false,
+  appName: 'My App',
+  wrap: false,
+  splashVisible: true,
+  code: {
+    html: `<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f5f5f7;
+    color: #1d1d1f;
+    min-height: 100vh;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 48px 20px 32px;
+    color: white;
+    text-align: center;
+  }
+  .header h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+  .header p  { font-size: 14px; opacity: 0.8; }
+
+  .nav-bar {
+    display: flex;
+    background: white;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 0 16px;
+  }
+  .nav-item {
+    flex: 1;
+    text-align: center;
+    padding: 14px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #8e8ea8;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .nav-item.active { color: #667eea; border-bottom-color: #667eea; }
+
+  .section { padding: 20px 16px; }
+  .section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .card-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .card-title { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .card-sub   { font-size: 12px; color: #8e8ea8; }
+
+  .fab {
+    position: fixed;
+    bottom: 24px; right: 20px;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    font-size: 26px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(102,126,234,0.45);
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>My App ✦</h1>
+  <p>Built with AppForge</p>
+</div>
+
+<div class="nav-bar">
+  <div class="nav-item active">Home</div>
+  <div class="nav-item">Explore</div>
+  <div class="nav-item">Profile</div>
+</div>
+
+<div class="section">
+  <div class="section-title">Featured</div>
+
+  <div class="card">
+    <div class="card-icon" style="background:#fff0f0">🔥</div>
+    <div>
+      <div class="card-title">Trending Now</div>
+      <div class="card-sub">See what's popular today</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-icon" style="background:#f0f8ff">🎵</div>
+    <div>
+      <div class="card-title">Music Vibes</div>
+      <div class="card-sub">Curated playlists for you</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-icon" style="background:#f0fff4">🌿</div>
+    <div>
+      <div class="card-title">Wellness</div>
+      <div class="card-sub">Daily tips & routines</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-icon" style="background:#fdf5ff">🚀</div>
+    <div>
+      <div class="card-title">Launch Mode</div>
+      <div class="card-sub">Productivity unlocked</div>
+    </div>
+  </div>
+</div>
+
+<div class="fab">+</div>
+
+</body>
+</html>`,
+    css: `/* Global styles — injected into the preview */
+/* You can add extra CSS here that merges with your HTML */
+
+body {
+  /* override default styles */
+}`,
+    js: `// JavaScript — runs inside the app preview
 // Use this for extra behaviour
 
 console.log('AppForge running!');
@@ -6,4 +1192,409 @@ console.log('AppForge running!');
 // Example: log touch events
 document.addEventListener('click', e => {
   console.log('Clicked:', e.target.tagName);
+});`
+  }
+};
+
+/* ═══════════════════════════════════════════════
+   DEVICES CONFIG
+═══════════════════════════════════════════════ */
+const DEVICES = {
+  'iphone15': {
+    label: 'iPhone 15 Pro',
+    cls: 'device-iphone15',
+    screenW: 274, screenH: 594,
+    buildExtra: (shell) => {
+      shell.innerHTML += `<div class="dynamic-island"></div>
+        <div class="btn-l1"></div><div class="btn-l2"></div><div class="btn-l3"></div>`;
+    }
+  },
+  'samsung-s24': {
+    label: 'Samsung Galaxy S24',
+    cls: 'device-samsung-s24',
+    screenW: 263, screenH: 570,
+    buildExtra: (shell) => { shell.innerHTML += `<div class="punch-hole"></div>`; }
+  },
+  'samsung-a55': {
+    label: 'Samsung Galaxy A55',
+    cls: 'device-samsung-a55',
+    screenW: 250, screenH: 540,
+    buildExtra: (shell) => { shell.innerHTML += `<div class="punch-hole"></div>`; }
+  },
+  'pixel8': {
+    label: 'Google Pixel 8',
+    cls: 'device-pixel8',
+    screenW: 254, screenH: 550,
+    buildExtra: (shell) => {
+      shell.innerHTML += `<div class="camera-bar"></div><div class="punch-hole"></div>`;
+    }
+  },
+  'ipad-pro': {
+    label: 'iPad Pro 11"',
+    cls: 'device-ipad-pro',
+    screenW: 452, screenH: 620,
+    buildExtra: (shell) => { shell.innerHTML += `<div class="face-cam"></div>`; }
+  },
+  'samsung-tab': {
+    label: 'Samsung Galaxy Tab S9',
+    cls: 'device-samsung-tab',
+    screenW: 436, screenH: 600,
+    buildExtra: (shell) => { shell.innerHTML += `<div class="punch-hole-tab"></div>`; }
+  }
+};
+
+/* ═══════════════════════════════════════════════
+   BUILD PREVIEW HTML
+═══════════════════════════════════════════════ */
+function buildPreviewHTML() {
+  const html = state.code.html;
+  const css  = state.code.css;
+  const js   = state.code.js;
+
+  // Inject extra CSS & JS into the HTML
+  const hasHead = /<\/head>/i.test(html);
+  const cssTag  = `<style>${css}</style>`;
+  const jsTag   = `<script>${js}<\/script>`;
+
+  if (hasHead) {
+    return html
+      .replace(/<\/head>/i, cssTag + '</head>')
+      .replace(/<\/body>/i, jsTag + '</body>');
+  }
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">${cssTag}</head><body>${html}${jsTag}</body></html>`;
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER DEVICE
+═══════════════════════════════════════════════ */
+function renderDevice(deviceKey) {
+  const cfg = DEVICES[deviceKey];
+  const wrapper = document.getElementById('deviceWrapper');
+  const label   = document.getElementById('deviceLabel');
+  label.textContent = cfg.label;
+
+  let sw = cfg.screenW, sh = cfg.screenH;
+  if (state.rotated && (deviceKey === 'ipad-pro' || deviceKey === 'samsung-tab')) {
+    [sw, sh] = [sh, sw];
+  }
+
+  wrapper.innerHTML = '';
+
+  const phoneShell = document.createElement('div');
+  phoneShell.className = `phone-shell ${cfg.cls}`;
+
+  const body = document.createElement('div');
+  body.className = 'shell-body';
+
+  const screen = document.createElement('div');
+  screen.className = 'shell-screen';
+  screen.style.width  = sw + 'px';
+  screen.style.height = sh + 'px';
+
+  // Splash
+  const splash = document.createElement('div');
+  splash.className = 'splash-overlay';
+  if (!state.splashVisible) splash.classList.add('hidden');
+
+  const iconWrap = document.createElement('div');
+  iconWrap.className = 'splash-icon';
+  iconWrap.innerHTML = `<svg width="36" height="36"><use href="#ic-zap" stroke="#fff" stroke-width="2.5"/></svg>`;
+
+  const splashName = document.createElement('div');
+  splashName.className = 'splash-app-name';
+  splashName.textContent = state.appName;
+
+  const splashHint = document.createElement('div');
+  splashHint.className = 'splash-hint';
+  splashHint.textContent = 'tap to open';
+
+  splash.appendChild(iconWrap);
+  splash.appendChild(splashName);
+  splash.appendChild(splashHint);
+
+  splash.addEventListener('click', () => {
+    splash.classList.add('hidden');
+    state.splashVisible = false;
+  });
+
+  // iframe
+  const iframe = document.createElement('iframe');
+  iframe.id = 'previewIframe';
+  iframe.title = 'App Preview';
+  iframe.style.width  = sw + 'px';
+  iframe.style.height = sh + 'px';
+  iframe.style.border = 'none';
+  iframe.style.display = 'block';
+  iframe.style.background = '#fff';
+
+  screen.appendChild(splash);
+  screen.appendChild(iframe);
+  body.appendChild(screen);
+  phoneShell.appendChild(body);
+  cfg.buildExtra(phoneShell);
+
+  // badge
+  const badge = document.createElement('div');
+  badge.className = 'device-badge';
+  badge.innerHTML = `<div class="device-badge-dot"></div>${cfg.label}`;
+
+  wrapper.appendChild(phoneShell);
+  wrapper.appendChild(badge);
+
+  injectIntoIframe(iframe);
+}
+
+function injectIntoIframe(iframe) {
+  const html = buildPreviewHTML();
+  const blob = new Blob([html], { type: 'text/html' });
+  const url  = URL.createObjectURL(blob);
+  iframe.src = url;
+}
+
+function refreshPreview() {
+  const iframe = document.getElementById('previewIframe');
+  if (iframe) injectIntoIframe(iframe);
+  // Flash
+  const bar = document.getElementById('runFlashBar');
+  bar.className = 'run-flash';
+  setTimeout(() => bar.className = '', 700);
+}
+
+/* ═══════════════════════════════════════════════
+   CODEMIRROR SETUP
+═══════════════════════════════════════════════ */
+let editors = {};
+
+function getCMMode(tab) {
+  return tab === 'html' ? 'htmlmixed' : tab === 'css' ? 'css' : 'javascript';
+}
+
+function initEditors() {
+  const textarea = document.getElementById('codeEditor');
+
+  // Create one editor, swap content on tab switch
+  const cm = CodeMirror.fromTextArea(textarea, {
+    mode: 'htmlmixed',
+    theme: state.theme === 'dark' ? 'material-darker' : 'eclipse',
+    lineNumbers: true,
+    lineWrapping: state.wrap,
+    autoCloseTags: true,
+    autoCloseBrackets: true,
+    matchBrackets: true,
+    styleActiveLine: true,
+    foldGutter: true,
+    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
+    tabSize: 2,
+    indentWithTabs: false,
+    extraKeys: {
+      'Ctrl-Space': 'autocomplete',
+      'Ctrl-/': 'toggleComment',
+      'Ctrl-Z': function(cm) { cm.undo(); },
+      'Ctrl-Y': function(cm) { cm.redo(); },
+      'Ctrl-F': function(cm) { cm.execCommand('find'); },
+      'Ctrl-Enter': function() { runCode(); }
+    }
+  });
+
+  cm.setValue(state.code.html);
+  cm.on('change', () => {
+    state.code[state.activeTab] = cm.getValue();
+    // live update
+    scheduleRefresh();
+  });
+  cm.on('cursorActivity', () => {
+    const c = cm.getCursor();
+    document.getElementById('cursorPos').textContent = `Ln ${c.line+1}, Col ${c.ch+1}`;
+  });
+
+  editors.cm = cm;
+}
+
+let refreshTimer = null;
+function scheduleRefresh() {
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(refreshPreview, 800);
+}
+
+/* ═══════════════════════════════════════════════
+   TAB SWITCHING
+═══════════════════════════════════════════════ */
+function switchTab(tab) {
+  // Save current
+  state.code[state.activeTab] = editors.cm.getValue();
+  state.activeTab = tab;
+
+  editors.cm.setValue(state.code[tab]);
+  editors.cm.setOption('mode', getCMMode(tab));
+
+  document.getElementById('statusLang').textContent = tab.toUpperCase();
+
+  document.querySelectorAll('.editor-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tab);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   DEVICE SWITCHING
+═══════════════════════════════════════════════ */
+function switchDevice(key) {
+  state.activeDevice = key;
+  document.querySelectorAll('.device-chip[data-device]').forEach(c => {
+    c.classList.toggle('active', c.dataset.device === key);
+  });
+  state.splashVisible = true;
+  renderDevice(key);
+}
+
+/* ═══════════════════════════════════════════════
+   RUN
+═══════════════════════════════════════════════ */
+function runCode() {
+  state.code[state.activeTab] = editors.cm.getValue();
+  state.splashVisible = false;
+  refreshPreview();
+}
+
+/* ═══════════════════════════════════════════════
+   THEME
+═══════════════════════════════════════════════ */
+function toggleTheme() {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', state.theme);
+  editors.cm.setOption('theme', state.theme === 'dark' ? 'material-darker' : 'eclipse');
+  const icon = document.getElementById('themeIcon');
+  icon.setAttribute('href', state.theme === 'dark' ? '#ic-moon' : '#ic-sun');
+}
+
+/* ═══════════════════════════════════════════════
+   RESIZE PANEL
+═══════════════════════════════════════════════ */
+function initResize() {
+  const handle = document.getElementById('resizeHandle');
+  const panel  = document.getElementById('editorPanel');
+  let dragging = false;
+  let startX, startW;
+
+  handle.addEventListener('mousedown', e => {
+    dragging = true;
+    startX = e.clientX;
+    startW = panel.offsetWidth;
+    handle.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - startX;
+    const newW = Math.max(280, Math.min(startW + dx, window.innerWidth - 400));
+    panel.style.width = newW + 'px';
+    editors.cm.refresh();
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   TOOLBAR ACTIONS
+═══════════════════════════════════════════════ */
+function formatCode() {
+  // Simple indent formatter
+  const val = editors.cm.getValue();
+  let indented = '';
+  let level = 0;
+  const lines = val.split('\n');
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed) { indented += '\n'; return; }
+    if (/^<\//.test(trimmed) || /\/>$/.test(trimmed)) {
+      if (/^<\//.test(trimmed)) level = Math.max(0, level - 1);
+      indented += '  '.repeat(level) + trimmed + '\n';
+      return;
+    }
+    if (/^<[^!?\/][^>]*[^\/]>$/.test(trimmed) && !/<.*>.*<\/.*>/.test(trimmed)) {
+      indented += '  '.repeat(level) + trimmed + '\n';
+      level++;
+      return;
+    }
+    indented += '  '.repeat(level) + trimmed + '\n';
+  });
+  editors.cm.setValue(indented.trimEnd());
+}
+
+/* ═══════════════════════════════════════════════
+   EXPORT
+═══════════════════════════════════════════════ */
+function exportApp() {
+  const html = buildPreviewHTML();
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (state.appName.replace(/\s+/g,'-').toLowerCase() || 'app') + '.html';
+  a.click();
+}
+
+/* ═══════════════════════════════════════════════
+   EVENTS
+═══════════════════════════════════════════════ */
+document.querySelectorAll('.editor-tab').forEach(t => {
+  t.addEventListener('click', () => switchTab(t.dataset.tab));
 });
+
+document.querySelectorAll('.device-chip[data-device]').forEach(c => {
+  c.addEventListener('click', () => switchDevice(c.dataset.device));
+});
+
+document.getElementById('rotatBtn').addEventListener('click', () => {
+  state.rotated = !state.rotated;
+  renderDevice(state.activeDevice);
+});
+
+document.getElementById('btnRun').addEventListener('click', runCode);
+document.getElementById('btnExport').addEventListener('click', exportApp);
+document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+document.getElementById('btnUndo').addEventListener('click', () => editors.cm.undo());
+document.getElementById('btnRedo').addEventListener('click', () => editors.cm.redo());
+
+document.getElementById('appNameInput').addEventListener('input', e => {
+  state.appName = e.target.value || 'My App';
+  // Update splash if visible
+  const splashNames = document.querySelectorAll('.splash-app-name');
+  splashNames.forEach(s => s.textContent = state.appName);
+});
+
+document.getElementById('tbFormat').addEventListener('click', formatCode);
+document.getElementById('tbSearch').addEventListener('click', () => {
+  editors.cm.execCommand('find');
+});
+document.getElementById('tbCopy').addEventListener('click', () => {
+  navigator.clipboard.writeText(editors.cm.getValue()).then(() => {
+    const btn = document.getElementById('tbCopy');
+    btn.style.color = 'var(--green)';
+    setTimeout(() => btn.style.color = '', 1000);
+  });
+});
+document.getElementById('tbWrap').addEventListener('click', () => {
+  state.wrap = !state.wrap;
+  editors.cm.setOption('lineWrapping', state.wrap);
+  const btn = document.getElementById('tbWrap');
+  btn.style.color = state.wrap ? 'var(--accent)' : '';
+});
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+window.addEventListener('load', () => {
+  initEditors();
+  initResize();
+  renderDevice(state.activeDevice);
+});
+</script>
+</body>
+</html>
