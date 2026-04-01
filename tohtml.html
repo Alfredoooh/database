@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF → HTML Converter</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
+
+    :root {
+      --accent: #f26522;
+      --accent-dim: #c04d10;
+      --bg: #0d0d0d;
+      --surface: #141414;
+      --surface2: #1c1c1c;
+      --border: #272727;
+      --text: #e8e8e8;
+      --muted: #555;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* noise overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    .mono { font-family: 'DM Mono', monospace; }
+
+    /* drop zone */
+    #dropzone {
+      border: 1.5px dashed var(--border);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    #dropzone.drag-over {
+      border-color: var(--accent);
+      background: rgba(242,101,34,0.05);
+    }
+
+    /* progress bar */
+    #progress-bar {
+      transition: width 0.3s ease;
+    }
+
+    /* canvas pages */
+    .pdf-page-wrapper {
+      position: relative;
+      background: #fff;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+      overflow: hidden;
+    }
+    .pdf-page-wrapper canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .page-badge {
+      position: absolute;
+      bottom: 8px;
+      right: 10px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: rgba(0,0,0,0.3);
+    }
+
+    /* download btn pulse */
+    @keyframes pulse-border {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(242,101,34,0.4); }
+      50% { box-shadow: 0 0 0 6px rgba(242,101,34,0); }
+    }
+    #download-btn { animation: pulse-border 2s infinite; }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    /* fade in animation */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.4s ease forwards; }
+
+    .accent { color: var(--accent); }
+  </style>
+</head>
+<body class="relative z-10">
+
+  <!-- HEADER -->
+  <header class="border-b border-[var(--border)] px-6 py-4 flex items-center justify-between sticky top-0 z-50" style="background:rgba(13,13,13,0.92);backdrop-filter:blur(12px)">
+    <div class="flex items-center gap-3">
+      <!-- icon -->
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <rect width="28" height="28" rx="6" fill="var(--accent)"/>
+        <path d="M8 20V8h7.5a4.5 4.5 0 0 1 0 9H8" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M13 17v3" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <span class="text-lg font-bold tracking-tight">PDF<span class="accent">→</span>HTML</span>
+    </div>
+    <div class="mono text-xs text-[var(--muted)]">renderiza via canvas</div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="relative z-10 max-w-5xl mx-auto px-4 py-12">
+
+    <!-- HERO -->
+    <div class="mb-12 fade-up">
+      <p class="mono text-[var(--accent)] text-xs mb-3 tracking-widest uppercase">Conversor</p>
+      <h1 class="text-4xl sm:text-5xl font-extrabold leading-none tracking-tight mb-4">
+        PDF convertido<br/>em <span class="accent">HTML visual</span>
+      </h1>
+      <p class="text-[var(--muted)] text-sm max-w-md leading-relaxed">
+        Cada página do PDF é renderizada como canvas e exportada como HTML autônomo. Nenhum servidor. Nenhum dado sai do navegador.
+      </p>
+    </div>
+
+    <!-- DROP ZONE -->
+    <div
+      id="dropzone"
+      onclick="document.getElementById('file-input').click()"
+      class="rounded-xl p-12 flex flex-col items-center justify-center gap-4 cursor-pointer mb-8 fade-up"
+      style="animation-delay:0.1s"
+    >
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <path d="M20 27V13M13 20l7-7 7 7" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="1.5" y="1.5" width="37" height="37" rx="10.5" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="4 3"/>
+      </svg>
+      <div class="text-center">
+        <p class="font-semibold text-sm">Arraste um PDF aqui</p>
+        <p class="mono text-xs text-[var(--muted)] mt-1">ou clique para selecionar</p>
+      </div>
+      <input id="file-input" type="file" accept="application/pdf" class="hidden" />
+    </div>
+
+    <!-- STATUS CARD -->
+    <div id="status-card" class="hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 mb-8 fade-up">
+      <div class="flex items-center justify-between mb-3">
+        <span id="status-label" class="mono text-xs text-[var(--muted)]">Processando…</span>
+        <span id="status-count" class="mono text-xs accent"></span>
+      </div>
+      <div class="w-full h-1 rounded-full bg-[var(--border)]">
+        <div id="progress-bar" class="h-1 rounded-full bg-[var(--accent)] w-0"></div>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div id="actions" class="hidden flex flex-wrap gap-3 mb-10 fade-up">
+      <button id="download-btn"
+        class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white"
+        style="background:var(--accent)"
+        onclick="downloadHTML()"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2v8M5 7l3 3 3-3M2 12h12" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Baixar HTML
+      </button>
+      <button
+        class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold border border-[var(--border)] text-[var(--text)] hover:border-[var(--accent)] transition-colors"
+        onclick="resetAll()"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M2 8a6 6 0 1 1 1.2 3.6M2 12V8h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Novo PDF
+      </button>
+    </div>
+
+    <!-- PREVIEW -->
+    <div id="preview" class="hidden fade-up">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-1 h-4 rounded-sm" style="background:var(--accent)"></div>
+        <span class="font-semibold text-sm">Pré-visualização</span>
+        <span id="page-count-label" class="mono text-xs text-[var(--muted)]"></span>
+      </div>
+      <div id="pages-container" class="flex flex-col gap-6"></div>
+    </div>
+
+  </main>
+
+  <script>
+    // PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const dropzone       = document.getElementById('dropzone');
+    const fileInput      = document.getElementById('file-input');
+    const statusCard     = document.getElementById('status-card');
+    const statusLabel    = document.getElementById('status-label');
+    const statusCount    = document.getElementById('status-count');
+    const progressBar    = document.getElementById('progress-bar');
+    const actions        = document.getElementById('actions');
+    const preview        = document.getElementById('preview');
+    const pagesContainer = document.getElementById('pages-container');
+    const pageCountLabel = document.getElementById('page-count-label');
+
+    let renderedCanvases = []; // store dataURLs for export
+    let pdfFileName      = 'documento';
+
+    // ── Drag & drop ──────────────────────────────────────────
+    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type === 'application/pdf') loadPDF(file);
+    });
+    fileInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) loadPDF(file);
+    });
+
+    // ── Load & render PDF ────────────────────────────────────
+    async function loadPDF(file) {
+      pdfFileName = file.name.replace(/\.pdf$/i, '');
+      renderedCanvases = [];
+      pagesContainer.innerHTML = '';
+
+      statusCard.classList.remove('hidden');
+      actions.classList.add('hidden');
+      preview.classList.add('hidden');
+
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const total  = pdfDoc.numPages;
+
+      pageCountLabel.textContent = `${total} página${total > 1 ? 's' : ''}`;
+
+      for (let i = 1; i <= total; i++) {
+        statusLabel.textContent = `Renderizando página ${i} de ${total}…`;
+        statusCount.textContent = `${Math.round((i - 1) / total * 100)}%`;
+        progressBar.style.width = `${((i - 1) / total) * 100}%`;
+
+        const page     = await pdfDoc.getPage(i);
+        const scale    = 2; // retina
+        const viewport = page.getViewport({ scale });
+
+        const canvas    = document.createElement('canvas');
+        canvas.width    = viewport.width;
+        canvas.height   = viewport.height;
+        const ctx       = canvas.getContext('2d');
+
+        await page.render({ canvasContext: ctx, viewport }).promise;
+
+        const dataURL = canvas.toDataURL('image/png');
+        renderedCanvases.push({ dataURL, width: viewport.width, height: viewport.height });
+
+        // DOM preview
+        const wrapper = document.createElement('div');
+        wrapper.className = 'pdf-page-wrapper rounded-lg';
+        wrapper.innerHTML = `
+          <canvas width="${viewport.width}" height="${viewport.height}" style="width:100%;height:auto;display:block"></canvas>
+          <span class="page-badge">${i} / ${total}</span>
+        `;
+        const previewCanvas = wrapper.querySelector('canvas');
+        previewCanvas.getContext('2d').drawImage(canvas, 0, 0);
+        pagesContainer.appendChild(wrapper);
+
+        progressBar.style.width = `${(i / total) * 100}%`;
+        statusCount.textContent = `${Math.round(i / total * 100)}%`;
+      }
+
+      statusLabel.textContent = 'Concluído!';
+      statusCount.textContent = '100%';
+
+      setTimeout(() => {
+        statusCard.classList.add('hidden');
+        actions.classList.remove('hidden');
+        preview.classList.remove('hidden');
+      }, 600);
+    }
+
+    // ── Download HTML ────────────────────────────────────────
+    function downloadHTML() {
+      const pages = renderedCanvases.map(({ dataURL, width, height }, i) => `
+    <div class="page">
+      <img src="${dataURL}" width="${width}" height="${height}" alt="Página ${i + 1}" loading="lazy"/>
+      <span class="badge">${i + 1}</span>
+    </div>`).join('\n');
+
+      const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>${pdfFileName}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#1a1a1a;font-family:system-ui;display:flex;flex-direction:column;align-items:center;padding:40px 16px;gap:24px}
+    .page{position:relative;max-width:900px;width:100%;background:#fff;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+    .page img{display:block;width:100%;height:auto}
+    .badge{position:absolute;bottom:8px;right:10px;font-size:10px;color:rgba(0,0,0,.3);font-family:monospace}
+  </style>
+</head>
+<body>
+${pages}
+</body>
+</html>`;
+
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `${pdfFileName}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ── Reset ────────────────────────────────────────────────
+    function resetAll() {
+      renderedCanvases = [];
+      pagesContainer.innerHTML = '';
+      fileInput.value = '';
+      actions.classList.add('hidden');
+      preview.classList.add('hidden');
+      statusCard.classList.add('hidden');
+      progressBar.style.width = '0';
+    }
+  </script>
+</body>
+</html>
