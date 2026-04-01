@@ -3,21 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PDF → HTML Converter</title>
+  <title>PDF → HTML Editável</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
 
     :root {
       --accent: #f26522;
-      --accent-dim: #c04d10;
-      --bg: #0d0d0d;
+      --bg: #0c0c0c;
       --surface: #141414;
-      --surface2: #1c1c1c;
-      --border: #272727;
-      --text: #e8e8e8;
-      --muted: #555;
+      --border: #222;
+      --text: #e4e4e4;
+      --muted: #4a4a4a;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,275 +25,372 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* noise overlay */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.4;
     }
 
     .mono { font-family: 'DM Mono', monospace; }
 
-    /* drop zone */
     #dropzone {
       border: 1.5px dashed var(--border);
       transition: border-color 0.2s, background 0.2s;
+      cursor: pointer;
     }
     #dropzone.drag-over {
       border-color: var(--accent);
       background: rgba(242,101,34,0.05);
     }
 
-    /* progress bar */
-    #progress-bar {
-      transition: width 0.3s ease;
-    }
+    #progress-bar { transition: width 0.25s ease; }
 
-    /* canvas pages */
-    .pdf-page-wrapper {
+    .page-shell {
       position: relative;
       background: #fff;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+      overflow: hidden;
+      box-shadow: 0 8px 48px rgba(0,0,0,0.55);
+      margin: 0 auto;
+    }
+    .page-shell img {
+      display: block;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+    .text-layer {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       overflow: hidden;
     }
-    .pdf-page-wrapper canvas {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-    .page-badge {
+    .text-layer span {
       position: absolute;
-      bottom: 8px;
-      right: 10px;
+      white-space: pre;
+      cursor: text;
+      transform-origin: 0% 0%;
+      color: transparent;
+      line-height: 1;
+      user-select: text;
+    }
+    .text-layer span:hover {
+      color: rgba(0,0,0,0.06);
+      outline: 1px solid rgba(242,101,34,0.3);
+    }
+    .text-layer span::selection {
+      background: rgba(242,101,34,0.25);
+      color: #000;
+    }
+    .page-num {
+      position: absolute;
+      bottom: 6px; right: 8px;
       font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      color: rgba(0,0,0,0.3);
+      font-size: 9px;
+      color: rgba(0,0,0,0.25);
+      pointer-events: none;
     }
 
-    /* download btn pulse */
-    @keyframes pulse-border {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(242,101,34,0.4); }
-      50% { box-shadow: 0 0 0 6px rgba(242,101,34,0); }
-    }
-    #download-btn { animation: pulse-border 2s infinite; }
-
-    /* scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
 
-    /* fade in animation */
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
+      from { opacity: 0; transform: translateY(14px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .fade-up { animation: fadeUp 0.4s ease forwards; }
+    .fade-up { animation: fadeUp 0.35s ease forwards; }
 
-    .accent { color: var(--accent); }
+    #code-view {
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10.5px;
+      color: #7ec8a0;
+      white-space: pre;
+      overflow: auto;
+      max-height: 320px;
+      line-height: 1.65;
+    }
   </style>
 </head>
-<body class="relative z-10">
+<body>
 
-  <!-- HEADER -->
-  <header class="border-b border-[var(--border)] px-6 py-4 flex items-center justify-between sticky top-0 z-50" style="background:rgba(13,13,13,0.92);backdrop-filter:blur(12px)">
-    <div class="flex items-center gap-3">
-      <!-- icon -->
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-        <rect width="28" height="28" rx="6" fill="var(--accent)"/>
-        <path d="M8 20V8h7.5a4.5 4.5 0 0 1 0 9H8" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M13 17v3" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+  <header class="sticky top-0 z-50 px-5 py-3 flex items-center justify-between border-b border-[var(--border)]"
+    style="background:rgba(12,12,12,0.92);backdrop-filter:blur(12px)">
+    <div class="flex items-center gap-2.5">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+        <rect width="26" height="26" rx="6" fill="#f26522"/>
+        <path d="M7 19V7h7a4 4 0 0 1 0 8H7" stroke="white" stroke-width="1.7" stroke-linecap="round"/>
+        <path d="M12 15v4" stroke="white" stroke-width="1.7" stroke-linecap="round"/>
       </svg>
-      <span class="text-lg font-bold tracking-tight">PDF<span class="accent">→</span>HTML</span>
+      <span class="font-extrabold tracking-tight text-base">PDF <span style="color:var(--accent)">→</span> HTML</span>
     </div>
-    <div class="mono text-xs text-[var(--muted)]">renderiza via canvas</div>
+    <span class="mono text-[10px]" style="color:var(--muted)">texto editável · client-side</span>
   </header>
 
-  <!-- MAIN -->
-  <main class="relative z-10 max-w-5xl mx-auto px-4 py-12">
+  <main class="max-w-4xl mx-auto px-4 py-10">
 
-    <!-- HERO -->
-    <div class="mb-12 fade-up">
-      <p class="mono text-[var(--accent)] text-xs mb-3 tracking-widest uppercase">Conversor</p>
-      <h1 class="text-4xl sm:text-5xl font-extrabold leading-none tracking-tight mb-4">
-        PDF convertido<br/>em <span class="accent">HTML visual</span>
+    <div class="mb-10 fade-up">
+      <p class="mono text-[10px] tracking-widest uppercase mb-2" style="color:var(--accent)">Conversor v2</p>
+      <h1 class="text-4xl font-extrabold leading-none tracking-tight mb-3">
+        HTML <span style="color:var(--accent)">100%</span> editável
       </h1>
-      <p class="text-[var(--muted)] text-sm max-w-md leading-relaxed">
-        Cada página do PDF é renderizada como canvas e exportada como HTML autônomo. Nenhum servidor. Nenhum dado sai do navegador.
+      <p class="text-sm leading-relaxed" style="color:var(--muted);max-width:460px">
+        Cada elemento de texto do PDF é extraído e convertido em
+        <code class="mono" style="color:#888">&lt;span&gt;</code> absolutamente posicionado.
+        Gráficos ficam no canvas base. O HTML final é editável em qualquer editor de código.
       </p>
     </div>
 
-    <!-- DROP ZONE -->
-    <div
-      id="dropzone"
-      onclick="document.getElementById('file-input').click()"
-      class="rounded-xl p-12 flex flex-col items-center justify-center gap-4 cursor-pointer mb-8 fade-up"
-      style="animation-delay:0.1s"
-    >
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-        <path d="M20 27V13M13 20l7-7 7 7" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="1.5" y="1.5" width="37" height="37" rx="10.5" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <div id="dropzone" onclick="document.getElementById('file-input').click()"
+      class="rounded-xl p-12 flex flex-col items-center gap-4 mb-6 fade-up"
+      style="animation-delay:0.08s">
+      <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+        <path d="M19 26V12M12 19l7-7 7 7" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="1" y="1" width="36" height="36" rx="10" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="4 3"/>
       </svg>
       <div class="text-center">
-        <p class="font-semibold text-sm">Arraste um PDF aqui</p>
-        <p class="mono text-xs text-[var(--muted)] mt-1">ou clique para selecionar</p>
+        <p class="font-bold text-sm">Arraste o PDF aqui</p>
+        <p class="mono text-[11px] mt-1" style="color:var(--muted)">ou clique para selecionar</p>
       </div>
-      <input id="file-input" type="file" accept="application/pdf" class="hidden" />
+      <input id="file-input" type="file" accept="application/pdf" class="hidden"/>
     </div>
 
-    <!-- STATUS CARD -->
-    <div id="status-card" class="hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 mb-8 fade-up">
-      <div class="flex items-center justify-between mb-3">
-        <span id="status-label" class="mono text-xs text-[var(--muted)]">Processando…</span>
-        <span id="status-count" class="mono text-xs accent"></span>
+    <div id="status-card" class="hidden rounded-xl border border-[var(--border)] p-4 mb-6 fade-up"
+      style="background:var(--surface)">
+      <div class="flex justify-between mb-2">
+        <span id="status-label" class="mono text-[11px]" style="color:var(--muted)">Iniciando…</span>
+        <span id="status-pct"   class="mono text-[11px]" style="color:var(--accent)">0%</span>
       </div>
-      <div class="w-full h-1 rounded-full bg-[var(--border)]">
-        <div id="progress-bar" class="h-1 rounded-full bg-[var(--accent)] w-0"></div>
+      <div class="h-px rounded-full" style="background:var(--border)">
+        <div id="progress-bar" class="h-px rounded-full w-0" style="background:var(--accent)"></div>
       </div>
+      <div id="status-detail" class="mono text-[10px] mt-2" style="color:var(--muted)"></div>
     </div>
 
-    <!-- ACTIONS -->
-    <div id="actions" class="hidden flex flex-wrap gap-3 mb-10 fade-up">
-      <button id="download-btn"
-        class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white"
-        style="background:var(--accent)"
-        onclick="downloadHTML()"
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M8 2v8M5 7l3 3 3-3M2 12h12" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <div id="actions" class="hidden flex flex-wrap gap-3 mb-8 fade-up">
+      <button onclick="downloadHTML()"
+        class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold text-white transition-opacity hover:opacity-85"
+        style="background:var(--accent)">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+          <path d="M7.5 2v7M4.5 6.5l3 3 3-3M1.5 11.5h12" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         Baixar HTML
       </button>
-      <button
-        class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold border border-[var(--border)] text-[var(--text)] hover:border-[var(--accent)] transition-colors"
-        onclick="resetAll()"
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M2 8a6 6 0 1 1 1.2 3.6M2 12V8h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <button onclick="toggleCode()" id="code-btn"
+        class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold border transition-colors hover:border-[var(--accent)]"
+        style="border-color:var(--border);color:var(--text)">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+          <path d="M4 5L1 7.5 4 10M11 5l3 2.5L11 10M8 3l-2 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Ver código
+      </button>
+      <button onclick="resetAll()"
+        class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold border transition-colors hover:border-[var(--accent)]"
+        style="border-color:var(--border);color:var(--text)">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+          <path d="M1.5 7.5A6 6 0 1 1 2.7 11M1.5 11.5V7.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         Novo PDF
       </button>
     </div>
 
-    <!-- PREVIEW -->
+    <div id="code-panel" class="hidden mb-8 fade-up">
+      <div class="flex items-center gap-2 mb-2">
+        <div class="w-1 h-3 rounded-sm" style="background:var(--accent)"></div>
+        <span class="mono text-[11px]" style="color:var(--muted)">Código HTML gerado (página 1)</span>
+      </div>
+      <div id="code-view"></div>
+    </div>
+
     <div id="preview" class="hidden fade-up">
       <div class="flex items-center gap-2 mb-4">
         <div class="w-1 h-4 rounded-sm" style="background:var(--accent)"></div>
-        <span class="font-semibold text-sm">Pré-visualização</span>
-        <span id="page-count-label" class="mono text-xs text-[var(--muted)]"></span>
+        <span class="font-bold text-sm">Pré-visualização</span>
+        <span id="page-count-lbl" class="mono text-[11px]" style="color:var(--muted)"></span>
       </div>
-      <div id="pages-container" class="flex flex-col gap-6"></div>
+      <p class="mono text-[10px] mb-5" style="color:var(--muted)">
+        Passe o mouse nos textos para revelar os spans — cada um é um elemento HTML editável.
+      </p>
+      <div id="pages-container" class="flex flex-col gap-8 items-center"></div>
     </div>
 
   </main>
 
   <script>
-    // PDF.js worker
     pdfjsLib.GlobalWorkerOptions.workerSrc =
       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-    const dropzone       = document.getElementById('dropzone');
-    const fileInput      = document.getElementById('file-input');
-    const statusCard     = document.getElementById('status-card');
-    const statusLabel    = document.getElementById('status-label');
-    const statusCount    = document.getElementById('status-count');
-    const progressBar    = document.getElementById('progress-bar');
-    const actions        = document.getElementById('actions');
-    const preview        = document.getElementById('preview');
-    const pagesContainer = document.getElementById('pages-container');
-    const pageCountLabel = document.getElementById('page-count-label');
+    const SCALE = 1.8;
 
-    let renderedCanvases = []; // store dataURLs for export
-    let pdfFileName      = 'documento';
+    let pagesData   = [];
+    let pdfFileName = 'documento';
+    let codeVisible = false;
 
-    // ── Drag & drop ──────────────────────────────────────────
-    dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
-    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-    dropzone.addEventListener('drop', e => {
+    const $ = id => document.getElementById(id);
+
+    // ── Drag & drop ─────────────────────────────────────────
+    const dz = $('dropzone');
+    dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag-over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+    dz.addEventListener('drop', e => {
       e.preventDefault();
-      dropzone.classList.remove('drag-over');
-      const file = e.dataTransfer.files[0];
-      if (file && file.type === 'application/pdf') loadPDF(file);
+      dz.classList.remove('drag-over');
+      const f = e.dataTransfer.files[0];
+      if (f?.type === 'application/pdf') loadPDF(f);
     });
-    fileInput.addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (file) loadPDF(file);
+    $('file-input').addEventListener('change', e => {
+      if (e.target.files[0]) loadPDF(e.target.files[0]);
     });
 
-    // ── Load & render PDF ────────────────────────────────────
+    // ── Load PDF ─────────────────────────────────────────────
     async function loadPDF(file) {
       pdfFileName = file.name.replace(/\.pdf$/i, '');
-      renderedCanvases = [];
-      pagesContainer.innerHTML = '';
+      pagesData = [];
+      $('pages-container').innerHTML = '';
+      $('status-card').classList.remove('hidden');
+      $('actions').classList.add('hidden');
+      $('preview').classList.add('hidden');
+      $('code-panel').classList.add('hidden');
+      codeVisible = false;
 
-      statusCard.classList.remove('hidden');
-      actions.classList.add('hidden');
-      preview.classList.add('hidden');
-
-      const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const buf    = await file.arrayBuffer();
+      const pdfDoc = await pdfjsLib.getDocument({ data: buf }).promise;
       const total  = pdfDoc.numPages;
-
-      pageCountLabel.textContent = `${total} página${total > 1 ? 's' : ''}`;
+      $('page-count-lbl').textContent = `${total} página${total > 1 ? 's' : ''}`;
 
       for (let i = 1; i <= total; i++) {
-        statusLabel.textContent = `Renderizando página ${i} de ${total}…`;
-        statusCount.textContent = `${Math.round((i - 1) / total * 100)}%`;
-        progressBar.style.width = `${((i - 1) / total) * 100}%`;
+        setStatus(`Renderizando página ${i} de ${total}…`, i - 1, total, 'desenhando gráficos no canvas…');
 
         const page     = await pdfDoc.getPage(i);
-        const scale    = 2; // retina
-        const viewport = page.getViewport({ scale });
+        const viewport = page.getViewport({ scale: SCALE });
 
-        const canvas    = document.createElement('canvas');
-        canvas.width    = viewport.width;
-        canvas.height   = viewport.height;
-        const ctx       = canvas.getContext('2d');
+        // Canvas (background layer — graphics, images, shapes)
+        const canvas  = document.createElement('canvas');
+        canvas.width  = viewport.width;
+        canvas.height = viewport.height;
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+        const canvasDataURL = canvas.toDataURL('image/png');
 
-        await page.render({ canvasContext: ctx, viewport }).promise;
+        // Text content extraction
+        setStatus(`Extraindo texto da página ${i}…`, i - 0.5, total, 'mapeando posições dos elementos…');
+        const textContent = await page.getTextContent({ includeMarkedContent: false });
 
-        const dataURL = canvas.toDataURL('image/png');
-        renderedCanvases.push({ dataURL, width: viewport.width, height: viewport.height });
+        const textItems = [];
+        for (const item of textContent.items) {
+          if (!item.str) continue;
 
-        // DOM preview
-        const wrapper = document.createElement('div');
-        wrapper.className = 'pdf-page-wrapper rounded-lg';
-        wrapper.innerHTML = `
-          <canvas width="${viewport.width}" height="${viewport.height}" style="width:100%;height:auto;display:block"></canvas>
-          <span class="page-badge">${i} / ${total}</span>
-        `;
-        const previewCanvas = wrapper.querySelector('canvas');
-        previewCanvas.getContext('2d').drawImage(canvas, 0, 0);
-        pagesContainer.appendChild(wrapper);
+          // Convert PDF transform → viewport (top-left) pixel coords
+          const tx = pdfjsLib.Util.transform(viewport.transform, item.transform);
 
-        progressBar.style.width = `${(i / total) * 100}%`;
-        statusCount.textContent = `${Math.round(i / total * 100)}%`;
+          const fontHeight = Math.hypot(tx[2], tx[3]);
+          const angle      = Math.atan2(tx[1], tx[0]);
+          const style      = textContent.styles[item.fontName] || {};
+          const fontFamily = normalizeFontFamily(style.fontFamily || 'sans-serif');
+          const isBold     = /bold|Black|Heavy|ExtraBold|SemiBold/i.test(item.fontName + ' ' + (style.fontFamily || ''));
+          const isItalic   = /italic|oblique/i.test(item.fontName + ' ' + (style.fontFamily || ''));
+
+          // tx[4]=x, tx[5]=y baseline → adjust to top of glyph
+          const x = tx[4];
+          const y = tx[5] - fontHeight;
+
+          // Width in viewport pixels from PDF item.width
+          const widthPx = item.width > 0
+            ? item.width * Math.hypot(tx[0], tx[1]) / (item.transform[0] || 1)
+            : null;
+
+          textItems.push({ str: item.str, x, y, fontHeight, angle, fontFamily, isBold, isItalic, widthPx });
+        }
+
+        pagesData.push({ canvasDataURL, textItems, vpWidth: viewport.width, vpHeight: viewport.height });
+
+        // Build preview element
+        const shell = buildPageShell(i, total, pagesData[i - 1], false);
+        $('pages-container').appendChild(shell);
+
+        setStatus(`Página ${i} concluída`, i, total, '');
       }
 
-      statusLabel.textContent = 'Concluído!';
-      statusCount.textContent = '100%';
-
+      setStatus('Concluído!', total, total, '');
       setTimeout(() => {
-        statusCard.classList.add('hidden');
-        actions.classList.remove('hidden');
-        preview.classList.remove('hidden');
-      }, 600);
+        $('status-card').classList.add('hidden');
+        $('actions').classList.remove('hidden');
+        $('preview').classList.remove('hidden');
+      }, 500);
+    }
+
+    // ── Build page element ───────────────────────────────────
+    function buildPageShell(pageNum, totalPages, data, forExport) {
+      const { canvasDataURL, textItems, vpWidth, vpHeight } = data;
+
+      const displayW = forExport ? vpWidth : Math.min(vpWidth, window.innerWidth - 48);
+      const ratio    = displayW / vpWidth;
+      const displayH = vpHeight * ratio;
+
+      const shell = document.createElement('div');
+      shell.className = 'page-shell';
+      shell.style.width  = displayW + 'px';
+      shell.style.height = displayH + 'px';
+
+      // Background image layer
+      const bg = document.createElement('img');
+      bg.src   = canvasDataURL;
+      bg.alt   = `Página ${pageNum}`;
+      bg.style.cssText = 'display:block;position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none';
+      shell.appendChild(bg);
+
+      // Text layer
+      const textLayer = document.createElement('div');
+      textLayer.className = 'text-layer';
+
+      const sf = ratio; // scale factor
+
+      for (const item of textItems) {
+        const span = document.createElement('span');
+        span.textContent = item.str;
+
+        const fh = item.fontHeight * sf;
+        const x  = item.x * sf;
+        const y  = item.y * sf;
+
+        let css = [
+          `position:absolute`,
+          `left:${x}px`,
+          `top:${y}px`,
+          `font-size:${fh}px`,
+          `font-family:${item.fontFamily}`,
+          `font-weight:${item.isBold ? '700' : '400'}`,
+          `font-style:${item.isItalic ? 'italic' : 'normal'}`,
+          `white-space:pre`,
+          `transform-origin:0% 0%`,
+          `color:transparent`,
+          `line-height:1`,
+          `user-select:text`,
+        ];
+        if (item.angle !== 0) css.push(`transform:rotate(${item.angle}rad)`);
+        if (item.widthPx) css.push(`width:${item.widthPx * sf}px`, `display:inline-block`);
+
+        span.style.cssText = css.join(';');
+        textLayer.appendChild(span);
+      }
+
+      shell.appendChild(textLayer);
+
+      if (!forExport) {
+        const badge = document.createElement('span');
+        badge.className = 'page-num';
+        badge.textContent = `${pageNum} / ${totalPages}`;
+        shell.appendChild(badge);
+      }
+
+      return shell;
     }
 
     // ── Download HTML ────────────────────────────────────────
     function downloadHTML() {
-      const pages = renderedCanvases.map(({ dataURL, width, height }, i) => `
-    <div class="page">
-      <img src="${dataURL}" width="${width}" height="${height}" alt="Página ${i + 1}" loading="lazy"/>
-      <span class="badge">${i + 1}</span>
-    </div>`).join('\n');
+      const pagesHTML = pagesData.map((data, i) => {
+        const shell = buildPageShell(i + 1, pagesData.length, data, true);
+        return shell.outerHTML;
+      }).join('\n\n');
 
       const html = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -305,35 +400,117 @@
   <title>${pdfFileName}</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
-    body{background:#1a1a1a;font-family:system-ui;display:flex;flex-direction:column;align-items:center;padding:40px 16px;gap:24px}
-    .page{position:relative;max-width:900px;width:100%;background:#fff;box-shadow:0 8px 40px rgba(0,0,0,.5)}
-    .page img{display:block;width:100%;height:auto}
-    .badge{position:absolute;bottom:8px;right:10px;font-size:10px;color:rgba(0,0,0,.3);font-family:monospace}
+    body{
+      background:#e8e8e8;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:32px;
+      padding:40px 16px;
+    }
+    .page-shell{
+      position:relative;
+      background:#fff;
+      overflow:hidden;
+      box-shadow:0 4px 24px rgba(0,0,0,0.15);
+      max-width:100%;
+    }
+    .page-shell img{
+      display:block;
+      position:absolute;
+      top:0;left:0;
+      width:100%;height:100%;
+      pointer-events:none;
+    }
+    .text-layer{
+      position:absolute;
+      top:0;left:0;
+      width:100%;height:100%;
+      overflow:hidden;
+    }
+    .text-layer span{
+      position:absolute;
+      white-space:pre;
+      cursor:text;
+      transform-origin:0% 0%;
+      color:transparent;
+      line-height:1;
+      user-select:text;
+    }
+    .text-layer span:hover{
+      color:rgba(0,0,0,0.06);
+      outline:1px solid rgba(0,80,255,0.2);
+    }
+    .text-layer span::selection{
+      background:rgba(0,80,255,0.18);
+      color:#000;
+    }
   </style>
 </head>
 <body>
-${pages}
+${pagesHTML}
 </body>
 </html>`;
 
       const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement('a');
-      a.href     = url;
-      a.download = `${pdfFileName}.html`;
+      a.href = url;
+      a.download = pdfFileName + '.html';
       a.click();
       URL.revokeObjectURL(url);
     }
 
-    // ── Reset ────────────────────────────────────────────────
+    // ── Code preview ─────────────────────────────────────────
+    function toggleCode() {
+      codeVisible = !codeVisible;
+      const panel = $('code-panel');
+      if (!codeVisible) { panel.classList.add('hidden'); return; }
+      if (!pagesData.length) return;
+
+      const shell = buildPageShell(1, pagesData.length, pagesData[0], true);
+      let raw = shell.outerHTML;
+      // Truncate base64 for readability
+      raw = raw.replace(/src="data:image\/png;base64,[^"]{60}[^"]*"/g,
+        'src="data:image/png;base64,…"');
+      $('code-view').textContent = raw;
+      panel.classList.remove('hidden');
+    }
+
+    // ── Helpers ──────────────────────────────────────────────
+    function setStatus(label, done, total, detail) {
+      $('status-label').textContent  = label;
+      $('status-pct').textContent    = Math.round((done / total) * 100) + '%';
+      $('progress-bar').style.width  = (done / total * 100) + '%';
+      $('status-detail').textContent = detail ?? '';
+    }
+
+    function normalizeFontFamily(raw) {
+      if (!raw) return 'sans-serif';
+      raw = raw.replace(/^[A-Z]{6}\+/, ''); // strip subset prefix
+      const map = {
+        'Helvetica': 'Helvetica, Arial, sans-serif',
+        'Arial':     'Arial, sans-serif',
+        'Times':     '"Times New Roman", Times, serif',
+        'Courier':   '"Courier New", Courier, monospace',
+        'Symbol':    'Symbol, serif',
+      };
+      for (const [k, v] of Object.entries(map)) {
+        if (raw.startsWith(k)) return v;
+      }
+      return `"${raw}", sans-serif`;
+    }
+
     function resetAll() {
-      renderedCanvases = [];
-      pagesContainer.innerHTML = '';
-      fileInput.value = '';
-      actions.classList.add('hidden');
-      preview.classList.add('hidden');
-      statusCard.classList.add('hidden');
-      progressBar.style.width = '0';
+      pagesData = [];
+      $('pages-container').innerHTML = '';
+      $('file-input').value = '';
+      $('actions').classList.add('hidden');
+      $('preview').classList.add('hidden');
+      $('code-panel').classList.add('hidden');
+      $('status-card').classList.add('hidden');
+      $('progress-bar').style.width = '0';
+      codeVisible = false;
     }
   </script>
 </body>
