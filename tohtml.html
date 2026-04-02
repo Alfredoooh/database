@@ -1,517 +1,1338 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PDF → HTML Editável</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap');
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<title>APK Analyzer · PatrulhaXX</title>
+<link rel="preconnect" href="https://fonts.bunny.net"/>
+<link href="https://fonts.bunny.net/css?family=space-mono:400,700|syne:400,700,800" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        bg:      '#07070d',
+        surface: '#0f0f1a',
+        s2:      '#141420',
+        border:  '#1c1c2e',
+        accent:  '#ff3c3c',
+        a2:      '#ff8c00',
+        ok:      '#00e676',
+        warn:    '#ffb300',
+        info:    '#4a9eff',
+        muted:   '#4a4a6a',
+        txt:     '#e8e8f0',
+      },
+      fontFamily: {
+        mono: ['Space Mono', 'monospace'],
+        sans: ['Syne', 'sans-serif'],
+      }
+    }
+  }
+}
+</script>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{background:#07070d;color:#e8e8f0;font-family:'Syne',sans-serif;min-height:100vh;overscroll-behavior:none}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,60,60,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,60,60,.02) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0}
+  ::-webkit-scrollbar{width:3px;height:3px}
+  ::-webkit-scrollbar-track{background:#1c1c2e}
+  ::-webkit-scrollbar-thumb{background:#4a4a6a;border-radius:2px}
 
-    :root {
-      --accent: #f26522;
-      --bg: #0c0c0c;
-      --surface: #141414;
-      --border: #222;
-      --text: #e4e4e4;
-      --muted: #4a4a4a;
-    }
+  .tab-bar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:#0f0f1a;border-top:1px solid #1c1c2e;display:flex;padding:8px 0 env(safe-area-inset-bottom,8px)}
+  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;cursor:pointer;border:none;background:none;color:#4a4a6a;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;transition:color .15s}
+  .tab-btn.active{color:#ff3c3c}
+  .tab-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .tab-btn.active svg{fill:rgba(255,60,60,.15)}
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+  .page{display:none;position:relative;z-index:1;padding:0 16px 110px;max-width:640px;margin:0 auto}
+  .page.active{display:block}
 
-    body {
-      font-family: 'Syne', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
+  .drop-zone{border:2px dashed #1c1c2e;border-radius:16px;padding:44px 20px;text-align:center;cursor:pointer;transition:all .2s;background:#0f0f1a;position:relative;overflow:hidden}
+  .drop-zone::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 120%,rgba(255,60,60,.06),transparent 70%);pointer-events:none}
+  .drop-zone:hover,.drop-zone.drag-over{border-color:#ff3c3c;background:rgba(255,60,60,.04)}
+  .drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 
-    .mono { font-family: 'DM Mono', monospace; }
+  .badge{display:inline-block;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#ff3c3c;border:1px solid rgba(255,60,60,.4);padding:3px 8px;border-radius:3px}
 
-    #dropzone {
-      border: 1.5px dashed var(--border);
-      transition: border-color 0.2s, background 0.2s;
-      cursor: pointer;
-    }
-    #dropzone.drag-over {
-      border-color: var(--accent);
-      background: rgba(242,101,34,0.05);
-    }
+  .prog-fill{height:3px;background:linear-gradient(90deg,#ff3c3c,#ff8c00);border-radius:99px;transition:width .3s;width:0%}
 
-    #progress-bar { transition: width 0.25s ease; }
+  .card{background:#0f0f1a;border:1px solid #1c1c2e;border-radius:12px;overflow:hidden}
+  .card-header{padding:12px 16px;border-bottom:1px solid #1c1c2e;display:flex;align-items:center;gap:8px}
 
-    .page-shell {
-      position: relative;
-      background: #fff;
-      overflow: hidden;
-      box-shadow: 0 8px 48px rgba(0,0,0,0.55);
-      margin: 0 auto;
-    }
-    .page-shell img {
-      display: block;
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-    }
-    .text-layer {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      overflow: hidden;
-    }
-    .text-layer span {
-      position: absolute;
-      white-space: pre;
-      cursor: text;
-      transform-origin: 0% 0%;
-      color: transparent;
-      line-height: 1;
-      user-select: text;
-    }
-    .text-layer span:hover {
-      color: rgba(0,0,0,0.06);
-      outline: 1px solid rgba(242,101,34,0.3);
-    }
-    .text-layer span::selection {
-      background: rgba(242,101,34,0.25);
-      color: #000;
-    }
-    .page-num {
-      position: absolute;
-      bottom: 6px; right: 8px;
-      font-family: 'DM Mono', monospace;
-      font-size: 9px;
-      color: rgba(0,0,0,0.25);
-      pointer-events: none;
-    }
+  .issue{border-radius:10px;padding:12px 14px;margin-bottom:8px;border:1px solid #1c1c2e;animation:fadeUp .2s ease both}
+  .issue.fail{border-color:#ff3c3c;background:rgba(255,60,60,.05)}
+  .issue.warn{border-color:#ffb300;background:rgba(255,179,0,.05)}
+  .issue.ok{border-color:#00e676;background:rgba(0,230,118,.05)}
+  .issue.info{border-color:#4a9eff;background:rgba(74,158,255,.05)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+  .tree-node{font-family:'Space Mono',monospace;font-size:11px;padding:5px 12px;border-bottom:1px solid #1c1c2e;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .1s}
+  .tree-node:hover{background:rgba(255,255,255,.03)}
+  .tree-node.dir{color:#4a9eff}
+  .dir-arrow{transition:transform .15s;display:inline-block;color:#4a4a6a;flex-shrink:0;line-height:1}
+  .dir-arrow svg{width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;display:block}
+  .tree-children{display:none}
+  .tree-children.open{display:block}
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .fade-up { animation: fadeUp 0.35s ease forwards; }
+  .modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.85);display:none;flex-direction:column}
+  .modal.open{display:flex}
+  .modal-header{background:#0f0f1a;border-bottom:1px solid #1c1c2e;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+  .modal-body{flex:1;overflow-y:auto;padding:16px;font-family:'Space Mono',monospace;font-size:11px;line-height:1.8;white-space:pre-wrap;word-break:break-all;color:#e8e8f0}
 
-    #code-view {
-      background: #0a0a0a;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
-      font-family: 'DM Mono', monospace;
-      font-size: 10.5px;
-      color: #7ec8a0;
-      white-space: pre;
-      overflow: auto;
-      max-height: 320px;
-      line-height: 1.65;
-    }
-  </style>
+  .score-ring{position:relative;display:inline-flex;align-items:center;justify-content:center}
+  .score-ring svg{transform:rotate(-90deg)}
+  .score-ring .score-text{position:absolute;font-family:'Syne',sans-serif;font-weight:800}
+
+  .perm-pill{font-family:'Space Mono',monospace;font-size:9px;padding:3px 8px;border-radius:99px;border:1px solid #1c1c2e;color:#4a4a6a;display:inline-block;margin:3px}
+  .perm-pill.dangerous{border-color:#ff3c3c;color:#ff3c3c;background:rgba(255,60,60,.07)}
+
+  .fix-block{margin-top:8px;background:rgba(0,0,0,.5);border-left:2px solid #ff8c00;padding:8px 10px;font-family:'Space Mono',monospace;font-size:10px;color:#aaa;border-radius:0 4px 4px 0;white-space:pre-wrap;word-break:break-all;line-height:1.7}
+
+  .section-title{font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.15em;color:#4a4a6a;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .section-title::after{content:'';flex:1;height:1px;background:#1c1c2e}
+
+  .info-cell{background:#0f0f1a;border:1px solid #1c1c2e;border-radius:10px;padding:12px}
+  .info-label{font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:.12em;color:#4a4a6a;margin-bottom:5px}
+  .info-val{font-size:14px;font-weight:700}
+  .ok-c{color:#00e676}.warn-c{color:#ffb300}.fail-c{color:#ff3c3c}.info-c{color:#4a9eff}
+
+  .search-input{width:100%;background:#0f0f1a;border:1px solid #1c1c2e;border-radius:8px;padding:8px 12px;font-family:'Space Mono',monospace;font-size:11px;color:#e8e8f0;outline:none;transition:border-color .15s}
+  .search-input:focus{border-color:#ff3c3c}
+
+  .iaw-alert{background:linear-gradient(135deg,rgba(255,60,60,.08),rgba(255,140,0,.04));border:1px solid rgba(255,60,60,.4);border-radius:12px;padding:16px}
+
+  .sub-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+  .sub-tabs::-webkit-scrollbar{display:none}
+  .sub-tab{flex-shrink:0;font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.1em;padding:6px 12px;border-radius:6px;border:1px solid #1c1c2e;color:#4a4a6a;cursor:pointer;background:none;transition:all .15s}
+  .sub-tab.active{border-color:#ff3c3c;color:#ff3c3c;background:rgba(255,60,60,.07)}
+
+  .file-icon{width:12px;height:12px;flex-shrink:0;display:block}
+  .dir-folder-icon{width:12px;height:12px;flex-shrink:0;display:block}
+  .img-preview{max-width:100%;border-radius:8px;display:block;margin:0 auto}
+
+  /* API endpoint rows */
+  .api-row{border-radius:8px;padding:10px 12px;margin-bottom:6px;border:1px solid #1c1c2e;background:#0f0f1a;display:flex;flex-direction:column;gap:4px;animation:fadeUp .2s ease both}
+  .api-row:hover{border-color:#4a9eff22;background:rgba(74,158,255,.03)}
+  .api-url{font-family:'Space Mono',monospace;font-size:10px;color:#4a9eff;word-break:break-all;line-height:1.5}
+  .api-meta{font-family:'Space Mono',monospace;font-size:9px;color:#4a4a6a}
+  .api-tag{font-family:'Space Mono',monospace;font-size:8px;padding:2px 6px;border-radius:3px;border:1px solid;display:inline-block;margin-right:4px}
+  .api-tag.http{border-color:#ff3c3c44;color:#ff3c3c;background:rgba(255,60,60,.07)}
+  .api-tag.https{border-color:#00e67644;color:#00e676;background:rgba(0,230,118,.07)}
+  .api-tag.ws{border-color:#ffb30044;color:#ffb300;background:rgba(255,179,0,.07)}
+  .api-tag.path{border-color:#4a4a6a;color:#4a4a6a}
+
+  /* Rebuild section */
+  .rebuild-option{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #1c1c2e}
+  .rebuild-option:last-child{border-bottom:none}
+  .toggle{width:36px;height:20px;border-radius:99px;border:1px solid #1c1c2e;background:#141420;position:relative;cursor:pointer;transition:all .2s;flex-shrink:0}
+  .toggle.on{background:#ff3c3c;border-color:#ff3c3c}
+  .toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#4a4a6a;transition:all .2s}
+  .toggle.on::after{left:18px;background:#fff}
+
+  /* Btn */
+  .btn-primary{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:8px;border:1px solid #ff3c3c;background:rgba(255,60,60,.1);color:#ff3c3c;font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;cursor:pointer;transition:all .15s}
+  .btn-primary:hover{background:rgba(255,60,60,.2)}
+  .btn-secondary{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:8px;border:1px solid #1c1c2e;background:transparent;color:#4a4a6a;font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.1em;cursor:pointer;transition:all .15s}
+  .btn-secondary:hover{border-color:#4a9eff;color:#4a9eff}
+
+  /* Copy button */
+  .copy-btn{background:none;border:1px solid #1c1c2e;border-radius:4px;padding:2px 6px;font-family:'Space Mono',monospace;font-size:8px;color:#4a4a6a;cursor:pointer;transition:all .15s;flex-shrink:0}
+  .copy-btn:hover{border-color:#4a9eff;color:#4a9eff}
+  .copy-btn.copied{border-color:#00e676;color:#00e676}
+
+  /* Chip for filter */
+  .filter-chip{font-family:'Space Mono',monospace;font-size:9px;padding:4px 10px;border-radius:99px;border:1px solid #1c1c2e;color:#4a4a6a;cursor:pointer;background:none;transition:all .15s;flex-shrink:0}
+  .filter-chip.active{border-color:#ff3c3c;color:#ff3c3c;background:rgba(255,60,60,.08)}
+
+  /* Spinner */
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spinner{width:14px;height:14px;border:2px solid #1c1c2e;border-top-color:#ff3c3c;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+
+  .num-input{background:#141420;border:1px solid #1c1c2e;border-radius:6px;padding:6px 10px;font-family:'Space Mono',monospace;font-size:11px;color:#e8e8f0;outline:none;width:80px;transition:border-color .15s}
+  .num-input:focus{border-color:#ff3c3c}
+</style>
 </head>
 <body>
 
-  <header class="sticky top-0 z-50 px-5 py-3 flex items-center justify-between border-b border-[var(--border)]"
-    style="background:rgba(12,12,12,0.92);backdrop-filter:blur(12px)">
-    <div class="flex items-center gap-2.5">
-      <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
-        <rect width="26" height="26" rx="6" fill="#f26522"/>
-        <path d="M7 19V7h7a4 4 0 0 1 0 8H7" stroke="white" stroke-width="1.7" stroke-linecap="round"/>
-        <path d="M12 15v4" stroke="white" stroke-width="1.7" stroke-linecap="round"/>
-      </svg>
-      <span class="font-extrabold tracking-tight text-base">PDF <span style="color:var(--accent)">→</span> HTML</span>
+<!-- HEADER -->
+<div style="position:relative;z-index:1;padding:20px 16px 8px;max-width:640px;margin:0 auto">
+  <div class="badge">PatrulhaXX · APK Analyzer v2</div>
+  <h1 style="font-size:clamp(26px,7vw,38px);font-weight:800;line-height:1.05;letter-spacing:-.02em;margin-top:8px">
+    APK <span style="color:#ff3c3c">Analyzer</span>
+  </h1>
+  <p style="font-family:'Space Mono',monospace;font-size:10px;color:#4a4a6a;margin-top:4px">
+    // APIs · ZIP · Rebuild · Diagnóstico real
+  </p>
+</div>
+
+<!-- PAGE: UPLOAD -->
+<div class="page active" id="page-upload" style="padding-top:8px">
+
+  <div class="drop-zone" id="dropZone">
+    <input type="file" id="fileInput" accept=".apk"/>
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff3c3c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <div style="font-size:15px;font-weight:700;margin-bottom:4px">Arrasta o APK aqui</div>
+    <div style="font-family:'Space Mono',monospace;font-size:10px;color:#4a4a6a">ou toca para escolher · até 300MB</div>
+  </div>
+
+  <div id="progressWrap" style="display:none;margin-top:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span style="font-family:'Space Mono',monospace;font-size:10px;color:#4a4a6a" id="progLabel">A analisar...</span>
+      <span style="font-family:'Space Mono',monospace;font-size:10px;color:#ff3c3c" id="progPct">0%</span>
     </div>
-    <span class="mono text-[10px]" style="color:var(--muted)">texto editável · client-side</span>
-  </header>
-
-  <main class="max-w-4xl mx-auto px-4 py-10">
-
-    <div class="mb-10 fade-up">
-      <p class="mono text-[10px] tracking-widest uppercase mb-2" style="color:var(--accent)">Conversor v2</p>
-      <h1 class="text-4xl font-extrabold leading-none tracking-tight mb-3">
-        HTML <span style="color:var(--accent)">100%</span> editável
-      </h1>
-      <p class="text-sm leading-relaxed" style="color:var(--muted);max-width:460px">
-        Cada elemento de texto do PDF é extraído e convertido em
-        <code class="mono" style="color:#888">&lt;span&gt;</code> absolutamente posicionado.
-        Gráficos ficam no canvas base. O HTML final é editável em qualquer editor de código.
-      </p>
+    <div style="height:3px;background:#1c1c2e;border-radius:99px;overflow:hidden">
+      <div class="prog-fill" id="progFill"></div>
     </div>
+  </div>
 
-    <div id="dropzone" onclick="document.getElementById('file-input').click()"
-      class="rounded-xl p-12 flex flex-col items-center gap-4 mb-6 fade-up"
-      style="animation-delay:0.08s">
-      <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-        <path d="M19 26V12M12 19l7-7 7 7" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="1" y="1" width="36" height="36" rx="10" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="4 3"/>
-      </svg>
-      <div class="text-center">
-        <p class="font-bold text-sm">Arraste o PDF aqui</p>
-        <p class="mono text-[11px] mt-1" style="color:var(--muted)">ou clique para selecionar</p>
+  <div id="loadedBadge" style="display:none;margin-top:16px" class="card">
+    <div class="card-header">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00e676" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <span style="font-family:'Space Mono',monospace;font-size:10px;color:#00e676">APK carregado</span>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn-secondary" onclick="downloadZip()" style="padding:6px 10px;font-size:9px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          ZIP
+        </button>
+        <button class="btn-secondary" onclick="exportJson()" style="padding:6px 10px;font-size:9px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          JSON
+        </button>
       </div>
-      <input id="file-input" type="file" accept="application/pdf" class="hidden"/>
     </div>
-
-    <div id="status-card" class="hidden rounded-xl border border-[var(--border)] p-4 mb-6 fade-up"
-      style="background:var(--surface)">
-      <div class="flex justify-between mb-2">
-        <span id="status-label" class="mono text-[11px]" style="color:var(--muted)">Iniciando…</span>
-        <span id="status-pct"   class="mono text-[11px]" style="color:var(--accent)">0%</span>
-      </div>
-      <div class="h-px rounded-full" style="background:var(--border)">
-        <div id="progress-bar" class="h-px rounded-full w-0" style="background:var(--accent)"></div>
-      </div>
-      <div id="status-detail" class="mono text-[10px] mt-2" style="color:var(--muted)"></div>
+    <div style="padding:12px 16px">
+      <div style="font-weight:700;font-size:13px" id="loadedName">—</div>
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:#4a4a6a;margin-top:2px" id="loadedMeta">—</div>
     </div>
+  </div>
 
-    <div id="actions" class="hidden flex flex-wrap gap-3 mb-8 fade-up">
-      <button onclick="downloadHTML()"
-        class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold text-white transition-opacity hover:opacity-85"
-        style="background:var(--accent)">
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-          <path d="M7.5 2v7M4.5 6.5l3 3 3-3M1.5 11.5h12" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Baixar HTML
-      </button>
-      <button onclick="toggleCode()" id="code-btn"
-        class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold border transition-colors hover:border-[var(--accent)]"
-        style="border-color:var(--border);color:var(--text)">
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-          <path d="M4 5L1 7.5 4 10M11 5l3 2.5L11 10M8 3l-2 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Ver código
-      </button>
-      <button onclick="resetAll()"
-        class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold border transition-colors hover:border-[var(--accent)]"
-        style="border-color:var(--border);color:var(--text)">
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-          <path d="M1.5 7.5A6 6 0 1 1 2.7 11M1.5 11.5V7.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Novo PDF
-      </button>
+  <div id="iawPanel" style="display:none;margin-top:16px" class="iaw-alert">
+    <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#ff3c3c;margin-bottom:8px">
+      ⚠ flutter_inappwebview detectado
     </div>
-
-    <div id="code-panel" class="hidden mb-8 fade-up">
-      <div class="flex items-center gap-2 mb-2">
-        <div class="w-1 h-3 rounded-sm" style="background:var(--accent)"></div>
-        <span class="mono text-[11px]" style="color:var(--muted)">Código HTML gerado (página 1)</span>
-      </div>
-      <div id="code-view"></div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px">Black screen / blur bug com WebView</div>
+    <div style="font-family:'Space Mono',monospace;font-size:10px;color:#aaa;line-height:1.7">
+      O <code style="color:#ff8c00">flutter_inappwebview</code> conflitua com <code style="color:#ff8c00">BackdropFilter</code> no Android.
     </div>
+    <div class="fix-block" style="margin-top:10px">// FIX — remove todos os BackdropFilter da home_page.dart
+// Alternativa: usa SurfaceAndroidWebView:
+WebView.platform = SurfaceAndroidWebView();</div>
+  </div>
 
-    <div id="preview" class="hidden fade-up">
-      <div class="flex items-center gap-2 mb-4">
-        <div class="w-1 h-4 rounded-sm" style="background:var(--accent)"></div>
-        <span class="font-bold text-sm">Pré-visualização</span>
-        <span id="page-count-lbl" class="mono text-[11px]" style="color:var(--muted)"></span>
-      </div>
-      <p class="mono text-[10px] mb-5" style="color:var(--muted)">
-        Passe o mouse nos textos para revelar os spans — cada um é um elemento HTML editável.
-      </p>
-      <div id="pages-container" class="flex flex-col gap-8 items-center"></div>
+</div>
+
+<!-- PAGE: DIAGNÓSTICO -->
+<div class="page" id="page-diag">
+  <div id="diagContent" style="margin-top:8px">
+    <div style="text-align:center;padding:60px 0;font-family:'Space Mono',monospace;font-size:11px;color:#4a4a6a">Carrega um APK primeiro</div>
+  </div>
+</div>
+
+<!-- PAGE: APIs -->
+<div class="page" id="page-apis">
+  <div style="margin-top:8px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px">
+    <input class="search-input" type="text" id="apiSearch" placeholder="filtrar endpoints..." oninput="filterApis(this.value)"/>
+    <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none">
+      <button class="filter-chip active" onclick="setApiFilter('all',this)">Todos</button>
+      <button class="filter-chip" onclick="setApiFilter('https',this)">HTTPS</button>
+      <button class="filter-chip" onclick="setApiFilter('http',this)">HTTP</button>
+      <button class="filter-chip" onclick="setApiFilter('ws',this)">WebSocket</button>
+      <button class="filter-chip" onclick="setApiFilter('path',this)">Paths</button>
     </div>
+  </div>
+  <div id="apisContent">
+    <div style="text-align:center;padding:60px 0;font-family:'Space Mono',monospace;font-size:11px;color:#4a4a6a">Carrega um APK para extrair APIs</div>
+  </div>
+</div>
 
-  </main>
+<!-- PAGE: ESTRUTURA -->
+<div class="page" id="page-tree">
+  <div style="margin-top:8px;margin-bottom:12px">
+    <input class="search-input" type="text" id="treeSearch" placeholder="filtrar ficheiros..." oninput="filterTree(this.value)"/>
+  </div>
+  <div id="treeContent" class="card">
+    <div style="text-align:center;padding:60px 0;font-family:'Space Mono',monospace;font-size:11px;color:#4a4a6a">Carrega um APK para ver a estrutura</div>
+  </div>
+</div>
 
-  <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+<!-- PAGE: FICHEIROS -->
+<div class="page" id="page-files">
+  <div style="margin-top:8px;margin-bottom:12px;display:flex;gap:6px">
+    <div class="sub-tabs" id="fileSubTabs">
+      <button class="sub-tab active" onclick="showFileTab('all',this)">Todos</button>
+      <button class="sub-tab" onclick="showFileTab('dex',this)">DEX</button>
+      <button class="sub-tab" onclick="showFileTab('so',this)">Libs .so</button>
+      <button class="sub-tab" onclick="showFileTab('assets',this)">Assets</button>
+      <button class="sub-tab" onclick="showFileTab('manifest',this)">Manifest</button>
+      <button class="sub-tab" onclick="showFileTab('flutter',this)">Flutter</button>
+    </div>
+  </div>
+  <div id="filesContent" class="card">
+    <div style="text-align:center;padding:60px 0;font-family:'Space Mono',monospace;font-size:11px;color:#4a4a6a">Carrega um APK para ler ficheiros</div>
+  </div>
+</div>
 
-    const SCALE = 1.8;
+<!-- PAGE: REBUILD -->
+<div class="page" id="page-rebuild">
+  <div style="margin-top:8px" id="rebuildContent">
+    <div style="text-align:center;padding:60px 0;font-family:'Space Mono',monospace;font-size:11px;color:#4a4a6a">Carrega um APK para configurar rebuild</div>
+  </div>
+</div>
 
-    let pagesData   = [];
-    let pdfFileName = 'documento';
-    let codeVisible = false;
+<!-- FILE VIEWER MODAL -->
+<div class="modal" id="fileModal">
+  <div class="modal-header">
+    <button onclick="closeModal()" style="background:none;border:none;color:#4a4a6a;cursor:pointer;padding:0;line-height:1">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    </button>
+    <div style="flex:1;min-width:0">
+      <div style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="modalTitle">—</div>
+      <div style="font-family:'Space Mono',monospace;font-size:9px;color:#4a4a6a" id="modalMeta">—</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button id="btnDownFile" onclick="downloadCurrentFile()" style="background:none;border:1px solid #1c1c2e;border-radius:6px;color:#4a4a6a;font-family:'Space Mono',monospace;font-size:9px;padding:4px 8px;cursor:pointer">DL</button>
+      <button id="btnHex" onclick="setViewMode('hex')" style="background:none;border:1px solid #1c1c2e;border-radius:6px;color:#4a4a6a;font-family:'Space Mono',monospace;font-size:9px;padding:4px 8px;cursor:pointer">HEX</button>
+      <button id="btnText" onclick="setViewMode('text')" style="background:none;border:1px solid #1c1c2e;border-radius:6px;color:#4a4a6a;font-family:'Space Mono',monospace;font-size:9px;padding:4px 8px;cursor:pointer">TXT</button>
+    </div>
+  </div>
+  <div class="modal-body" id="modalBody">—</div>
+</div>
 
-    const $ = id => document.getElementById(id);
+<!-- TAB BAR — 6 tabs -->
+<nav class="tab-bar">
+  <button class="tab-btn active" id="tab-upload" onclick="switchTab('upload')">
+    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <span>Upload</span>
+  </button>
+  <button class="tab-btn" id="tab-diag" onclick="switchTab('diag')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span>Diag</span>
+  </button>
+  <button class="tab-btn" id="tab-apis" onclick="switchTab('apis')">
+    <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+    <span>APIs</span>
+  </button>
+  <button class="tab-btn" id="tab-tree" onclick="switchTab('tree')">
+    <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <span>Tree</span>
+  </button>
+  <button class="tab-btn" id="tab-files" onclick="switchTab('files')">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span>Files</span>
+  </button>
+  <button class="tab-btn" id="tab-rebuild" onclick="switchTab('rebuild')">
+    <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    <span>Rebuild</span>
+  </button>
+</nav>
 
-    // ── Drag & drop ─────────────────────────────────────────
-    const dz = $('dropzone');
-    dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag-over'); });
-    dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
-    dz.addEventListener('drop', e => {
-      e.preventDefault();
-      dz.classList.remove('drag-over');
-      const f = e.dataTransfer.files[0];
-      if (f?.type === 'application/pdf') loadPDF(f);
-    });
-    $('file-input').addEventListener('change', e => {
-      if (e.target.files[0]) loadPDF(e.target.files[0]);
-    });
+<script>
+// ══════════════════════════════════════════════════════════════
+// GLOBAL STATE
+// ══════════════════════════════════════════════════════════════
+let G = {
+  apkZip: null,
+  apkData: null,
+  analysis: null,
+  apis: [],
+  apiFilter: 'all',
+  currentFileTab: 'all',
+  modalFile: null,
+  modalMode: 'text',
+  modalBytes: null,
+  rebuildConfig: {
+    minSdk: 21,
+    targetSdk: 34,
+    abiArm32: true,
+    abiArm64: true,
+    abiX86: false,
+    abiX64: false,
+    multiDex: true,
+    proguard: true,
+    shrinkRes: true,
+    debuggable: false,
+  }
+};
 
-    // ── Load PDF ─────────────────────────────────────────────
-    async function loadPDF(file) {
-      pdfFileName = file.name.replace(/\.pdf$/i, '');
-      pagesData = [];
-      $('pages-container').innerHTML = '';
-      $('status-card').classList.remove('hidden');
-      $('actions').classList.add('hidden');
-      $('preview').classList.add('hidden');
-      $('code-panel').classList.add('hidden');
-      codeVisible = false;
+// ══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
 
-      const buf    = await file.arrayBuffer();
-      const pdfDoc = await pdfjsLib.getDocument({ data: buf }).promise;
-      const total  = pdfDoc.numPages;
-      $('page-count-lbl').textContent = `${total} página${total > 1 ? 's' : ''}`;
+// ══════════════════════════════════════════════════════════════
+// DROP / FILE INPUT
+// ══════════════════════════════════════════════════════════════
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if(f) processApk(f); });
+fileInput.addEventListener('change', e => { if(e.target.files[0]) processApk(e.target.files[0]); });
 
-      for (let i = 1; i <= total; i++) {
-        setStatus(`Renderizando página ${i} de ${total}…`, i - 1, total, 'desenhando gráficos no canvas…');
+// ══════════════════════════════════════════════════════════════
+// PROGRESS
+// ══════════════════════════════════════════════════════════════
+function setProgress(pct, label) {
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progLabel').textContent = label;
+  document.getElementById('progPct').textContent = pct + '%';
+}
+function hideProgress() { document.getElementById('progressWrap').style.display = 'none'; }
 
-        const page     = await pdfDoc.getPage(i);
-        const viewport = page.getViewport({ scale: SCALE });
+// ══════════════════════════════════════════════════════════════
+// DANGEROUS PERMS
+// ══════════════════════════════════════════════════════════════
+const DANGEROUS_PERMS = [
+  'READ_CONTACTS','WRITE_CONTACTS','READ_CALL_LOG','WRITE_CALL_LOG',
+  'CAMERA','RECORD_AUDIO','READ_EXTERNAL_STORAGE','WRITE_EXTERNAL_STORAGE',
+  'ACCESS_FINE_LOCATION','ACCESS_COARSE_LOCATION','ACCESS_BACKGROUND_LOCATION',
+  'READ_SMS','SEND_SMS','RECEIVE_SMS','READ_PHONE_STATE','CALL_PHONE',
+  'BODY_SENSORS','ACTIVITY_RECOGNITION','BLUETOOTH_SCAN','BLUETOOTH_CONNECT',
+  'NEARBY_WIFI_DEVICES','POST_NOTIFICATIONS','MANAGE_EXTERNAL_STORAGE',
+  'REQUEST_INSTALL_PACKAGES','ACCESS_WIFI_STATE','CHANGE_WIFI_STATE'
+];
 
-        // Canvas (background layer — graphics, images, shapes)
-        const canvas  = document.createElement('canvas');
-        canvas.width  = viewport.width;
-        canvas.height = viewport.height;
-        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-        const canvasDataURL = canvas.toDataURL('image/png');
+const PLUGIN_MAP = {
+  'libflutter_inappwebview': { name: 'flutter_inappwebview', minSdk: 24, note: 'Conflitua com BackdropFilter → black screen' },
+  'flutter_inappwebview':    { name: 'flutter_inappwebview', minSdk: 24, note: 'Conflitua com BackdropFilter → black screen' },
+  'inappwebview':            { name: 'flutter_inappwebview', minSdk: 24, note: 'Conflitua com BackdropFilter → black screen' },
+  'webview_flutter':         { name: 'webview_flutter',      minSdk: 20 },
+  'camera':                  { name: 'camera',               minSdk: 21 },
+  'video_player':            { name: 'video_player',         minSdk: 21 },
+  'mobile_scanner':          { name: 'mobile_scanner',       minSdk: 21 },
+  'permission_handler':      { name: 'permission_handler',   minSdk: 16 },
+  'flutter_p2p':             { name: 'flutter_p2p',          minSdk: 26 },
+  'p2p_connection':          { name: 'p2p_connection',       minSdk: 26 },
+  'wakelock':                { name: 'wakelock',             minSdk: 16 },
+  'sqflite':                 { name: 'sqflite',              minSdk: 16 },
+};
 
-        // Text content extraction
-        setStatus(`Extraindo texto da página ${i}…`, i - 0.5, total, 'mapeando posições dos elementos…');
-        const textContent = await page.getTextContent({ includeMarkedContent: false });
+// ══════════════════════════════════════════════════════════════
+// MAIN PROCESS
+// ══════════════════════════════════════════════════════════════
+async function processApk(file) {
+  try {
+    setProgress(5, 'A ler ficheiro...');
+    const buf = await file.arrayBuffer();
+    setProgress(15, 'A descomprimir APK (ZIP)...');
+    let zip;
+    try {
+      zip = await JSZip.loadAsync(buf);
+    } catch(e) {
+      throw new Error('Ficheiro inválido — não é um APK/ZIP válido: ' + e.message);
+    }
+    G.apkZip = zip;
+    setProgress(30, 'A inventariar conteúdo...');
+    const data = await extractApkData(zip, file);
+    G.apkData = data;
 
-        const textItems = [];
-        for (const item of textContent.items) {
-          if (!item.str) continue;
+    setProgress(70, 'A extrair APIs e endpoints...');
+    G.apis = extractApis(data);
 
-          // Convert PDF transform → viewport (top-left) pixel coords
-          const tx = pdfjsLib.Util.transform(viewport.transform, item.transform);
+    setProgress(85, 'A analisar compatibilidade...');
+    G.analysis = analyzeData(data);
 
-          const fontHeight = Math.hypot(tx[2], tx[3]);
-          const angle      = Math.atan2(tx[1], tx[0]);
-          const style      = textContent.styles[item.fontName] || {};
-          const fontFamily = normalizeFontFamily(style.fontFamily || 'sans-serif');
-          const isBold     = /bold|Black|Heavy|ExtraBold|SemiBold/i.test(item.fontName + ' ' + (style.fontFamily || ''));
-          const isItalic   = /italic|oblique/i.test(item.fontName + ' ' + (style.fontFamily || ''));
+    // Sync rebuild config with detected values
+    if (data.minSdk) G.rebuildConfig.minSdk = data.minSdk;
+    if (data.targetSdk) G.rebuildConfig.targetSdk = data.targetSdk;
+    if (data.abis.size > 0) {
+      G.rebuildConfig.abiArm32 = data.abis.has('armeabi-v7a');
+      G.rebuildConfig.abiArm64 = data.abis.has('arm64-v8a');
+      G.rebuildConfig.abiX86   = data.abis.has('x86');
+      G.rebuildConfig.abiX64   = data.abis.has('x86_64');
+    }
+    G.rebuildConfig.multiDex = data.hasMultiDex;
 
-          // tx[4]=x, tx[5]=y baseline → adjust to top of glyph
-          const x = tx[4];
-          const y = tx[5] - fontHeight;
+    setProgress(100, 'Concluído!');
+    setTimeout(() => {
+      hideProgress();
+      document.getElementById('loadedBadge').style.display = 'block';
+      document.getElementById('loadedName').textContent = file.name;
+      document.getElementById('loadedMeta').textContent =
+        `${(file.size/1024/1024).toFixed(1)} MB · ${data.files.length} ficheiros · ${data.permissions.length} perm · ${G.apis.length} endpoints`;
 
-          // Width in viewport pixels from PDF item.width
-          const widthPx = item.width > 0
-            ? item.width * Math.hypot(tx[0], tx[1]) / (item.transform[0] || 1)
-            : null;
+      const hasIaw = data.plugins.some(p => p.name === 'flutter_inappwebview');
+      document.getElementById('iawPanel').style.display = hasIaw ? 'block' : 'none';
 
-          textItems.push({ str: item.str, x, y, fontHeight, angle, fontFamily, isBold, isItalic, widthPx });
+      renderDiag();
+      renderTree();
+      renderFiles();
+      renderApis();
+      renderRebuild();
+    }, 300);
+  } catch(e) {
+    hideProgress();
+    document.getElementById('loadedBadge').style.display = 'none';
+    document.getElementById('diagContent').innerHTML = `
+      <div class="issue fail" style="margin-top:8px">
+        <div style="font-weight:700;margin-bottom:4px">Erro ao processar APK</div>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:#aaa;line-height:1.7">${escHtml(e.message)}</div>
+      </div>`;
+    switchTab('diag');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// EXTRACT APK DATA
+// ══════════════════════════════════════════════════════════════
+async function extractApkData(zip, file) {
+  const data = {
+    fileName: file.name, fileSize: file.size,
+    files: [], soFiles: [], dexFiles: [],
+    permissions: [], minSdk: null, targetSdk: null,
+    packageName: null, versionCode: null, versionName: null,
+    abis: new Set(), plugins: [],
+    hasMultiDex: false, hasFlutter: false, hasFlutterAssets: false,
+    assets: [], manifestStrings: [], allStrings: [],
+  };
+
+  const entries = Object.values(zip.files);
+  for (const e of entries) {
+    if (e.dir) continue;
+    const sz = e._data?.uncompressedSize || 0;
+    data.files.push({ name: e.name, size: sz, entry: e });
+    const n = e.name.toLowerCase();
+    if (n.endsWith('.so')) {
+      data.soFiles.push(e.name);
+      if (n.includes('/armeabi-v7a/')) data.abis.add('armeabi-v7a');
+      if (n.includes('/arm64-v8a/'))  data.abis.add('arm64-v8a');
+      if (n.includes('/x86_64/'))     data.abis.add('x86_64');
+      if (n.includes('/x86/'))        data.abis.add('x86');
+      if (n.includes('libflutter'))   data.hasFlutter = true;
+    }
+    if (n.endsWith('.dex')) { data.dexFiles.push(e.name); if(n !== 'classes.dex') data.hasMultiDex = true; }
+    if (n.startsWith('assets/flutter_assets/')) data.hasFlutterAssets = true;
+    if (n.startsWith('assets/')) data.assets.push(e.name);
+    for (const [key, plug] of Object.entries(PLUGIN_MAP)) {
+      if (n.includes(key.toLowerCase()) && !data.plugins.find(p => p.name === plug.name)) data.plugins.push({ ...plug });
+    }
+  }
+
+  setProgress(45, 'A descodificar AndroidManifest binário...');
+  try {
+    const mf = zip.file('AndroidManifest.xml');
+    if (mf) {
+      const mbuf = await mf.async('arraybuffer');
+      const parsed = parseBinaryManifest(new Uint8Array(mbuf));
+      data.permissions   = parsed.permissions;
+      data.minSdk        = parsed.minSdk;
+      data.targetSdk     = parsed.targetSdk;
+      data.packageName   = parsed.packageName;
+      data.versionCode   = parsed.versionCode;
+      data.versionName   = parsed.versionName;
+      data.manifestStrings = parsed.allStrings;
+      data.allStrings = [...parsed.allStrings];
+      for (const [key, plug] of Object.entries(PLUGIN_MAP)) {
+        const found = parsed.allStrings.some(s => s.toLowerCase().includes(key.toLowerCase()));
+        if (found && !data.plugins.find(p => p.name === plug.name)) data.plugins.push({ ...plug });
+      }
+    }
+  } catch(e) {}
+
+  setProgress(60, 'A extrair strings de ficheiros text/assets...');
+  // Read text-ish files for string extraction (assets, json, etc.)
+  const textFiles = data.files.filter(f => {
+    const ext = f.name.split('.').pop().toLowerCase();
+    return ['json','txt','xml','properties','js','html','dart','yaml','toml','gradle'].includes(ext) && f.size < 2*1024*1024;
+  });
+  for (const tf of textFiles.slice(0, 30)) {
+    try {
+      const entry = zip.file(tf.name);
+      if (!entry) continue;
+      const bytes = await entry.async('uint8array');
+      const text = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+      data.allStrings.push(text);
+    } catch(e) {}
+  }
+
+  return data;
+}
+
+// ══════════════════════════════════════════════════════════════
+// EXTRACT APIs / ENDPOINTS
+// ══════════════════════════════════════════════════════════════
+function extractApis(data) {
+  const found = new Map(); // url -> {url, type, sources:[]}
+
+  const allText = data.allStrings.join('\n');
+
+  // Full URLs: http/https/ws/wss
+  const urlRe = /\b(https?|wss?):\/\/[^\s"'`<>\]{}|\\^~\x00-\x1F]{4,300}/g;
+  let m;
+  while ((m = urlRe.exec(allText)) !== null) {
+    const url = m[0].replace(/[.,;:!?)]+$/, ''); // strip trailing punctuation
+    if (url.length < 8) continue;
+    if (!found.has(url)) {
+      const proto = url.startsWith('ws') ? 'ws' : url.startsWith('https') ? 'https' : 'http';
+      found.set(url, { url, type: proto, source: 'string' });
+    }
+  }
+
+  // Paths that look like API endpoints (at least /v + something or /api/)
+  const pathRe = /["'`](\/(v\d+\/|api\/|graphql|rest\/|rpc\/|auth\/|oauth\/|user[s]?\/|account[s]?\/|data\/|stream\/)[^\s"'`<>]{2,120})["'`]/g;
+  while ((m = pathRe.exec(allText)) !== null) {
+    const path = m[1];
+    if (!found.has(path)) found.set(path, { url: path, type: 'path', source: 'string' });
+  }
+
+  // From file paths themselves: assets, manifest
+  const filePathRe = /\/(v\d+|api|graphql|rest|rpc|auth|stream)\//gi;
+  for (const f of data.files) {
+    if (filePathRe.test(f.name)) {
+      const p = '/' + f.name;
+      if (!found.has(p)) found.set(p, { url: p, type: 'path', source: 'file:' + f.name });
+    }
+  }
+
+  // Deduplicate, clean, sort
+  const list = Array.from(found.values());
+  list.sort((a, b) => {
+    const order = { https:0, ws:1, http:2, path:3 };
+    return (order[a.type]||9) - (order[b.type]||9);
+  });
+
+  return list;
+}
+
+// ══════════════════════════════════════════════════════════════
+// BINARY ANDROID MANIFEST PARSER
+// ══════════════════════════════════════════════════════════════
+function parseBinaryManifest(bytes) {
+  const result = { allStrings: [], permissions: [], minSdk: null, targetSdk: null, packageName: null, versionCode: null, versionName: null };
+  try {
+    const dv = new DataView(bytes.buffer);
+    if (dv.getUint32(0, true) !== 0x00080003) return result;
+    let off = 0;
+    while (off < bytes.length - 4) {
+      const chunkType = dv.getUint16(off, true);
+      if (chunkType === 0x0001) {
+        const strCount   = dv.getUint32(off + 8, true);
+        const flags      = dv.getUint32(off + 16, true);
+        const strDataOff = dv.getUint32(off + 20, true);
+        const isUtf8     = (flags & 0x100) !== 0;
+        const offsetBase = off + 28;
+        const strBase    = off + 8 + strDataOff;
+        for (let i = 0; i < strCount && i < 4000; i++) {
+          try {
+            const relOff = dv.getUint32(offsetBase + i * 4, true);
+            let s = '';
+            if (isUtf8) {
+              let p = strBase + relOff;
+              if (bytes[p] & 0x80) p += 2; else p += 1;
+              if (bytes[p] & 0x80) p += 2; else p += 1;
+              while (p < bytes.length && bytes[p] !== 0 && s.length < 300) s += String.fromCharCode(bytes[p++]);
+            } else {
+              let p = strBase + relOff;
+              const len = dv.getUint16(p, true); p += 2;
+              for (let j = 0; j < len && j < 300 && p + 1 < bytes.length; j++, p += 2) {
+                const ch = dv.getUint16(p, true);
+                if (ch === 0) break;
+                s += String.fromCharCode(ch);
+              }
+            }
+            if (s.length > 1 && s.length < 250) result.allStrings.push(s);
+          } catch(e) {}
         }
-
-        pagesData.push({ canvasDataURL, textItems, vpWidth: viewport.width, vpHeight: viewport.height });
-
-        // Build preview element
-        const shell = buildPageShell(i, total, pagesData[i - 1], false);
-        $('pages-container').appendChild(shell);
-
-        setStatus(`Página ${i} concluída`, i, total, '');
+        break;
       }
-
-      setStatus('Concluído!', total, total, '');
-      setTimeout(() => {
-        $('status-card').classList.add('hidden');
-        $('actions').classList.remove('hidden');
-        $('preview').classList.remove('hidden');
-      }, 500);
+      off += 4;
     }
+    result.permissions = result.allStrings.filter(s =>
+      s.startsWith('android.permission.') || (s.includes('.permission.') && s.length < 120)
+    ).map(s => s.replace('android.permission.', ''));
+    result.packageName = result.allStrings.find(s =>
+      /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*){2,}$/.test(s) && !s.startsWith('android') && !s.startsWith('com.google.android')
+    ) || null;
+    result.versionName = result.allStrings.find(s => /^\d+\.\d+(\.\d+)?/.test(s)) || null;
+    const dv2 = new DataView(bytes.buffer);
+    for (let i = 0; i < bytes.length - 12; i++) {
+      if (dv2.getUint32(i, true) === 0x0101021b) { const v = dv2.getInt32(i+8,true); if(v>0&&v<=50) result.minSdk=v; }
+      if (dv2.getUint32(i, true) === 0x01010270) { const v = dv2.getInt32(i+8,true); if(v>0&&v<=50) result.targetSdk=v; }
+      if (dv2.getUint32(i, true) === 0x0101021c) { const v = dv2.getInt32(i+8,true); if(v>0&&v<1e8) result.versionCode=v; }
+    }
+  } catch(e) {}
+  return result;
+}
 
-    // ── Build page element ───────────────────────────────────
-    function buildPageShell(pageNum, totalPages, data, forExport) {
-      const { canvasDataURL, textItems, vpWidth, vpHeight } = data;
+function sdkVer(sdk) {
+  const m={16:'4.1',17:'4.2',18:'4.3',19:'4.4',20:'4.4W',21:'5.0',22:'5.1',23:'6.0',24:'7.0',25:'7.1',26:'8.0',27:'8.1',28:'9',29:'10',30:'11',31:'12',32:'12L',33:'13',34:'14',35:'15',36:'16'};
+  return m[sdk] ? `Android ${m[sdk]}` : `API ${sdk}`;
+}
 
-      const displayW = forExport ? vpWidth : Math.min(vpWidth, window.innerWidth - 48);
-      const ratio    = displayW / vpWidth;
-      const displayH = vpHeight * ratio;
+// ══════════════════════════════════════════════════════════════
+// ANALYSIS ENGINE
+// ══════════════════════════════════════════════════════════════
+function analyzeData(data) {
+  const issues = [];
+  let score = 100;
+  const minSdk = data.minSdk || 21;
+  if (minSdk > 21) {
+    issues.push({ sev:'fail', title:`minSdk=${minSdk} — exclui dispositivos com ${sdkVer(21)}–${sdkVer(minSdk-1)}`,
+      desc:`O manifesto declara minSdkVersion ${minSdk}.`,
+      fix:`// build.gradle.kts\nminSdk = 21   // suporte Android 5+` });
+    score -= 20;
+  } else {
+    issues.push({ sev:'ok', title:`minSdk=${minSdk} → suporta ${sdkVer(minSdk)}+`, desc:'Configuração de compatibilidade correta.' });
+  }
+  const worstPlug = data.plugins.reduce((acc, p) => (!acc || p.minSdk > acc.minSdk) ? p : acc, null);
+  if (worstPlug && worstPlug.minSdk > minSdk) {
+    const isIaw = worstPlug.name === 'flutter_inappwebview';
+    issues.push({
+      sev:'fail',
+      title:`${worstPlug.name} detectado — requer API ${worstPlug.minSdk}, conflito com minSdk=${minSdk}`,
+      desc: isIaw
+        ? `Detectado via paths no APK. Requer API 24+. ${worstPlug.note||''}\nEm API ${minSdk}–${worstPlug.minSdk-1} instala mas crasha.`
+        : `Plugin define internamente minSdkVersion=${worstPlug.minSdk}.`,
+      fix: isIaw
+        ? `// Remove BackdropFilter acima do InAppWebView\n// OU:\nWebView.platform = SurfaceAndroidWebView();\n\n// build.gradle.kts\nminSdk = 24`
+        : `// Opção A:\nminSdk = ${worstPlug.minSdk}\n// Opção B:\nif (sdkInt >= ${worstPlug.minSdk}) { /* usa plugin */ } else { /* fallback */ }`
+    });
+    score -= 25;
+  }
+  const abis = [...data.abis];
+  if (!abis.includes('armeabi-v7a') && data.soFiles.length > 0) {
+    issues.push({ sev:'fail', title:'armeabi-v7a ausente — dispositivos 32-bit vão crashar',
+      desc:`Libs: ${abis.join(', ')||'nenhuma'}. Maioria dos Android 5–8 são 32-bit.`,
+      fix:`// build.gradle.kts\nndk { abiFilters += listOf("armeabi-v7a","arm64-v8a") }` });
+    score -= 25;
+  } else if (abis.length > 0) {
+    issues.push({ sev:'ok', title:`ABIs: ${abis.join(', ')}`, desc:'Boa cobertura de arquiteturas.' });
+  }
+  if (data.hasMultiDex) {
+    issues.push({ sev:'ok', title:`MultiDex ativo (${data.dexFiles.length} DEX)`, desc:'Sem limite de 65k métodos.' });
+  } else if (data.dexFiles.length === 1) {
+    issues.push({ sev:'info', title:'DEX único — sem MultiDex',
+      desc:'Se ultrapassar 65 536 métodos, em Android <5 o app não abre.',
+      fix:`// build.gradle.kts\ndefaultConfig { multiDexEnabled = true }\ndependencies { implementation("androidx.multidex:multidex:2.0.1") }` });
+  }
+  const dangerPerms = data.permissions.filter(p => DANGEROUS_PERMS.some(d => p.toUpperCase().includes(d)));
+  if (dangerPerms.length > 0) {
+    issues.push({ sev:'warn', title:`${dangerPerms.length} permissões perigosas — requerem runtime request (API 23+)`,
+      desc:`${dangerPerms.slice(0,5).join(', ')}${dangerPerms.length>5?'...':''}`,
+      fix:`final status = await Permission.camera.request();\nif (!status.isGranted) return;` });
+    score -= 10;
+  }
+  if (data.permissions.some(p => p.includes('REQUEST_INSTALL_PACKAGES'))) {
+    issues.push({ sev:'warn', title:'REQUEST_INSTALL_PACKAGES — API 26+ requer autorização',
+      fix:`if (Platform.isAndroid && sdkInt >= 26) {\n    await openAppSettings();\n}` });
+    score -= 5;
+  }
+  if (data.hasFlutter) {
+    issues.push({ sev:'ok', title:'Flutter engine detectado (libflutter.so)', desc:`${abis.length} ABI(s). Flutter assets: ${data.hasFlutterAssets?'Sim':'Não encontrados'}.` });
+  }
+  const mb = (data.fileSize/1024/1024).toFixed(1);
+  if (data.fileSize > 50*1024*1024) {
+    issues.push({ sev:'warn', title:`APK grande: ${mb} MB`,
+      fix:`// Usa App Bundle ou split por ABI:\nsplits { abi { isEnable = true\n    include("armeabi-v7a","arm64-v8a") } }` });
+    score -= 5;
+  } else {
+    issues.push({ sev:'ok', title:`Tamanho: ${mb} MB`, desc:'Tamanho razoável.' });
+  }
+  // API security check
+  const httpOnly = G.apis.filter(a => a.type === 'http');
+  if (httpOnly.length > 0) {
+    issues.push({ sev:'warn', title:`${httpOnly.length} endpoint(s) HTTP não seguro`,
+      desc:`URLs plaintext encontrados: ${httpOnly.slice(0,3).map(a=>a.url).join(', ')}${httpOnly.length>3?'...':''}`,
+      fix:`// AndroidManifest.xml\n// Garante usesCleartextTraffic="false"\n// ou usa network_security_config.xml` });
+    score -= 10;
+  }
+  score = Math.max(0, Math.min(100, score));
+  return { issues, score };
+}
 
-      const shell = document.createElement('div');
-      shell.className = 'page-shell';
-      shell.style.width  = displayW + 'px';
-      shell.style.height = displayH + 'px';
+// ══════════════════════════════════════════════════════════════
+// RENDER APIS
+// ══════════════════════════════════════════════════════════════
+function renderApis() {
+  renderApiList();
+}
 
-      // Background image layer
-      const bg = document.createElement('img');
-      bg.src   = canvasDataURL;
-      bg.alt   = `Página ${pageNum}`;
-      bg.style.cssText = 'display:block;position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none';
-      shell.appendChild(bg);
+function setApiFilter(f, btn) {
+  G.apiFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderApiList();
+}
 
-      // Text layer
-      const textLayer = document.createElement('div');
-      textLayer.className = 'text-layer';
+function filterApis(q) {
+  renderApiList(q);
+}
 
-      const sf = ratio; // scale factor
+function renderApiList(q) {
+  q = q !== undefined ? q : document.getElementById('apiSearch').value;
+  if (!G.apkData) return;
 
-      for (const item of textItems) {
-        const span = document.createElement('span');
-        span.textContent = item.str;
+  let list = G.apis;
+  if (G.apiFilter !== 'all') list = list.filter(a => a.type === G.apiFilter);
+  if (q) list = list.filter(a => a.url.toLowerCase().includes(q.toLowerCase()));
 
-        const fh = item.fontHeight * sf;
-        const x  = item.x * sf;
-        const y  = item.y * sf;
+  if (list.length === 0) {
+    document.getElementById('apisContent').innerHTML = `
+      <div style="text-align:center;padding:60px 0;font-family:'Space Mono',monospace;font-size:11px;color:#4a4a6a">
+        ${G.apis.length === 0 ? 'Nenhum endpoint encontrado neste APK' : 'Sem resultados para este filtro'}
+      </div>`;
+    return;
+  }
 
-        let css = [
-          `position:absolute`,
-          `left:${x}px`,
-          `top:${y}px`,
-          `font-size:${fh}px`,
-          `font-family:${item.fontFamily}`,
-          `font-weight:${item.isBold ? '700' : '400'}`,
-          `font-style:${item.isItalic ? 'italic' : 'normal'}`,
-          `white-space:pre`,
-          `transform-origin:0% 0%`,
-          `color:transparent`,
-          `line-height:1`,
-          `user-select:text`,
-        ];
-        if (item.angle !== 0) css.push(`transform:rotate(${item.angle}rad)`);
-        if (item.widthPx) css.push(`width:${item.widthPx * sf}px`, `display:inline-block`);
+  const summary = `<div style="font-family:'Space Mono',monospace;font-size:10px;color:#4a4a6a;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+    <span>${list.length} endpoint(s)</span>
+    <button class="btn-secondary" onclick="copyAllApis()" style="padding:5px 10px;font-size:9px">
+      Copiar todos
+    </button>
+  </div>`;
 
-        span.style.cssText = css.join(';');
-        textLayer.appendChild(span);
+  const rows = list.map((a, i) => {
+    const tagCls = a.type;
+    const tagLabel = a.type.toUpperCase();
+    const id = 'api-' + i;
+    return `<div class="api-row" style="animation-delay:${Math.min(i*0.02,0.5)}s">
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <span class="api-tag ${tagCls}">${tagLabel}</span>
+        <span class="api-url" style="flex:1">${escHtml(a.url)}</span>
+        <button class="copy-btn" id="${id}" onclick="copyApi('${escAttr(a.url)}','${id}')">COPY</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('apisContent').innerHTML = summary + rows;
+}
+
+function copyApi(url, btnId) {
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById(btnId);
+    if (btn) { btn.textContent = 'OK'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 1500); }
+  }).catch(() => {});
+}
+
+function copyAllApis() {
+  const text = G.apis.map(a => a.url).join('\n');
+  navigator.clipboard.writeText(text).catch(() => {});
+}
+
+// ══════════════════════════════════════════════════════════════
+// RENDER DIAGNÓSTICO
+// ══════════════════════════════════════════════════════════════
+function renderDiag() {
+  const { issues, score } = G.analysis;
+  const data = G.apkData;
+  const minSdk = data.minSdk || '?';
+  const targetSdk = data.targetSdk || '?';
+  const abis = [...data.abis];
+  let color, verdict;
+  if (score >= 80) { color='#00e676'; verdict='Provavelmente estável'; }
+  else if (score >= 55) { color='#ffb300'; verdict='Crashes intermitentes esperados'; }
+  else { color='#ff3c3c'; verdict='Crash garantido em versões antigas'; }
+  const fails = issues.filter(i=>i.sev==='fail').length;
+  const warns = issues.filter(i=>i.sev==='warn').length;
+  const r=44, circ=2*Math.PI*r, dash=circ*(score/100);
+  const sevDot = (sev) => {
+    const c=sev==='fail'?'#ff3c3c':sev==='warn'?'#ffb300':sev==='ok'?'#00e676':'#4a9eff';
+    return `<svg width="10" height="10" viewBox="0 0 10 10" style="flex-shrink:0;margin-top:2px"><circle cx="5" cy="5" r="4" fill="${c}"/></svg>`;
+  };
+  let html = `
+    <div class="card" style="padding:20px;margin-bottom:16px;display:flex;align-items:center;gap:20px">
+      <div class="score-ring" style="flex-shrink:0">
+        <svg width="100" height="100">
+          <circle cx="50" cy="50" r="${r}" fill="none" stroke="#1c1c2e" stroke-width="6"/>
+          <circle cx="50" cy="50" r="${r}" fill="none" stroke="${color}" stroke-width="6"
+            stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}"
+            stroke-linecap="round" style="transition:stroke-dasharray .8s cubic-bezier(.4,0,.2,1)"/>
+        </svg>
+        <div class="score-text" style="font-size:20px;color:${color}">${score}%</div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700;color:${color};margin-bottom:4px">${verdict}</div>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:#4a4a6a;line-height:1.7">
+          ${fails} crítico(s) · ${warns} aviso(s)<br/>
+          ${data.fileName}<br/>
+          ${(data.fileSize/1024/1024).toFixed(1)} MB · ${G.apis.length} endpoints
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <div class="info-cell"><div class="info-label">Package</div><div class="info-val" style="font-size:10px;font-family:'Space Mono',monospace">${data.packageName||'?'}</div></div>
+      <div class="info-cell"><div class="info-label">Version</div><div class="info-val">${data.versionName||'?'}</div></div>
+      <div class="info-cell"><div class="info-label">minSdk</div><div class="info-val ${minSdk<=21?'ok-c':'fail-c'}">${minSdk} <span style="font-size:10px;font-weight:400">${minSdk?sdkVer(minSdk):''}</span></div></div>
+      <div class="info-cell"><div class="info-label">targetSdk</div><div class="info-val">${targetSdk} <span style="font-size:10px;font-weight:400">${targetSdk?sdkVer(targetSdk):''}</span></div></div>
+      <div class="info-cell"><div class="info-label">ABIs</div><div class="info-val ${abis.includes('armeabi-v7a')?'ok-c':'fail-c'}" style="font-size:11px">${abis.length?abis.join(', '):'?'}</div></div>
+      <div class="info-cell"><div class="info-label">DEX</div><div class="info-val ${data.hasMultiDex?'ok-c':''}">${data.dexFiles.length} ${data.hasMultiDex?'✓ multi':''}</div></div>
+      <div class="info-cell"><div class="info-label">Libs .so</div><div class="info-val">${data.soFiles.length}</div></div>
+      <div class="info-cell"><div class="info-label">Endpoints</div><div class="info-val info-c">${G.apis.length}</div></div>
+    </div>
+    <div class="section-title">Diagnóstico</div>
+    ${issues.map((iss,i) => `
+      <div class="issue ${iss.sev}" style="animation-delay:${i*0.05}s">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="flex-shrink:0;margin-top:2px">${sevDot(iss.sev)}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;margin-bottom:3px">${iss.title}</div>
+            ${iss.desc?`<div style="font-family:'Space Mono',monospace;font-size:10px;color:#aaa;line-height:1.65;white-space:pre-wrap">${iss.desc}</div>`:''}
+            ${iss.fix?`<div class="fix-block">${escHtml(iss.fix)}</div>`:''}
+          </div>
+        </div>
+      </div>`).join('')}
+    ${data.permissions.length>0?`
+    <div class="section-title" style="margin-top:16px">Permissões (${data.permissions.length})</div>
+    <div style="display:flex;flex-wrap:wrap;margin-bottom:16px">
+      ${data.permissions.map(p=>{const isDanger=DANGEROUS_PERMS.some(d=>p.toUpperCase().includes(d));return`<span class="perm-pill ${isDanger?'dangerous':'normal'}">${p}</span>`;}).join('')}
+    </div>`:''}
+    ${data.plugins.length>0?`
+    <div class="section-title">Plugins detectados (${data.plugins.length})</div>
+    <div class="card" style="margin-bottom:16px">
+      ${data.plugins.map(p=>`
+        <div style="padding:10px 14px;border-bottom:1px solid #1c1c2e;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700">${p.name}</div>
+            ${p.note?`<div style="font-family:'Space Mono',monospace;font-size:9px;color:#ff3c3c;margin-top:2px">${p.note}</div>`:''}
+          </div>
+          <span style="font-family:'Space Mono',monospace;font-size:9px;padding:3px 8px;border-radius:99px;border:1px solid ${p.minSdk>(data.minSdk||21)?'#ffb300':'#1c1c2e'};color:${p.minSdk>(data.minSdk||21)?'#ffb300':'#4a4a6a'}">API ${p.minSdk}+</span>
+        </div>`).join('')}
+    </div>`:''}
+  `;
+  document.getElementById('diagContent').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════
+// RENDER REBUILD
+// ══════════════════════════════════════════════════════════════
+function renderRebuild() {
+  if (!G.apkData) return;
+  const cfg = G.rebuildConfig;
+  const data = G.apkData;
+
+  const toggleHtml = (key, label, sublabel) => {
+    const on = cfg[key];
+    return `<div class="rebuild-option">
+      <div>
+        <div style="font-size:13px;font-weight:700">${label}</div>
+        ${sublabel?`<div style="font-family:'Space Mono',monospace;font-size:9px;color:#4a4a6a;margin-top:2px">${sublabel}</div>`:''}
+      </div>
+      <div class="toggle ${on?'on':''}" onclick="toggleCfg('${key}',this)"></div>
+    </div>`;
+  };
+
+  const html = `
+    <div class="section-title" style="margin-top:8px">Configuração de SDK</div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="rebuild-option">
+        <div>
+          <div style="font-size:13px;font-weight:700">minSdk</div>
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:#4a4a6a;margin-top:2px">Atual APK: ${data.minSdk||'?'}</div>
+        </div>
+        <input class="num-input" type="number" min="16" max="35" value="${cfg.minSdk}" oninput="G.rebuildConfig.minSdk=+this.value;updateGradlePreview()"/>
+      </div>
+      <div class="rebuild-option">
+        <div>
+          <div style="font-size:13px;font-weight:700">targetSdk</div>
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:#4a4a6a;margin-top:2px">Atual APK: ${data.targetSdk||'?'}</div>
+        </div>
+        <input class="num-input" type="number" min="21" max="36" value="${cfg.targetSdk}" oninput="G.rebuildConfig.targetSdk=+this.value;updateGradlePreview()"/>
+      </div>
+    </div>
+
+    <div class="section-title">ABIs a incluir</div>
+    <div class="card" style="margin-bottom:16px">
+      ${toggleHtml('abiArm64','arm64-v8a','64-bit · todos os Android modernos')}
+      ${toggleHtml('abiArm32','armeabi-v7a','32-bit · Android 5–8 legado')}
+      ${toggleHtml('abiX86','x86','Emuladores 32-bit')}
+      ${toggleHtml('abiX64','x86_64','Emuladores 64-bit')}
+    </div>
+
+    <div class="section-title">Opções de Build</div>
+    <div class="card" style="margin-bottom:16px">
+      ${toggleHtml('multiDex','MultiDex','Necessário se >65k métodos')}
+      ${toggleHtml('proguard','ProGuard / R8','Obfuscação e remoção de código morto')}
+      ${toggleHtml('shrinkRes','Shrink Resources','Remove recursos não usados')}
+      ${toggleHtml('debuggable','Debuggable','NÃO usar em produção')}
+    </div>
+
+    <div class="section-title">build.gradle.kts gerado</div>
+    <div style="margin-bottom:16px">
+      <div style="position:relative">
+        <pre id="gradlePreview" style="background:#0f0f1a;border:1px solid #1c1c2e;border-radius:10px;padding:14px;font-family:'Space Mono',monospace;font-size:10px;color:#e8e8f0;line-height:1.7;overflow-x:auto;white-space:pre;margin:0"></pre>
+        <button class="copy-btn" id="gradleCopyBtn" onclick="copyGradle()" style="position:absolute;top:10px;right:10px">COPY</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-primary" onclick="downloadZip()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download APK como ZIP
+      </button>
+      <button class="btn-secondary" onclick="exportJson()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Exportar Relatório JSON
+      </button>
+    </div>
+  `;
+
+  document.getElementById('rebuildContent').innerHTML = html;
+  updateGradlePreview();
+}
+
+function toggleCfg(key, el) {
+  G.rebuildConfig[key] = !G.rebuildConfig[key];
+  el.classList.toggle('on', G.rebuildConfig[key]);
+  updateGradlePreview();
+}
+
+function updateGradlePreview() {
+  const cfg = G.rebuildConfig;
+  const abis = [];
+  if (cfg.abiArm64) abis.push('"arm64-v8a"');
+  if (cfg.abiArm32) abis.push('"armeabi-v7a"');
+  if (cfg.abiX86)   abis.push('"x86"');
+  if (cfg.abiX64)   abis.push('"x86_64"');
+  const abiStr = abis.length ? abis.join(', ') : '/* nenhuma selecionada */';
+  const code =
+`android {
+    defaultConfig {
+        minSdk = ${cfg.minSdk}
+        targetSdk = ${cfg.targetSdk}
+        multiDexEnabled = ${cfg.multiDex}
+        
+        ndk {
+            abiFilters += listOf(${abiStr})
+        }
+    }
+    
+    buildTypes {
+        release {
+            isMinifyEnabled = ${cfg.proguard}
+            isShrinkResources = ${cfg.shrinkRes}
+            isDebuggable = ${cfg.debuggable}
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+}
+
+${cfg.multiDex ? `dependencies {\n    implementation("androidx.multidex:multidex:2.0.1")\n}` : '// MultiDex desativado'}`;
+  const el = document.getElementById('gradlePreview');
+  if (el) el.textContent = code;
+}
+
+function copyGradle() {
+  const el = document.getElementById('gradlePreview');
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    const btn = document.getElementById('gradleCopyBtn');
+    if (btn) { btn.textContent = 'OK'; btn.classList.add('copied'); setTimeout(()=>{btn.textContent='COPY';btn.classList.remove('copied');},1500); }
+  }).catch(()=>{});
+}
+
+// ══════════════════════════════════════════════════════════════
+// DOWNLOAD ZIP
+// ══════════════════════════════════════════════════════════════
+async function downloadZip() {
+  if (!G.apkZip || !G.apkData) return;
+  try {
+    const blob = await G.apkZip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+    const baseName = G.apkData.fileName.replace(/\.apk$/i, '');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = baseName + '_extracted.zip';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  } catch(e) {
+    alert('Erro ao gerar ZIP: ' + e.message);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// EXPORT JSON REPORT
+// ══════════════════════════════════════════════════════════════
+function exportJson() {
+  if (!G.apkData || !G.analysis) return;
+  const data = G.apkData;
+  const report = {
+    meta: {
+      fileName: data.fileName,
+      fileSize: data.fileSize,
+      packageName: data.packageName,
+      versionName: data.versionName,
+      versionCode: data.versionCode,
+      minSdk: data.minSdk,
+      targetSdk: data.targetSdk,
+      abis: [...data.abis],
+      hasFlutter: data.hasFlutter,
+      hasFlutterAssets: data.hasFlutterAssets,
+      hasMultiDex: data.hasMultiDex,
+      dexCount: data.dexFiles.length,
+      soCount: data.soFiles.length,
+      totalFiles: data.files.length,
+    },
+    score: G.analysis.score,
+    issues: G.analysis.issues.map(i => ({ severity: i.sev, title: i.title, desc: i.desc||'', fix: i.fix||'' })),
+    permissions: data.permissions,
+    plugins: data.plugins.map(p => ({ name: p.name, minSdk: p.minSdk, note: p.note||'' })),
+    apis: G.apis.map(a => ({ url: a.url, type: a.type })),
+    generatedAt: new Date().toISOString(),
+  };
+  const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+  const baseName = data.fileName.replace(/\.apk$/i, '');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = baseName + '_report.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
+
+// ══════════════════════════════════════════════════════════════
+// RENDER FILES
+// ══════════════════════════════════════════════════════════════
+function renderFiles() {
+  showFileTab(G.currentFileTab, document.querySelector('.sub-tab.active'));
+}
+
+function showFileTab(tab, btn) {
+  G.currentFileTab = tab;
+  document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (!G.apkData) return;
+  const all = G.apkData.files;
+  let filtered;
+  switch(tab) {
+    case 'dex':      filtered = all.filter(f => f.name.endsWith('.dex')); break;
+    case 'so':       filtered = all.filter(f => f.name.endsWith('.so')); break;
+    case 'assets':   filtered = all.filter(f => f.name.startsWith('assets/')); break;
+    case 'manifest': filtered = all.filter(f => f.name === 'AndroidManifest.xml' || f.name.endsWith('.xml')); break;
+    case 'flutter':  filtered = all.filter(f => f.name.includes('flutter')); break;
+    default:         filtered = all;
+  }
+  const html = filtered.length ? filtered.map(f => {
+    const sz = f.size>1024*1024?(f.size/1024/1024).toFixed(1)+'MB':f.size>1024?(f.size/1024).toFixed(0)+'KB':f.size+'B';
+    const fname = f.name.split('/').pop();
+    const ext = fname.includes('.')?fname.split('.').pop().toLowerCase():'';
+    const icon = getFileIconSvg(ext);
+    return `<div class="tree-node" onclick="openFile('${escAttr(f.name)}')">
+      ${icon}
+      <span style="flex:1;min-width:0;font-family:'Space Mono',monospace;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(f.name)}</span>
+      <span style="font-family:'Space Mono',monospace;font-size:9px;color:#4a4a6a;flex-shrink:0;margin-left:8px">${sz}</span>
+    </div>`;
+  }).join('') : `<div style="padding:40px;text-align:center;font-family:'Space Mono',monospace;font-size:11px;color:#4a4a6a">Nenhum ficheiro nesta categoria</div>`;
+  document.getElementById('filesContent').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════
+// FILE VIEWER
+// ══════════════════════════════════════════════════════════════
+const IMAGE_EXTS = new Set(['png','jpg','jpeg','webp','gif','bmp','ico']);
+
+async function openFile(name) {
+  if (!G.apkZip) return;
+  const entry = G.apkZip.file(name);
+  if (!entry) return;
+  document.getElementById('modalTitle').textContent = name.split('/').pop();
+  document.getElementById('modalMeta').textContent = name;
+  document.getElementById('fileModal').classList.add('open');
+  document.getElementById('modalBody').textContent = 'A carregar...';
+  G.modalFile = name;
+  try {
+    const buf = await entry.async('arraybuffer');
+    const bytes = new Uint8Array(buf);
+    G.modalBytes = bytes;
+    renderModal(bytes);
+  } catch(e) {
+    document.getElementById('modalBody').textContent = 'Erro ao ler ficheiro: ' + e.message;
+  }
+}
+
+function renderModal(bytes) {
+  const ext = G.modalFile.split('.').pop().toLowerCase();
+  const mode = G.modalMode;
+  const body = document.getElementById('modalBody');
+  if (IMAGE_EXTS.has(ext) && mode === 'text') {
+    const mime = ext==='jpg'||ext==='jpeg'?'image/jpeg':ext==='webp'?'image/webp':ext==='gif'?'image/gif':ext==='bmp'?'image/bmp':ext==='ico'?'image/x-icon':'image/png';
+    const blob = new Blob([bytes],{type:mime});
+    const url = URL.createObjectURL(blob);
+    body.innerHTML = `<img class="img-preview" src="${url}" onload="URL.revokeObjectURL(this.src)" onerror="this.parentElement.textContent='Não foi possível renderizar'"/>`;
+    updateBtnStates(mode); return;
+  }
+  if (mode === 'hex') {
+    const limit = Math.min(bytes.length, 2048);
+    let rows = '';
+    for (let i=0; i<limit; i+=16) {
+      const rowBytes = bytes.slice(i,i+16);
+      const hex = Array.from(rowBytes).map(b=>b.toString(16).padStart(2,'0')).join(' ');
+      const ascii = Array.from(rowBytes).map(b=>(b>=32&&b<127)?String.fromCharCode(b):'.').join('');
+      rows += `<div style="display:flex;gap:16px;margin-bottom:1px"><span style="color:#4a4a6a;min-width:48px">${i.toString(16).padStart(6,'0')}</span><span style="color:#e8e8f0;letter-spacing:.05em">${hex.padEnd(47,' ')}</span><span style="color:#4a9eff">${escHtml(ascii)}</span></div>`;
+    }
+    if (bytes.length>2048) rows += `<div style="color:#4a4a6a;margin-top:8px">... ${bytes.length-2048} bytes restantes</div>`;
+    body.innerHTML = `<div style="font-family:'Space Mono',monospace;font-size:10px;line-height:1.6;overflow-x:auto">${rows}</div>`;
+  } else {
+    const isText = ['xml','txt','json','html','js','css','md','dart','kt','java','gradle','yaml','toml','properties','mf','sf'].includes(ext);
+    if (ext==='xml' && bytes[0]===0x03) {
+      const parsed = parseBinaryManifest(bytes);
+      body.textContent = '// Binary XML — strings:\n\n' + parsed.allStrings.filter(s=>s.length>2).join('\n');
+    } else if (isText) {
+      try { body.textContent = new TextDecoder('utf-8').decode(bytes); } catch(e) { body.textContent='// Não foi possível decodificar como UTF-8'; }
+    } else {
+      const printable = [];
+      let cur = '';
+      for (const b of bytes) {
+        if (b>=32&&b<127) { cur+=String.fromCharCode(b); }
+        else { if(cur.length>=4) printable.push(cur); cur=''; }
       }
+      if (cur.length>=4) printable.push(cur);
+      body.textContent = `// Binário — strings extraídas (${printable.length}):\n\n` + printable.join('\n');
+    }
+  }
+  updateBtnStates(mode);
+}
 
-      shell.appendChild(textLayer);
+function updateBtnStates(mode) {
+  document.getElementById('btnHex').style.borderColor  = mode==='hex' ?'#ff3c3c':'#1c1c2e';
+  document.getElementById('btnHex').style.color        = mode==='hex' ?'#ff3c3c':'#4a4a6a';
+  document.getElementById('btnText').style.borderColor = mode==='text'?'#ff3c3c':'#1c1c2e';
+  document.getElementById('btnText').style.color       = mode==='text'?'#ff3c3c':'#4a4a6a';
+}
 
-      if (!forExport) {
-        const badge = document.createElement('span');
-        badge.className = 'page-num';
-        badge.textContent = `${pageNum} / ${totalPages}`;
-        shell.appendChild(badge);
-      }
+function setViewMode(m) { G.modalMode = m; if(G.modalBytes) renderModal(G.modalBytes); }
 
-      return shell;
-    }
+async function downloadCurrentFile() {
+  if (!G.apkZip || !G.modalFile) return;
+  const entry = G.apkZip.file(G.modalFile);
+  if (!entry) return;
+  const buf = await entry.async('arraybuffer');
+  const blob = new Blob([buf]);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = G.modalFile.split('/').pop();
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+}
 
-    // ── Download HTML ────────────────────────────────────────
-    function downloadHTML() {
-      const pagesHTML = pagesData.map((data, i) => {
-        const shell = buildPageShell(i + 1, pagesData.length, data, true);
-        return shell.outerHTML;
-      }).join('\n\n');
+function closeModal() { document.getElementById('fileModal').classList.remove('open'); G.modalBytes = null; }
 
-      const html = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>${pdfFileName}</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      background:#e8e8e8;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:32px;
-      padding:40px 16px;
+// ══════════════════════════════════════════════════════════════
+// RENDER TREE
+// ══════════════════════════════════════════════════════════════
+function renderTree() {
+  const files = G.apkData.files;
+  const root = { type:'dir', children:new Map(), files:[] };
+  for (const f of files) {
+    const parts = f.name.split('/');
+    let cur = root;
+    for (let i=0; i<parts.length-1; i++) {
+      const part = parts[i];
+      if (!cur.children.has(part)) cur.children.set(part,{type:'dir',children:new Map(),files:[]});
+      cur = cur.children.get(part);
     }
-    .page-shell{
-      position:relative;
-      background:#fff;
-      overflow:hidden;
-      box-shadow:0 4px 24px rgba(0,0,0,0.15);
-      max-width:100%;
-    }
-    .page-shell img{
-      display:block;
-      position:absolute;
-      top:0;left:0;
-      width:100%;height:100%;
-      pointer-events:none;
-    }
-    .text-layer{
-      position:absolute;
-      top:0;left:0;
-      width:100%;height:100%;
-      overflow:hidden;
-    }
-    .text-layer span{
-      position:absolute;
-      white-space:pre;
-      cursor:text;
-      transform-origin:0% 0%;
-      color:transparent;
-      line-height:1;
-      user-select:text;
-    }
-    .text-layer span:hover{
-      color:rgba(0,0,0,0.06);
-      outline:1px solid rgba(0,80,255,0.2);
-    }
-    .text-layer span::selection{
-      background:rgba(0,80,255,0.18);
-      color:#000;
-    }
-  </style>
-</head>
-<body>
-${pagesHTML}
-</body>
-</html>`;
+    const fname = parts[parts.length-1];
+    if (fname) cur.files.push({name:fname,full:f.name,size:f.size});
+  }
+  const html = renderDirNode(root, 0);
+  document.getElementById('treeContent').innerHTML = html || `<div style="padding:20px;font-family:'Space Mono',monospace;font-size:11px;color:#4a4a6a">Árvore vazia</div>`;
+}
 
-      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href = url;
-      a.download = pdfFileName + '.html';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+function countDescendants(node) {
+  let n = node.files.length;
+  for (const child of node.children.values()) n += countDescendants(child);
+  return n;
+}
 
-    // ── Code preview ─────────────────────────────────────────
-    function toggleCode() {
-      codeVisible = !codeVisible;
-      const panel = $('code-panel');
-      if (!codeVisible) { panel.classList.add('hidden'); return; }
-      if (!pagesData.length) return;
+function renderDirNode(node, depth) {
+  let html = '';
+  const indentPx = depth * 14;
+  for (const [dirName, dirNode] of node.children) {
+    const id = 'td-' + Math.random().toString(36).slice(2);
+    const count = countDescendants(dirNode);
+    html += `
+      <div class="tree-node dir" style="padding-left:${12+indentPx}px" onclick="toggleDir('${id}',this)">
+        ${arrowSvg()}${folderIconSvg('#4a9eff')}
+        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(dirName)}</span>
+        <span style="font-family:'Space Mono',monospace;font-size:9px;color:#4a4a6a;flex-shrink:0;margin-left:6px">${count}</span>
+      </div>
+      <div class="tree-children" id="${id}">${renderDirNode(dirNode,depth+1)}</div>`;
+  }
+  for (const f of node.files) html += renderFileRow(f, indentPx);
+  return html;
+}
 
-      const shell = buildPageShell(1, pagesData.length, pagesData[0], true);
-      let raw = shell.outerHTML;
-      // Truncate base64 for readability
-      raw = raw.replace(/src="data:image\/png;base64,[^"]{60}[^"]*"/g,
-        'src="data:image/png;base64,…"');
-      $('code-view').textContent = raw;
-      panel.classList.remove('hidden');
-    }
+function renderFileRow(f, indentPx) {
+  const sz = f.size>1024*1024?(f.size/1024/1024).toFixed(1)+'MB':f.size>1024?(f.size/1024).toFixed(0)+'KB':f.size+'B';
+  const ext = f.name.includes('.')?f.name.split('.').pop().toLowerCase():'';
+  const tagColor = ext==='so'?'#ff3c3c':ext==='dex'?'#4a9eff':ext==='xml'?'#ffb300':ext==='arsc'?'#00e676':'#4a4a6a';
+  const icon = getFileIconSvg(ext);
+  return `<div class="tree-node" style="padding-left:${12+indentPx}px" onclick="openFile('${escAttr(f.full)}')">
+    ${icon}
+    <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(f.name)}</span>
+    ${ext?`<span style="font-family:'Space Mono',monospace;font-size:8px;padding:1px 5px;border-radius:3px;border:1px solid ${tagColor}22;color:${tagColor};margin-left:4px;flex-shrink:0">${ext}</span>`:''}
+    <span style="font-family:'Space Mono',monospace;font-size:9px;color:#4a4a6a;margin-left:6px;flex-shrink:0">${sz}</span>
+  </div>`;
+}
 
-    // ── Helpers ──────────────────────────────────────────────
-    function setStatus(label, done, total, detail) {
-      $('status-label').textContent  = label;
-      $('status-pct').textContent    = Math.round((done / total) * 100) + '%';
-      $('progress-bar').style.width  = (done / total * 100) + '%';
-      $('status-detail').textContent = detail ?? '';
-    }
+function toggleDir(id, el) {
+  const child = document.getElementById(id);
+  const isOpen = child.classList.toggle('open');
+  const arrow = el.querySelector('.dir-arrow svg');
+  if (arrow) arrow.style.transform = isOpen ? 'rotate(90deg)' : 'rotate(0deg)';
+}
 
-    function normalizeFontFamily(raw) {
-      if (!raw) return 'sans-serif';
-      raw = raw.replace(/^[A-Z]{6}\+/, ''); // strip subset prefix
-      const map = {
-        'Helvetica': 'Helvetica, Arial, sans-serif',
-        'Arial':     'Arial, sans-serif',
-        'Times':     '"Times New Roman", Times, serif',
-        'Courier':   '"Courier New", Courier, monospace',
-        'Symbol':    'Symbol, serif',
-      };
-      for (const [k, v] of Object.entries(map)) {
-        if (raw.startsWith(k)) return v;
-      }
-      return `"${raw}", sans-serif`;
-    }
+function filterTree(q) {
+  const rows = document.querySelectorAll('#treeContent .tree-node');
+  const lq = q.toLowerCase();
+  rows.forEach(row => { row.style.display = (!q || row.textContent.toLowerCase().includes(lq)) ? '' : 'none'; });
+  if (q) {
+    document.querySelectorAll('#treeContent .tree-children').forEach(c => c.classList.add('open'));
+    document.querySelectorAll('#treeContent .dir-arrow svg').forEach(a => a.style.transform = 'rotate(90deg)');
+  }
+}
 
-    function resetAll() {
-      pagesData = [];
-      $('pages-container').innerHTML = '';
-      $('file-input').value = '';
-      $('actions').classList.add('hidden');
-      $('preview').classList.add('hidden');
-      $('code-panel').classList.add('hidden');
-      $('status-card').classList.add('hidden');
-      $('progress-bar').style.width = '0';
-      codeVisible = false;
-    }
-  </script>
+// ══════════════════════════════════════════════════════════════
+// FILE ICONS
+// ══════════════════════════════════════════════════════════════
+function getFileIconSvg(ext) {
+  const IMAGE_EXTS = ['png','jpg','jpeg','webp','gif','bmp','ico','svg'];
+  const AUDIO_EXTS = ['mp3','ogg','wav','flac','aac','m4a'];
+  const VIDEO_EXTS = ['mp4','mkv','avi','mov','webm'];
+  if (IMAGE_EXTS.includes(ext)) return `<svg class="file-icon" viewBox="0 0 16 16" fill="none" stroke="#4a9eff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="14" height="14" rx="2"/><circle cx="5.5" cy="5.5" r="1.2" fill="#4a9eff" stroke="none"/><polyline points="1,11 5,7 8,10 11,7 15,11"/></svg>`;
+  if (AUDIO_EXTS.includes(ext)) return `<svg class="file-icon" viewBox="0 0 16 16" fill="none" stroke="#a855f7" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3L5 6H2v4h3l4 3V3z"/><path d="M11.5 6.5a3 3 0 0 1 0 3"/></svg>`;
+  if (VIDEO_EXTS.includes(ext)) return `<svg class="file-icon" viewBox="0 0 16 16" fill="none" stroke="#ff8c00" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="10" height="10" rx="1.5"/><polyline points="11,6 15,4 15,12 11,10"/></svg>`;
+  if (ext==='so') return `<svg class="file-icon" viewBox="0 0 16 16" fill="none" stroke="#ff3c3c" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1L2 4v4c0 3.3 2.6 5.8 6 6 3.4-.2 6-2.7 6-6V4z"/></svg>`;
+  if (ext==='dex') return `<svg class="file-icon" viewBox="0 0 16 16" fill="none" stroke="#4a9eff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="14" height="14" rx="2"/><line x1="4" y1="5" x2="12" y2="5"/><line x1="4" y1="8" x2="10" y2="8"/><line x1="4" y1="11" x2="8" y2="11"/></svg>`;
+  if (ext==='xml') return `<svg class="file-icon" viewBox="0 0 16 16" fill="none" stroke="#ffb300" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5,4 2,8 5,12"/><polyline points="11,4 14,8 11,12"/><line x1="9" y1="3" x2="7" y2="13"/></svg>`;
+  if (ext==='arsc') return `<svg class="file-icon" viewBox="0 0 16 16" fill="none" stroke="#00e676" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="14" height="10" rx="1.5"/><line x1="1" y1="7" x2="15" y2="7"/><line x1="6" y1="3" x2="6" y2="13"/></svg>`;
+  if (ext==='dart') return `<svg class="file-icon" viewBox="0 0 16 16" fill="none" stroke="#4a9eff" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><polygon points="3,2 13,2 15,8 13,14 3,14 1,8"/></svg>`;
+  if (ext==='kt'||ext==='java') return `<svg class="file-icon" viewBox="0 0 16 16" fill="none" stroke="#ff8c00" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6z"/><polyline points="9,2 9,6 13,6"/></svg>`;
+  if (ext==='json') return `<svg class="file-icon" viewBox="0 0 16 16" fill="none" stroke="#00e676" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2c-1 0-2 .5-2 2v1c0 1-.5 1.5-1 2 .5.5 1 1 1 2v1c0 1.5 1 2 2 2"/><path d="M11 2c1 0 2 .5 2 2v1c0 1 .5 1.5 1 2-.5.5-1 1-1 2v1c0 1.5-1 2-2 2"/></svg>`;
+  if (ext==='ttf'||ext==='otf') return `<svg class="file-icon" viewBox="0 0 16 16" fill="none" stroke="#a855f7" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="4" x2="13" y2="4"/><line x1="8" y1="4" x2="8" y2="13"/></svg>`;
+  return `<svg class="file-icon" viewBox="0 0 16 16" fill="none" stroke="#4a4a6a" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6z"/><polyline points="9,2 9,6 13,6"/></svg>`;
+}
+
+function folderIconSvg(color) {
+  return `<svg class="dir-folder-icon" viewBox="0 0 16 16" fill="rgba(74,158,255,.25)" stroke="${color||'#4a9eff'}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4a1 1 0 0 1 1-1h4l2 2h6a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1z"/></svg>`;
+}
+
+function arrowSvg() {
+  return `<span class="dir-arrow"><svg viewBox="0 0 8 8"><polyline points="2,1 6,4 2,7"/></svg></span>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════════
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+}
+</script>
 </body>
 </html>
