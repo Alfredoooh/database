@@ -1,567 +1,906 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <title>Documento Acadêmico</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    <style>
-        :root {
-            --bg: #505050;
-            --bar-bg: #ffffff;
-            --accent: #111111;
-            --text-primary: #111111;
-            --shadow: 0 4px 12px rgba(16,16,16,0.08);
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZipMiner — Extractor</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-        html, body {
-            height: 100%;
-            overflow-x: hidden;
-        }
+  :root {
+    --bg: #0a0a0b;
+    --surface: #111114;
+    --surface2: #18181d;
+    --border: #1f1f28;
+    --border2: #2a2a38;
+    --accent: #7c6cfc;
+    --accent2: #5d4ef0;
+    --accent-glow: rgba(124,108,252,0.15);
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --success: #4ade80;
+    --warning: #fb923c;
+    --danger: #f87171;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
 
-        body {
-            font-family: 'Times New Roman', Times, serif;
-            background-color: var(--bg);
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-        }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .scroll-container {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 20px 20px 100px 20px;
-            display: flex;
-            justify-content: center;
-            -webkit-overflow-scrolling: touch;
-        }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-        .page {
-            width: 210mm;
-            min-height: 297mm;
-            background-color: white;
-            padding: 2.54cm;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            margin: 0 auto;
-            position: relative;
-        }
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,108,252,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,108,252,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
 
-        .page-number {
-            position: absolute;
-            top: 1.27cm;
-            right: 2.54cm;
-            font-size: 12pt;
-        }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    position: relative;
+    z-index: 1;
+  }
 
-        [contenteditable="true"]:focus {
-            outline: 2px solid #4CAF50;
-            background: rgba(76, 175, 80, 0.05);
-        }
+  /* Header */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
 
-        p {
-            line-height: 2;
-            text-align: justify;
-            font-size: 12pt;
-            margin-bottom: 0;
-        }
+  .logo {
+    width: 44px;
+    height: 44px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-size: 20px;
+    box-shadow: 0 0 24px var(--accent-glow);
+    flex-shrink: 0;
+  }
 
-        .indent {
-            text-indent: 1.27cm;
-        }
+  .header-text h1 {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
 
-        .citation {
-            margin-left: 2.5cm;
-            margin-right: 0;
-            margin-top: 0;
-            margin-bottom: 12pt;
-        }
+  .header-text p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
 
-        table {
-            width: 100%;
-            max-width: 100%;
-            border-collapse: collapse;
-            margin: 12pt 0;
-            table-layout: fixed;
-            word-wrap: break-word;
-        }
+  /* Panel */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
 
-        th, td {
-            border: 1px solid #000;
-            padding: 6pt;
-            text-align: center;
-            font-size: 10pt;
-            line-height: 1.5;
-            overflow-wrap: break-word;
-            word-break: break-word;
-        }
+  .panel-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
 
-        th {
-            font-weight: bold;
-        }
+  /* Controls row */
+  .controls-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 12px;
+    align-items: end;
+  }
 
-        .table-label {
-            font-weight: bold;
-            margin: 12pt 0 6pt 0;
-            line-height: 2;
-        }
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
 
-        .table-title {
-            text-indent: 1.27cm;
-            font-style: italic;
-            margin-bottom: 6pt;
-            line-height: 2;
-        }
+  .field-group label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
 
-        .table-source {
-            text-indent: 1.27cm;
-            margin-top: 6pt;
-            font-style: italic;
-            line-height: 2;
-            margin-bottom: 0;
-        }
+  input[type="text"] {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
 
-        .table-note {
-            margin-left: 2.54cm;
-            margin-top: 6pt;
-            margin-bottom: 12pt;
-            line-height: 2;
-        }
+  input[type="text"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
 
-        .chart-container {
-            margin: 12pt 0 0 0;
-            page-break-inside: avoid;
-        }
+  input[type="text"]::placeholder { color: var(--muted); }
 
-        .chart-title {
-            font-weight: bold;
-            margin-bottom: 12pt;
-            font-size: 12pt;
-            line-height: 2;
-            text-align: center;
-        }
+  /* Upload zone */
+  .upload-zone {
+    border: 1.5px dashed var(--border2);
+    border-radius: 12px;
+    padding: 36px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
 
-        .chart-wrapper {
-            border: 1px solid #ccc;
-            padding: 10pt;
-            background: white;
-            width: fit-content;
-            margin: 0 auto;
-        }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+  }
 
-        canvas {
-            display: block;
-        }
+  .upload-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
 
-        .bottom-bar-wrapper {
-            position: fixed;
-            left: 0;
-            right: 0;
-            bottom: 20px;
-            display: flex;
-            justify-content: center;
-            pointer-events: none;
-            z-index: 999;
-            padding: 0 20px;
-        }
+  .upload-icon { font-size: 36px; margin-bottom: 10px; display: block; }
 
-        .bottom-bar {
-            pointer-events: auto;
-            width: 100%;
-            max-width: 500px;
-            background: var(--bar-bg);
-            border-radius: 999px;
-            padding: 8px 16px;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-        }
+  .upload-zone h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
 
-        .tab {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-            padding: 0;
-            color: #5b5b5b;
-            text-decoration: none;
-            border-radius: 50%;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            flex-shrink: 0;
-            font-size: 24px;
-        }
+  .upload-zone p {
+    font-size: 12px;
+    color: var(--muted);
+  }
 
-        .tab:hover {
-            background: rgba(128,128,128,0.1);
-        }
+  /* Btn */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
 
-        .tab:active {
-            transform: scale(0.9);
-        }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
 
-        .tab.active {
-            color: var(--accent);
-            background: rgba(128,128,128,0.15);
-        }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-        .center-btn {
-            background: var(--accent);
-            color: white;
-            padding: 14px 28px;
-            border-radius: 999px;
-            box-shadow: 0 4px 12px rgba(17,17,17,0.2);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 15px;
-            border: none;
-            cursor: pointer;
-            justify-content: center;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-            flex-shrink: 0;
-            height: 48px;
-        }
+  .btn-ghost {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border2);
+  }
 
-        .center-btn:hover {
-            opacity: 0.9;
-            box-shadow: 0 6px 16px rgba(17,17,17,0.25);
-        }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 
-        .center-btn:active {
-            transform: scale(0.96);
-        }
+  .btn-success {
+    background: rgba(74,222,128,0.12);
+    color: var(--success);
+    border: 1px solid rgba(74,222,128,0.25);
+  }
 
-        .edit-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #4CAF50;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            display: none;
-            align-items: center;
-            gap: 8px;
-            z-index: 1000;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
+  .btn-success:hover { background: rgba(74,222,128,0.2); }
+  .btn-success:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .edit-indicator.show {
-            display: flex;
-        }
+  /* Progress */
+  .progress-wrap {
+    display: none;
+    margin-top: 20px;
+  }
 
-        @media (max-width: 520px) {
-            .bottom-bar {
-                padding: 6px 12px;
-                max-width: 90%;
-                gap: 4px;
-            }
-            .center-btn {
-                padding: 12px 20px;
-                font-size: 14px;
-            }
-            .tab {
-                width: 44px;
-                height: 44px;
-            }
-        }
+  .progress-wrap.show { display: block; }
 
-        @media print {
-            body {
-                background-color: white;
-                padding: 0;
-            }
-            .bottom-bar-wrapper,
-            .edit-indicator {
-                display: none !important;
-            }
-            .page {
-                box-shadow: none;
-                margin: 0;
-                page-break-after: always;
-            }
-            [contenteditable="true"] {
-                outline: none;
-            }
-        }
-    </style>
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .progress-label { font-size: 12px; color: var(--muted); }
+  .progress-count { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #a78bfa);
+    border-radius: 99px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    display: none;
+  }
+
+  .stats-bar.show { display: grid; }
+
+  .stat {
+    background: var(--surface);
+    padding: 18px 20px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    display: block;
+  }
+
+  /* Toolbar */
+  .results-toolbar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .results-toolbar.show { display: flex; }
+
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .folder-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .folder-input-wrap label {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .folder-input-wrap input {
+    width: 180px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  /* Checkbox */
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+    transition: color 0.15s;
+  }
+
+  .checkbox-label:hover { color: var(--text); }
+
+  .checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  /* Grid */
+  .files-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  /* File card */
+  .file-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.15s;
+    position: relative;
+    animation: cardIn 0.25s ease both;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .file-card:hover {
+    border-color: var(--border2);
+    background: var(--surface2);
+  }
+
+  .file-card.selected {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  .file-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .file-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .file-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    word-break: break-all;
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+
+  .file-meta {
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .file-meta span { display: block; }
+
+  .file-source {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--muted);
+    font-family: var(--mono);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Empty / error states */
+  .empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--muted);
+    display: none;
+  }
+
+  .empty-state.show { display: block; }
+  .empty-state .big { font-size: 40px; margin-bottom: 12px; display: block; }
+  .empty-state p { font-size: 13px; }
+
+  /* Log */
+  .log-panel {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    max-height: 120px;
+    overflow-y: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+    display: none;
+    margin-top: 16px;
+  }
+
+  .log-panel.show { display: block; }
+  .log-entry.ok { color: var(--success); }
+  .log-entry.err { color: var(--danger); }
+  .log-entry.info { color: var(--accent); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .controls-row { grid-template-columns: 1fr; }
+    .stats-bar { grid-template-columns: repeat(2,1fr); }
+    .files-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .results-toolbar { flex-direction: column; align-items: flex-start; }
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 13px;
+    color: var(--text);
+    z-index: 999;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+</style>
 </head>
 <body>
-    <div class="edit-indicator" id="editIndicator">
-        <ion-icon name="create-outline"></ion-icon>
-        Modo de edição ativo
+
+<div class="container">
+  <header>
+    <div class="logo">⛏️</div>
+    <div class="header-text">
+      <h1>ZipMiner</h1>
+      <p>Extrai arquivos de centenas de ZIPs por extensão</p>
+    </div>
+  </header>
+
+  <!-- Config panel -->
+  <div class="panel">
+    <div class="panel-label">Configuração</div>
+
+    <div class="controls-row" style="margin-bottom:20px;">
+      <div class="field-group">
+        <label>Extensões a extrair (separadas por vírgula)</label>
+        <input type="text" id="extInput" placeholder="ex: .ttf, .otf, .woff2" value=".ttf">
+      </div>
+      <div class="field-group">
+        <label>Pasta de destino no ZIP</label>
+        <input type="text" id="folderInput" placeholder="ex: fontes/" style="width:180px;">
+      </div>
     </div>
 
-    <div class="scroll-container">
-        <div class="page" id="document">
-            <div class="page-number" contenteditable="true">[Apelido] 2</div>
-            
-            <p class="citation indent" contenteditable="true">[Para citações de mais de quatro linhas, avance a citação 2.5 cm a partir da margem esquerda e não utilize aspas. Para aplicar esta formatação, no separador Base, na Galeria de Estilos, clique em Citação. Para citações mais curtas, pode colocá-las entre aspas e incorporá-las diretamente no texto.]</p>
-            
-            <p class="table-label" contenteditable="true">Tabela 1</p>
-            
-            <p class="table-title" contenteditable="true">[Este Título da Tabela Utiliza um Estilo Chamado "Título da Tabela", Disponível no Separador Base, na Galeria de Estilos]</p>
-            
-            <table>
-                <tr>
-                    <th contenteditable="true">Cabeçalho de Coluna</th>
-                    <th contenteditable="true">Cabeçalho de Coluna</th>
-                    <th contenteditable="true">Cabeçalho de Coluna</th>
-                    <th contenteditable="true">Cabeçalho de Coluna</th>
-                </tr>
-                <tr>
-                    <td contenteditable="true">Cabeçalho de Linha</td>
-                    <td contenteditable="true">Dados da tabela</td>
-                    <td contenteditable="true">Dados da tabela</td>
-                    <td contenteditable="true">Dados da tabela</td>
-                </tr>
-                <tr>
-                    <td contenteditable="true">Cabeçalho de Linha</td>
-                    <td contenteditable="true">Dados da tabela</td>
-                    <td contenteditable="true">Dados da tabela</td>
-                    <td contenteditable="true">Dados da tabela</td>
-                </tr>
-                <tr>
-                    <td contenteditable="true">Cabeçalho de Linha</td>
-                    <td contenteditable="true">Dados da tabela</td>
-                    <td contenteditable="true">Dados da tabela</td>
-                    <td contenteditable="true">Dados da tabela</td>
-                </tr>
-            </table>
-            
-            <p class="table-source" contenteditable="true">Origem: [Este texto de origem utiliza um estilo chamado "Origem da Tabela", disponível no separador Base, na Galeria de Estilos.]</p>
-            
-            <p class="table-note" contenteditable="true">a. [Este texto de nota utiliza um estilo chamado "Nota da Tabela", disponível no separador Base, na Galeria de Estilos. As notas da tabela utilizam letras minúsculas em vez de numerais árabes para diferenciá-las das notas nos conteúdos do corpo.]</p>
-            
-            <div class="chart-container">
-                <div class="chart-title" contenteditable="true">Título do Gráfico</div>
-                <div class="chart-wrapper">
-                    <canvas id="myChart" width="420" height="210"></canvas>
-                </div>
-            </div>
-        </div>
+    <!-- Upload zone -->
+    <div class="upload-zone" id="dropZone">
+      <input type="file" id="zipFiles" multiple accept=".zip">
+      <span class="upload-icon">📦</span>
+      <h3>Arraste os ZIPs aqui ou clique para selecionar</h3>
+      <p>Suporta mais de 1000 ZIPs simultaneamente • Processado 100% no browser</p>
     </div>
 
-    <div class="bottom-bar-wrapper">
-        <nav class="bottom-bar" role="navigation">
-            <button class="tab" id="tab-zoom-out" aria-label="Diminuir zoom">
-                <ion-icon name="remove-outline"></ion-icon>
-            </button>
-            <button class="tab" id="tab-edit" aria-label="Editar documento">
-                <ion-icon name="create-outline"></ion-icon>
-            </button>
-            <button class="center-btn" id="btn-download" aria-label="Download PDF">
-                <ion-icon name="download-outline"></ion-icon>
-                <span>PDF</span>
-            </button>
-            <button class="tab" id="tab-zoom-in" aria-label="Aumentar zoom">
-                <ion-icon name="add-outline"></ion-icon>
-            </button>
-        </nav>
+    <!-- Progress -->
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-header">
+        <span class="progress-label" id="progressLabel">Aguardando…</span>
+        <span class="progress-count" id="progressCount">0 / 0</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
     </div>
 
-    <script>
-        let currentZoom = 1;
-        let editMode = false;
+    <!-- Log -->
+    <div class="log-panel" id="logPanel"></div>
+  </div>
 
-        const ctx = document.getElementById('myChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Categoria 1', 'Categoria 2', 'Categoria 3', 'Categoria 4'],
-                datasets: [{
-                    label: 'Série 1',
-                    data: [4, 2.5, 3.5, 4.5],
-                    backgroundColor: '#d3d3d3',
-                    borderColor: '#999',
-                    borderWidth: 1
-                }, {
-                    label: 'Série 2',
-                    data: [2.5, 2.5, 2, 3],
-                    backgroundColor: '#a9a9a9',
-                    borderColor: '#666',
-                    borderWidth: 1
-                }, {
-                    label: 'Série 3',
-                    data: [2, 3, 3, 5.5],
-                    backgroundColor: '#696969',
-                    borderColor: '#333',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: false,
-                maintainAspectRatio: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 6,
-                        ticks: {
-                            stepSize: 1,
-                            color: '#000',
-                            font: {
-                                size: 11
-                            }
-                        },
-                        grid: {
-                            color: '#ddd'
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            color: '#000',
-                            font: {
-                                size: 11
-                            }
-                        },
-                        grid: {
-                            display: false
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom',
-                        labels: {
-                            color: '#000',
-                            boxWidth: 15,
-                            padding: 10,
-                            font: {
-                                size: 11
-                            }
-                        }
-                    }
-                }
-            }
+  <!-- Stats -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat">
+      <span class="stat-value" id="statZips">0</span>
+      <span class="stat-label">ZIPs processados</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="statFound">0</span>
+      <span class="stat-label">Ficheiros encontrados</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="statSelected">0</span>
+      <span class="stat-label">Selecionados</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="statSize">0 KB</span>
+      <span class="stat-label">Tamanho total</span>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="results-toolbar" id="resultsToolbar">
+    <div class="toolbar-left">
+      <label class="checkbox-label">
+        <input type="checkbox" id="selectAll"> Selecionar tudo
+      </label>
+      <span id="selectedCount" style="font-size:12px;color:var(--muted);"></span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <div class="folder-input-wrap">
+        <label>Pasta no ZIP:</label>
+        <input type="text" id="zipFolderInput" placeholder="ex: fontes/">
+      </div>
+      <button class="btn btn-success" id="downloadBtn" disabled>
+        ⬇ Baixar selecionados
+      </button>
+    </div>
+  </div>
+
+  <!-- Results grid -->
+  <div class="files-grid" id="filesGrid"></div>
+
+  <!-- Empty state -->
+  <div class="empty-state" id="emptyState">
+    <span class="big">🔍</span>
+    <p>Nenhum ficheiro encontrado com essas extensões.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────
+const state = {
+  extractedFiles: [],   // { name, ext, size, zipName, zipIndex, data: Uint8Array }
+  selected: new Set()
+};
+
+// ─── Elem refs ───────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const filesGrid     = $('filesGrid');
+const progressWrap  = $('progressWrap');
+const progressFill  = $('progressFill');
+const progressLabel = $('progressLabel');
+const progressCount = $('progressCount');
+const logPanel      = $('logPanel');
+const statsBar      = $('statsBar');
+const resultsToolbar= $('resultsToolbar');
+const emptyState    = $('emptyState');
+const downloadBtn   = $('downloadBtn');
+const selectAllCb   = $('selectAll');
+const zipFilesInput = $('zipFiles');
+const dropZone      = $('dropZone');
+
+// ─── Helpers ─────────────────────────────────────────────────────────
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/(1024*1024)).toFixed(2) + ' MB';
+}
+
+function getIcon(ext) {
+  const map = {
+    '.ttf':'🔤', '.otf':'🔤', '.woff':'🔤', '.woff2':'🔤',
+    '.png':'🖼️', '.jpg':'🖼️', '.jpeg':'🖼️', '.gif':'🖼️', '.webp':'🖼️', '.svg':'🖼️',
+    '.mp3':'🎵', '.wav':'🎵', '.ogg':'🎵', '.flac':'🎵',
+    '.mp4':'🎬', '.mov':'🎬', '.avi':'🎬',
+    '.json':'📋', '.xml':'📋', '.csv':'📋',
+    '.pdf':'📄', '.docx':'📄', '.xlsx':'📄',
+    '.js':'📜', '.ts':'📜', '.css':'📜', '.html':'📜',
+    '.sh':'⚙️', '.py':'⚙️',
+  };
+  return map[ext.toLowerCase()] || '📁';
+}
+
+function log(msg, type = 'info') {
+  logPanel.classList.add('show');
+  const el = document.createElement('div');
+  el.className = 'log-entry ' + type;
+  const ts = new Date().toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  el.textContent = `[${ts}] ${msg}`;
+  logPanel.appendChild(el);
+  logPanel.scrollTop = logPanel.scrollHeight;
+}
+
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function updateStats() {
+  $('statZips').textContent   = state.totalZips || 0;
+  $('statFound').textContent  = state.extractedFiles.length;
+  $('statSelected').textContent = state.selected.size;
+
+  let totalBytes = 0;
+  state.selected.forEach(i => totalBytes += state.extractedFiles[i].size);
+  $('statSize').textContent = formatSize(totalBytes);
+
+  downloadBtn.disabled = state.selected.size === 0;
+  $('selectedCount').textContent = state.selected.size > 0
+    ? `${state.selected.size} selecionado(s)` : '';
+
+  selectAllCb.checked = state.selected.size === state.extractedFiles.length && state.extractedFiles.length > 0;
+  selectAllCb.indeterminate = state.selected.size > 0 && state.selected.size < state.extractedFiles.length;
+}
+
+// ─── Parse extensions ────────────────────────────────────────────────
+function getExtensions() {
+  return $('extInput').value
+    .split(',')
+    .map(e => e.trim().toLowerCase())
+    .filter(Boolean)
+    .map(e => e.startsWith('.') ? e : '.' + e);
+}
+
+// ─── Process ZIPs ────────────────────────────────────────────────────
+async function processFiles(files) {
+  const exts = getExtensions();
+  if (!exts.length) { showToast('⚠ Insere pelo menos uma extensão.'); return; }
+
+  // reset
+  state.extractedFiles = [];
+  state.selected.clear();
+  filesGrid.innerHTML = '';
+  logPanel.innerHTML = '';
+  statsBar.classList.remove('show');
+  resultsToolbar.classList.remove('show');
+  emptyState.classList.remove('show');
+  progressWrap.classList.add('show');
+  logPanel.classList.add('show');
+
+  const zipList = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.zip'));
+  state.totalZips = zipList.length;
+
+  if (!zipList.length) { showToast('Nenhum ficheiro .zip encontrado.'); return; }
+
+  log(`Iniciando — ${zipList.length} ZIPs, extensões: ${exts.join(', ')}`, 'info');
+
+  let processed = 0;
+
+  // Process in batches of 20 to avoid memory issues
+  const BATCH = 20;
+
+  for (let b = 0; b < zipList.length; b += BATCH) {
+    const batch = zipList.slice(b, b + BATCH);
+    await Promise.all(batch.map(async (file) => {
+      try {
+        const ab = await file.arrayBuffer();
+        const zip = await JSZip.loadAsync(ab);
+
+        zip.forEach((relativePath, zipEntry) => {
+          if (zipEntry.dir) return;
+          const lp = relativePath.toLowerCase();
+          const matched = exts.find(e => lp.endsWith(e));
+          if (!matched) return;
+
+          state.extractedFiles.push({
+            name: relativePath.split('/').pop(),
+            fullPath: relativePath,
+            ext: matched,
+            size: zipEntry._data ? zipEntry._data.uncompressedSize || 0 : 0,
+            zipName: file.name,
+            zipEntry  // store reference for lazy load
+          });
         });
 
-        const tabZoomOut = document.getElementById('tab-zoom-out');
-        const tabZoomIn = document.getElementById('tab-zoom-in');
-        const tabEdit = document.getElementById('tab-edit');
-        const btnDownload = document.getElementById('btn-download');
-        const page = document.getElementById('document');
-        const editIndicator = document.getElementById('editIndicator');
+        processed++;
+        const pct = Math.round((processed / zipList.length) * 100);
+        progressFill.style.width = pct + '%';
+        progressLabel.textContent = `Processando ZIPs…`;
+        progressCount.textContent = `${processed} / ${zipList.length}`;
 
-        tabZoomOut.addEventListener('click', () => {
-            if (currentZoom > 0.5) {
-                currentZoom -= 0.1;
-                page.style.transform = `scale(${currentZoom})`;
-                page.style.transformOrigin = 'top center';
-            }
-        });
+        if (processed % 10 === 0 || processed === zipList.length) {
+          log(`✔ ${file.name} — total até agora: ${state.extractedFiles.length} ficheiros`, 'ok');
+        }
+      } catch (err) {
+        log(`✘ Erro em ${file.name}: ${err.message}`, 'err');
+        processed++;
+      }
+    }));
 
-        tabZoomIn.addEventListener('click', () => {
-            if (currentZoom < 1.5) {
-                currentZoom += 0.1;
-                page.style.transform = `scale(${currentZoom})`;
-                page.style.transformOrigin = 'top center';
-            }
-        });
+    // Yield to browser
+    await new Promise(r => setTimeout(r, 0));
+  }
 
-        tabEdit.addEventListener('click', () => {
-            editMode = !editMode;
-            tabEdit.classList.toggle('active', editMode);
-            editIndicator.classList.toggle('show', editMode);
-            
-            const editableElements = document.querySelectorAll('[contenteditable]');
-            editableElements.forEach(el => {
-                el.contentEditable = editMode;
-            });
-        });
+  progressLabel.textContent = 'Concluído!';
+  progressCount.textContent = `${zipList.length} / ${zipList.length}`;
+  progressFill.style.width = '100%';
 
-        btnDownload.addEventListener('click', async () => {
-            try {
-                const wasEditMode = editMode;
-                if (editMode) {
-                    editMode = false;
-                    tabEdit.classList.remove('active');
-                    editIndicator.classList.remove('show');
-                    const editableElements = document.querySelectorAll('[contenteditable]');
-                    editableElements.forEach(el => {
-                        el.contentEditable = false;
-                    });
-                }
+  log(`Finalizado — ${state.extractedFiles.length} ficheiro(s) encontrado(s) em ${zipList.length} ZIP(s).`, 'info');
 
-                const originalTransform = page.style.transform;
-                page.style.transform = 'scale(1)';
-                
-                await new Promise(resolve => setTimeout(resolve, 100));
+  renderGrid();
+  statsBar.classList.add('show');
+  if (state.extractedFiles.length > 0) {
+    resultsToolbar.classList.add('show');
+  } else {
+    emptyState.classList.add('show');
+  }
 
-                const element = document.getElementById('document');
-                const opt = {
-                    margin: [0, 0, 0, 0],
-                    filename: 'documento-academico.pdf',
-                    image: { 
-                        type: 'jpeg', 
-                        quality: 0.98 
-                    },
-                    html2canvas: {
-                        scale: 2,
-                        useCORS: true,
-                        letterRendering: true,
-                        logging: false,
-                        width: 794,
-                        height: 1123,
-                        scrollY: 0,
-                        scrollX: 0,
-                        windowWidth: 794,
-                        windowHeight: 1123
-                    },
-                    jsPDF: {
-                        unit: 'px',
-                        format: [794, 1123],
-                        orientation: 'portrait',
-                        hotfixes: ['px_scaling']
-                    },
-                    pagebreak: { mode: 'avoid-all' }
-                };
-                
-                await html2pdf().set(opt).from(element).save();
-                
-                page.style.transform = originalTransform;
-                
-                if (wasEditMode) {
-                    editMode = true;
-                    tabEdit.classList.add('active');
-                    editIndicator.classList.add('show');
-                    const editableElements = document.querySelectorAll('[contenteditable]');
-                    editableElements.forEach(el => {
-                        el.contentEditable = true;
-                    });
-                }
-            } catch (error) {
-                console.error('Erro ao gerar PDF:', error);
-                alert('Erro ao gerar PDF. Por favor, tente novamente.');
-            }
-        });
+  updateStats();
+}
 
-        const editableElements = document.querySelectorAll('[contenteditable]');
-        editableElements.forEach(el => {
-            el.contentEditable = false;
-        });
-    </script>
+// ─── Render ──────────────────────────────────────────────────────────
+function renderGrid() {
+  filesGrid.innerHTML = '';
+  state.extractedFiles.forEach((f, i) => {
+    const card = document.createElement('div');
+    card.className = 'file-card';
+    card.dataset.index = i;
+    card.innerHTML = `
+      <span class="file-icon">${getIcon(f.ext)}</span>
+      <div class="file-name">${f.name}</div>
+      <div class="file-meta">
+        <span>${formatSize(f.size)}</span>
+        <span style="color:var(--accent);font-family:var(--mono);">${f.ext}</span>
+      </div>
+      <div class="file-source" title="${f.zipName}">📦 ${f.zipName}</div>
+    `;
+    card.addEventListener('click', () => toggleSelect(i, card));
+    filesGrid.appendChild(card);
+  });
+}
+
+function toggleSelect(i, card) {
+  if (state.selected.has(i)) {
+    state.selected.delete(i);
+    card.classList.remove('selected');
+  } else {
+    state.selected.add(i);
+    card.classList.add('selected');
+  }
+  updateStats();
+}
+
+// ─── Select all ──────────────────────────────────────────────────────
+selectAllCb.addEventListener('change', () => {
+  const cards = filesGrid.querySelectorAll('.file-card');
+  if (selectAllCb.checked) {
+    state.extractedFiles.forEach((_, i) => state.selected.add(i));
+    cards.forEach(c => c.classList.add('selected'));
+  } else {
+    state.selected.clear();
+    cards.forEach(c => c.classList.remove('selected'));
+  }
+  updateStats();
+});
+
+// ─── Download ────────────────────────────────────────────────────────
+downloadBtn.addEventListener('click', async () => {
+  if (!state.selected.size) return;
+
+  downloadBtn.disabled = true;
+  downloadBtn.textContent = '⏳ Preparando…';
+
+  const outputZip = new JSZip();
+  const folderName = $('zipFolderInput').value.trim().replace(/\/+$/, '');
+  const prefix = folderName ? folderName + '/' : '';
+
+  const indices = Array.from(state.selected);
+  const nameCount = {};
+
+  try {
+    for (const i of indices) {
+      const f = state.extractedFiles[i];
+      // Deduplicate names
+      let finalName = f.name;
+      if (nameCount[finalName] !== undefined) {
+        nameCount[finalName]++;
+        const base = finalName.replace(new RegExp('\\' + f.ext + '$'), '');
+        finalName = `${base}_(${nameCount[finalName]})${f.ext}`;
+      } else {
+        nameCount[finalName] = 0;
+      }
+
+      // Lazily extract data
+      const data = await f.zipEntry.async('uint8array');
+      outputZip.file(prefix + finalName, data);
+    }
+
+    const blob = await outputZip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `zipminer_export_${Date.now()}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`✅ ${indices.length} ficheiro(s) exportados!`);
+  } catch (err) {
+    showToast('❌ Erro ao gerar ZIP: ' + err.message);
+  }
+
+  downloadBtn.disabled = false;
+  downloadBtn.textContent = '⬇ Baixar selecionados';
+  updateStats();
+});
+
+// ─── File input ──────────────────────────────────────────────────────
+zipFilesInput.addEventListener('change', () => {
+  if (zipFilesInput.files.length) processFiles(zipFilesInput.files);
+});
+
+// ─── Drag & Drop ────────────────────────────────────────────────────
+dropZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
+
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files.length) processFiles(e.dataTransfer.files);
+});
+</script>
 </body>
 </html>
