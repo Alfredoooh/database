@@ -6,52 +6,24 @@
 <title>ZipMiner</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
-
-:root {
-  --bg: #08080a;
-  --s1: #0f0f13;
-  --s2: #15151b;
-  --s3: #1c1c25;
-  --b1: #1e1e28;
-  --b2: #28283a;
-  --ac: #7c6cfc;
-  --ac2: #5d4ef0;
-  --acg: rgba(124,108,252,.12);
-  --acg2: rgba(124,108,252,.06);
-  --tx: #eeeef5;
-  --t2: #a0a0b8;
-  --t3: #5a5a72;
-  --ok: #4ade80;
-  --err: #f87171;
-  --mono: 'Space Mono', monospace;
-  --sans: 'DM Sans', sans-serif;
-}
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap');
+:root{--bg:#08080a;--s1:#0f0f13;--s2:#15151b;--s3:#1c1c25;--b1:#1e1e28;--b2:#28283a;--ac:#7c6cfc;--ac2:#5d4ef0;--acg:rgba(124,108,252,.12);--acg2:rgba(124,108,252,.06);--tx:#eeeef5;--t2:#a0a0b8;--t3:#5a5a72;--ok:#4ade80;--err:#f87171;--mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--tx);font-family:var(--sans);min-height:100vh;line-height:1.5}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(124,108,252,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(124,108,252,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
 .app{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:36px 24px 80px}
-
-/* header */
 .hdr{display:flex;align-items:center;gap:14px;margin-bottom:40px}
-.hdr-logo{width:48px;height:48px;background:linear-gradient(135deg,var(--ac),#a78bfa);border-radius:14px;display:grid;place-items:center;font-size:22px;box-shadow:0 0 32px rgba(124,108,252,.3),inset 0 1px 0 rgba(255,255,255,.1);flex-shrink:0}
+.hdr-logo{width:48px;height:48px;background:linear-gradient(135deg,var(--ac),#a78bfa);border-radius:14px;display:grid;place-items:center;font-size:22px;box-shadow:0 0 32px rgba(124,108,252,.3);flex-shrink:0}
 .hdr h1{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:-.5px}
 .hdr p{font-size:12px;color:var(--t3);margin-top:2px}
-
-/* card */
 .card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:24px;margin-bottom:16px}
 .chip{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ac);background:var(--acg2);border:1px solid rgba(124,108,252,.2);border-radius:6px;padding:3px 8px;margin-bottom:18px}
-
-/* setup */
 .setup-grid{display:grid;grid-template-columns:1fr 220px;gap:12px;margin-bottom:20px}
 .field{display:flex;flex-direction:column;gap:6px}
 .field label{font-size:11px;color:var(--t3);letter-spacing:.5px;font-weight:500}
 input[type=text]{background:var(--s2);border:1px solid var(--b2);border-radius:8px;color:var(--tx);font-family:var(--mono);font-size:13px;padding:10px 14px;outline:none;transition:border-color .15s,box-shadow .15s;width:100%}
 input[type=text]:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--acg)}
 input[type=text]::placeholder{color:var(--t3)}
-
-/* drop */
 .drop{border:1.5px dashed var(--b2);border-radius:14px;padding:48px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;overflow:hidden;background:var(--s2)}
 .drop.over,.drop:hover{border-color:var(--ac);background:var(--acg)}
 .drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
@@ -59,8 +31,6 @@ input[type=text]::placeholder{color:var(--t3)}
 .drop h3{font-size:15px;font-weight:600;margin-bottom:4px}
 .drop p{font-size:12px;color:var(--t3)}
 .drop-badge{display:inline-block;margin-top:12px;background:var(--acg);border:1px solid rgba(124,108,252,.25);border-radius:99px;padding:4px 12px;font-size:11px;color:var(--ac);font-weight:600}
-
-/* progress */
 .prog-wrap{display:none;margin-top:20px}
 .prog-wrap.on{display:block}
 .prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
@@ -71,15 +41,11 @@ input[type=text]::placeholder{color:var(--t3)}
 @keyframes shimmer{to{background-position:-200% 0}}
 .prog-sub{margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--t3);display:flex;gap:16px;flex-wrap:wrap}
 .prog-sub span{color:var(--ac)}
-
-/* stats */
 .stats{display:none;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1);border-radius:14px;overflow:hidden;margin-bottom:16px;border:1px solid var(--b1)}
 .stats.on{display:grid}
 .stat{background:var(--s1);padding:20px 18px;text-align:center}
 .stat-v{font-family:var(--mono);font-size:26px;font-weight:700;display:block;line-height:1}
 .stat-l{font-size:10px;color:var(--t3);margin-top:5px;display:block;letter-spacing:.5px}
-
-/* toolbar */
 .toolbar{display:none;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px}
 .toolbar.on{display:flex}
 .toolbar-l{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -91,14 +57,10 @@ input[type=text]::placeholder{color:var(--t3)}
 .filter-wrap{display:flex;align-items:center;gap:8px}
 .filter-wrap label{font-size:11px;color:var(--t3);white-space:nowrap}
 .filter-wrap input{width:160px;padding:8px 12px;font-size:12px}
-
-/* buttons */
 .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
 .btn-ok{background:rgba(74,222,128,.1);color:var(--ok);border:1px solid rgba(74,222,128,.2)}
 .btn-ok:hover{background:rgba(74,222,128,.18)}
 .btn-ok:disabled{opacity:.3;cursor:not-allowed}
-
-/* grid */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
 .fc{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:14px;cursor:pointer;transition:border-color .12s,background .12s;position:relative;animation:fadeUp .2s ease both;user-select:none}
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -110,27 +72,17 @@ input[type=text]::placeholder{color:var(--t3)}
 .fc-meta{font-size:10px;color:var(--t3)}
 .fc-meta b{color:var(--ac);font-weight:400}
 .fc-src{margin-top:8px;padding-top:8px;border-top:1px solid var(--b1);font-size:9px;color:var(--t3);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-/* empty */
 .empty{display:none;text-align:center;padding:72px 24px;color:var(--t3)}
 .empty.on{display:block}
 .empty .big{font-size:48px;display:block;margin-bottom:14px}
 .empty p{font-size:13px}
-
-/* toast */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--s2);border:1px solid var(--b2);border-radius:10px;padding:11px 18px;font-size:13px;z-index:999;transform:translateY(70px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);pointer-events:none;max-width:320px}
 .toast.on{transform:translateY(0);opacity:1}
-
-@media(max-width:640px){
-  .setup-grid{grid-template-columns:1fr}
-  .stats.on{grid-template-columns:repeat(2,1fr)}
-  .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
-}
+@media(max-width:640px){.setup-grid{grid-template-columns:1fr}.stats.on{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}}
 </style>
 </head>
 <body>
 <div class="app">
-
   <header class="hdr">
     <div class="hdr-logo">⛏️</div>
     <div>
@@ -151,7 +103,6 @@ input[type=text]::placeholder{color:var(--t3)}
         <input type="text" id="outFolder" placeholder="ex: fontes/">
       </div>
     </div>
-
     <div class="drop" id="drop">
       <input type="file" id="fileInput" multiple accept=".zip">
       <span class="drop-icon">📦</span>
@@ -159,7 +110,6 @@ input[type=text]::placeholder{color:var(--t3)}
       <p>Seleciona tudo de uma vez no explorador de ficheiros — sem limite</p>
       <span class="drop-badge">✦ 32 ZIPs em paralelo simultaneamente</span>
     </div>
-
     <div class="prog-wrap" id="progWrap">
       <div class="prog-top">
         <span class="prog-msg" id="progMsg">Aguardando…</span>
@@ -201,153 +151,240 @@ input[type=text]::placeholder{color:var(--t3)}
     <p>Nenhum ficheiro encontrado com essas extensões nos ZIPs carregados.</p>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-const S = { files:[], selected:new Set(), totalZips:0, doneZips:0, errZips:0 };
-const $  = id => document.getElementById(id);
-const grid=\$('grid'), progWrap=\$('progWrap'), progFill=\$('progFill'),
-      progMsg=\$('progMsg'), progPct=\$('progPct'), stats=\$('stats'),
-      toolbar=\$('toolbar'), empty=\$('empty'), dlBtn=\$('dlBtn'),
-      cbAll=\$('cbAll'), drop=\$('drop'), fileInput=\$('fileInput');
+var S = { files: [], selected: new Set(), totalZips: 0, doneZips: 0, errZips: 0 };
 
-const fmt = b => b<1024?b+'B':b<1048576?(b/1024).toFixed(1)+'KB':(b/1048576).toFixed(2)+'MB';
-const ICONS={'.ttf':'🔤','.otf':'🔤','.woff':'🔤','.woff2':'🔤','.eot':'🔤','.png':'🖼','.jpg':'🖼','.jpeg':'🖼','.gif':'🖼','.webp':'🖼','.svg':'🖼','.ico':'🖼','.mp3':'🎵','.wav':'🎵','.ogg':'🎵','.flac':'🎵','.mp4':'🎬','.mov':'🎬','.avi':'🎬','.mkv':'🎬','.pdf':'📄','.doc':'📄','.docx':'📄','.json':'📋','.xml':'📋','.csv':'📋','.js':'📜','.ts':'📜','.css':'📜','.html':'📜','.py':'📜'};
-const icn = e => ICONS[e.toLowerCase()]||'📁';
+function ge(id) { return document.getElementById(id); }
 
-function toast(msg,ms=3200){const t=\$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),ms)}
+var grid     = ge('grid');
+var progWrap = ge('progWrap');
+var progFill = ge('progFill');
+var progMsg  = ge('progMsg');
+var progPct  = ge('progPct');
+var stats    = ge('stats');
+var toolbar  = ge('toolbar');
+var empty    = ge('empty');
+var dlBtn    = ge('dlBtn');
+var cbAll    = ge('cbAll');
+var drop     = ge('drop');
+var fileInput = ge('fileInput');
 
-function getExts(){return \$('extInput').value.split(',').map(e=>e.trim().toLowerCase()).filter(Boolean).map(e=>e.startsWith('.')?e:'.'+e)}
+var ICONS = {
+  '.ttf':'🔤','.otf':'🔤','.woff':'🔤','.woff2':'🔤','.eot':'🔤',
+  '.png':'🖼','.jpg':'🖼','.jpeg':'🖼','.gif':'🖼','.webp':'🖼','.svg':'🖼','.ico':'🖼',
+  '.mp3':'🎵','.wav':'🎵','.ogg':'🎵','.flac':'🎵',
+  '.mp4':'🎬','.mov':'🎬','.avi':'🎬','.mkv':'🎬',
+  '.pdf':'📄','.doc':'📄','.docx':'📄',
+  '.json':'📋','.xml':'📋','.csv':'📋',
+  '.js':'📜','.ts':'📜','.css':'📜','.html':'📜','.py':'📜'
+};
 
-function updateStats(){
-  \$('svZips').textContent=S.totalZips;
-  \$('svFound').textContent=S.files.length;
-  \$('svSel').textContent=S.selected.size;
-  let bytes=0; S.selected.forEach(i=>bytes+=(S.files[i].size||0));
-  \$('svSize').textContent=bytes?fmt(bytes):'—';
-  dlBtn.disabled=S.selected.size===0;
-  \$('selCount').textContent=S.selected.size?S.selected.size+' selecionado(s)':'';
-  cbAll.checked=S.selected.size===S.files.length&&S.files.length>0;
-  cbAll.indeterminate=S.selected.size>0&&S.selected.size<S.files.length;
+function icn(ext) { return ICONS[ext.toLowerCase()] || '📁'; }
+
+function fmt(b) {
+  if (b < 1024) return b + 'B';
+  if (b < 1048576) return (b/1024).toFixed(1) + 'KB';
+  return (b/1048576).toFixed(2) + 'MB';
 }
 
-function updateProg(){
-  const pct=S.totalZips?Math.round((S.doneZips/S.totalZips)*100):0;
-  progFill.style.width=pct+'%'; progPct.textContent=pct+'%';
-  \$('subZips').textContent=S.doneZips+'/'+S.totalZips;
-  \$('subFound').textContent=S.files.length;
-  \$('subErr').textContent=S.errZips;
+function toast(msg, ms) {
+  if (!ms) ms = 3200;
+  var t = ge('toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(t._t);
+  t._t = setTimeout(function() { t.classList.remove('on'); }, ms);
 }
 
-function makeCard(f,i){
-  const d=document.createElement('div');
-  d.className='fc'+(S.selected.has(i)?' sel':'');
-  d.dataset.i=i;
-  d.innerHTML=`<span class="fc-icon">${icn(f.ext)}</span><div class="fc-name">${f.name}</div><div class="fc-meta">${f.size?fmt(f.size):'?'} &nbsp;·&nbsp; <b>${f.ext}</b></div><div class="fc-src" title="${f.zipName}">📦 ${f.zipName}</div>`;
-  d.addEventListener('click',()=>{
-    if(S.selected.has(i)){S.selected.delete(i);d.classList.remove('sel')}
-    else{S.selected.add(i);d.classList.add('sel')}
+function getExts() {
+  return ge('extInput').value.split(',')
+    .map(function(e) { return e.trim().toLowerCase(); })
+    .filter(function(e) { return e.length > 0; })
+    .map(function(e) { return e.charAt(0) === '.' ? e : '.' + e; });
+}
+
+function updateStats() {
+  ge('svZips').textContent  = S.totalZips;
+  ge('svFound').textContent = S.files.length;
+  ge('svSel').textContent   = S.selected.size;
+  var bytes = 0;
+  S.selected.forEach(function(i) { bytes += (S.files[i].size || 0); });
+  ge('svSize').textContent = bytes ? fmt(bytes) : '—';
+  dlBtn.disabled = S.selected.size === 0;
+  ge('selCount').textContent = S.selected.size ? S.selected.size + ' selecionado(s)' : '';
+  cbAll.checked = S.selected.size === S.files.length && S.files.length > 0;
+  cbAll.indeterminate = S.selected.size > 0 && S.selected.size < S.files.length;
+}
+
+function updateProg() {
+  var pct = S.totalZips ? Math.round((S.doneZips / S.totalZips) * 100) : 0;
+  progFill.style.width = pct + '%';
+  progPct.textContent  = pct + '%';
+  ge('subZips').textContent  = S.doneZips + '/' + S.totalZips;
+  ge('subFound').textContent = S.files.length;
+  ge('subErr').textContent   = S.errZips;
+}
+
+function makeCard(f, i) {
+  var d = document.createElement('div');
+  d.className = 'fc' + (S.selected.has(i) ? ' sel' : '');
+  d.setAttribute('data-i', i);
+  d.innerHTML =
+    '<span class="fc-icon">' + icn(f.ext) + '</span>' +
+    '<div class="fc-name">' + f.name + '</div>' +
+    '<div class="fc-meta">' + (f.size ? fmt(f.size) : '?') + ' &nbsp;·&nbsp; <b>' + f.ext + '</b></div>' +
+    '<div class="fc-src" title="' + f.zipName + '">📦 ' + f.zipName + '</div>';
+  d.addEventListener('click', function() {
+    if (S.selected.has(i)) { S.selected.delete(i); d.classList.remove('sel'); }
+    else                   { S.selected.add(i);    d.classList.add('sel'); }
     updateStats();
   });
   return d;
 }
 
-async function processAll(rawFiles){
-  const exts=getExts();
-  if(!exts.length){toast('⚠ Insere pelo menos uma extensão.');return}
-  const zips=Array.from(rawFiles).filter(f=>f.name.toLowerCase().endsWith('.zip'));
-  if(!zips.length){toast('Nenhum ficheiro .zip encontrado.');return}
+function processAll(rawFiles) {
+  var exts = getExts();
+  if (!exts.length) { toast('⚠ Insere pelo menos uma extensão.'); return; }
 
-  S.files=[];S.selected.clear();S.totalZips=zips.length;S.doneZips=0;S.errZips=0;
-  grid.innerHTML='';
-  stats.classList.add('on');toolbar.classList.remove('on');empty.classList.remove('on');
+  var zips = Array.from(rawFiles).filter(function(f) {
+    return f.name.toLowerCase().endsWith('.zip');
+  });
+  if (!zips.length) { toast('Nenhum ficheiro .zip encontrado.'); return; }
+
+  S.files = []; S.selected.clear();
+  S.totalZips = zips.length; S.doneZips = 0; S.errZips = 0;
+  grid.innerHTML = '';
+  stats.classList.add('on');
+  toolbar.classList.remove('on');
+  empty.classList.remove('on');
   progWrap.classList.add('on');
-  progMsg.textContent='Varrendo '+zips.length+' ZIPs…';
+  progMsg.textContent = 'Varrendo ' + zips.length + ' ZIPs…';
   updateProg();
 
-  let idx=0, prevCount=0;
+  var idx = 0;
+  var prevCount = 0;
 
-  async function worker(){
-    while(idx<zips.length){
-      const file=zips[idx++];
-      try{
-        const ab=await file.arrayBuffer();
-        const zip=await JSZip.loadAsync(ab);
-        zip.forEach((path,entry)=>{
-          if(entry.dir)return;
-          const lp=path.toLowerCase();
-          const matched=exts.find(e=>lp.endsWith(e));
-          if(!matched)return;
-          S.files.push({
-            name:path.split('/').pop(),
-            fullPath:path,
-            ext:matched,
-            size:entry._data?.uncompressedSize||0,
-            zipName:file.name,
-            zipEntry:entry
-          });
+  function worker() {
+    if (idx >= zips.length) return Promise.resolve();
+    var file = zips[idx++];
+    return file.arrayBuffer().then(function(ab) {
+      return JSZip.loadAsync(ab);
+    }).then(function(zip) {
+      zip.forEach(function(path, entry) {
+        if (entry.dir) return;
+        var lp = path.toLowerCase();
+        var matched = null;
+        for (var e = 0; e < exts.length; e++) {
+          if (lp.endsWith(exts[e])) { matched = exts[e]; break; }
+        }
+        if (!matched) return;
+        S.files.push({
+          name: path.split('/').pop(),
+          fullPath: path,
+          ext: matched,
+          size: (entry._data && entry._data.uncompressedSize) ? entry._data.uncompressedSize : 0,
+          zipName: file.name,
+          zipEntry: entry
         });
-      }catch(e){S.errZips++}
+      });
+    }).catch(function() {
+      S.errZips++;
+    }).then(function() {
       S.doneZips++;
       updateProg();
-      if(S.files.length>prevCount){
-        const frag=document.createDocumentFragment();
-        for(let i=prevCount;i<S.files.length;i++)frag.appendChild(makeCard(S.files[i],i));
+      if (S.files.length > prevCount) {
+        var frag = document.createDocumentFragment();
+        for (var i = prevCount; i < S.files.length; i++) {
+          frag.appendChild(makeCard(S.files[i], i));
+        }
         grid.appendChild(frag);
-        prevCount=S.files.length;
+        prevCount = S.files.length;
       }
-    }
+      return worker();
+    });
   }
 
-  const W=Math.min(32,zips.length);
-  await Promise.all(Array.from({length:W},worker));
+  var CONCURRENCY = 32;
+  var workers = [];
+  for (var w = 0; w < Math.min(CONCURRENCY, zips.length); w++) {
+    workers.push(worker());
+  }
 
-  progMsg.textContent='Concluído — '+S.files.length+' ficheiro(s) em '+zips.length+' ZIP(s)';
-  progFill.style.width='100%'; progPct.textContent='100%';
-  updateStats();
-  if(S.files.length>0)toolbar.classList.add('on');
-  else empty.classList.add('on');
-  toast('✅ '+S.files.length+' ficheiro(s) encontrado(s) em '+zips.length+' ZIP(s)');
+  Promise.all(workers).then(function() {
+    progMsg.textContent = 'Concluído — ' + S.files.length + ' ficheiro(s) em ' + zips.length + ' ZIP(s)';
+    progFill.style.width = '100%';
+    progPct.textContent = '100%';
+    updateStats();
+    if (S.files.length > 0) toolbar.classList.add('on');
+    else empty.classList.add('on');
+    toast('✅ ' + S.files.length + ' ficheiro(s) encontrado(s) em ' + zips.length + ' ZIP(s)');
+  });
 }
 
-cbAll.addEventListener('change',()=>{
-  const cards=grid.querySelectorAll('.fc');
-  if(cbAll.checked){S.files.forEach((_,i)=>S.selected.add(i));cards.forEach(c=>c.classList.add('sel'))}
-  else{S.selected.clear();cards.forEach(c=>c.classList.remove('sel'))}
+cbAll.addEventListener('change', function() {
+  var cards = grid.querySelectorAll('.fc');
+  if (cbAll.checked) {
+    S.files.forEach(function(_, i) { S.selected.add(i); });
+    cards.forEach(function(c) { c.classList.add('sel'); });
+  } else {
+    S.selected.clear();
+    cards.forEach(function(c) { c.classList.remove('sel'); });
+  }
   updateStats();
 });
 
-dlBtn.addEventListener('click',async()=>{
-  if(!S.selected.size)return;
-  dlBtn.disabled=true; dlBtn.textContent='⏳ Gerando ZIP…';
-  const outZip=new JSZip();
-  const pfx=($('zipFolder').value.trim()||'').replace(/\/+$/,'')+'/';
-  const prefix=pfx==='/'?'':pfx;
-  const seen={};
-  try{
-    for(const i of Array.from(S.selected)){
-      const f=S.files[i];
-      let nm=f.name;
-      if(seen[nm]!==undefined){seen[nm]++;nm=nm.replace(new RegExp('\\'+f.ext+'$'),'')+'_('+seen[nm]+')'+f.ext}
-      else seen[nm]=0;
-      const data=await f.zipEntry.async('uint8array');
-      outZip.file(prefix+nm,data);
-    }
-    const blob=await outZip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
-    const url=URL.createObjectURL(blob);
-    Object.assign(document.createElement('a'),{href:url,download:'zipminer_'+Date.now()+'.zip'}).click();
+dlBtn.addEventListener('click', function() {
+  if (!S.selected.size) return;
+  dlBtn.disabled = true;
+  dlBtn.textContent = '⏳ Gerando ZIP…';
+  var outZip = new JSZip();
+  var rawFolder = ge('zipFolder').value.trim().replace(/\/+$/, '');
+  var prefix = rawFolder ? rawFolder + '/' : '';
+  var seen = {};
+  var indices = Array.from(S.selected);
+  var promises = indices.map(function(i) {
+    var f = S.files[i];
+    return f.zipEntry.async('uint8array').then(function(data) {
+      var nm = f.name;
+      if (seen[nm] !== undefined) {
+        seen[nm]++;
+        nm = nm.replace(new RegExp('\\' + f.ext + '$'), '') + '_(' + seen[nm] + ')' + f.ext;
+      } else { seen[nm] = 0; }
+      outZip.file(prefix + nm, data);
+    });
+  });
+  Promise.all(promises).then(function() {
+    return outZip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+  }).then(function(blob) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'zipminer_' + Date.now() + '.zip';
+    a.click();
     URL.revokeObjectURL(url);
-    toast('✅ '+S.selected.size+' ficheiro(s) exportados!');
-  }catch(e){toast('❌ Erro: '+e.message)}
-  dlBtn.disabled=false; dlBtn.textContent='⬇ Baixar ZIP';
-  updateStats();
+    toast('✅ ' + indices.length + ' ficheiro(s) exportados!');
+  }).catch(function(e) {
+    toast('❌ Erro: ' + e.message);
+  }).then(function() {
+    dlBtn.disabled = false;
+    dlBtn.textContent = '⬇ Baixar ZIP';
+    updateStats();
+  });
 });
 
-fileInput.addEventListener('change',()=>{if(fileInput.files.length)processAll(fileInput.files)});
-drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over')});
-drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
-drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files.length)processAll(e.dataTransfer.files)});
+fileInput.addEventListener('change', function() {
+  if (fileInput.files.length) processAll(fileInput.files);
+});
+
+drop.addEventListener('dragover', function(e) { e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', function() { drop.classList.remove('over'); });
+drop.addEventListener('drop', function(e) {
+  e.preventDefault();
+  drop.classList.remove('over');
+  if (e.dataTransfer.files.length) processAll(e.dataTransfer.files);
+});
 </script>
 </body>
 </html>
