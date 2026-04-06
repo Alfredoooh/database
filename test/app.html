@@ -3,904 +3,351 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ZipMiner — Extractor</title>
+<title>ZipMiner</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
-
-  :root {
-    --bg: #0a0a0b;
-    --surface: #111114;
-    --surface2: #18181d;
-    --border: #1f1f28;
-    --border2: #2a2a38;
-    --accent: #7c6cfc;
-    --accent2: #5d4ef0;
-    --accent-glow: rgba(124,108,252,0.15);
-    --text: #e8e8f0;
-    --muted: #6b6b80;
-    --success: #4ade80;
-    --warning: #fb923c;
-    --danger: #f87171;
-    --mono: 'Space Mono', monospace;
-    --sans: 'DM Sans', sans-serif;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Grid background */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(124,108,252,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(124,108,252,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 40px 24px;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Header */
-  header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 48px;
-  }
-
-  .logo {
-    width: 44px;
-    height: 44px;
-    background: var(--accent);
-    border-radius: 10px;
-    display: grid;
-    place-items: center;
-    font-size: 20px;
-    box-shadow: 0 0 24px var(--accent-glow);
-    flex-shrink: 0;
-  }
-
-  .header-text h1 {
-    font-family: var(--mono);
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    color: var(--text);
-  }
-
-  .header-text p {
-    font-size: 13px;
-    color: var(--muted);
-    margin-top: 2px;
-  }
-
-  /* Panel */
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px;
-    margin-bottom: 20px;
-  }
-
-  .panel-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-bottom: 16px;
-  }
-
-  /* Controls row */
-  .controls-row {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-    gap: 12px;
-    align-items: end;
-  }
-
-  .field-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .field-group label {
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.5px;
-    font-weight: 500;
-  }
-
-  input[type="text"] {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 13px;
-    padding: 10px 14px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    width: 100%;
-  }
-
-  input[type="text"]:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-  }
-
-  input[type="text"]::placeholder { color: var(--muted); }
-
-  /* Upload zone */
-  .upload-zone {
-    border: 1.5px dashed var(--border2);
-    border-radius: 12px;
-    padding: 36px 24px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .upload-zone:hover, .upload-zone.drag-over {
-    border-color: var(--accent);
-    background: var(--accent-glow);
-  }
-
-  .upload-zone input[type="file"] {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-    width: 100%;
-    height: 100%;
-  }
-
-  .upload-icon { font-size: 36px; margin-bottom: 10px; display: block; }
-
-  .upload-zone h3 {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-
-  .upload-zone p {
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  /* Btn */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-family: var(--sans);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    color: #fff;
-    box-shadow: 0 0 20px var(--accent-glow);
-  }
-
-  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
-  .btn-primary:active { transform: translateY(0); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-  .btn-ghost {
-    background: var(--surface2);
-    color: var(--text);
-    border: 1px solid var(--border2);
-  }
-
-  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-
-  .btn-success {
-    background: rgba(74,222,128,0.12);
-    color: var(--success);
-    border: 1px solid rgba(74,222,128,0.25);
-  }
-
-  .btn-success:hover { background: rgba(74,222,128,0.2); }
-  .btn-success:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  /* Progress */
-  .progress-wrap {
-    display: none;
-    margin-top: 20px;
-  }
-
-  .progress-wrap.show { display: block; }
-
-  .progress-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-
-  .progress-label { font-size: 12px; color: var(--muted); }
-  .progress-count { font-family: var(--mono); font-size: 12px; color: var(--accent); }
-
-  .progress-bar {
-    height: 4px;
-    background: var(--surface2);
-    border-radius: 99px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), #a78bfa);
-    border-radius: 99px;
-    transition: width 0.3s;
-    width: 0%;
-  }
-
-  /* Stats bar */
-  .stats-bar {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1px;
-    background: var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 20px;
-    display: none;
-  }
-
-  .stats-bar.show { display: grid; }
-
-  .stat {
-    background: var(--surface);
-    padding: 18px 20px;
-    text-align: center;
-  }
-
-  .stat-value {
-    font-family: var(--mono);
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text);
-    display: block;
-  }
-
-  .stat-label {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 2px;
-    display: block;
-  }
-
-  /* Toolbar */
-  .results-toolbar {
-    display: none;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-  }
-
-  .results-toolbar.show { display: flex; }
-
-  .toolbar-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .folder-input-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .folder-input-wrap label {
-    font-size: 11px;
-    color: var(--muted);
-    white-space: nowrap;
-    font-weight: 500;
-  }
-
-  .folder-input-wrap input {
-    width: 180px;
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-
-  /* Checkbox */
-  .checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    color: var(--muted);
-    transition: color 0.15s;
-  }
-
-  .checkbox-label:hover { color: var(--text); }
-
-  .checkbox-label input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--accent);
-    cursor: pointer;
-  }
-
-  /* Grid */
-  .files-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
-  }
-
-  /* File card */
-  .file-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.15s, transform 0.15s;
-    position: relative;
-    animation: cardIn 0.25s ease both;
-  }
-
-  @keyframes cardIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .file-card:hover {
-    border-color: var(--border2);
-    background: var(--surface2);
-  }
-
-  .file-card.selected {
-    border-color: var(--accent);
-    background: var(--accent-glow);
-  }
-
-  .file-card.selected::after {
-    content: '✓';
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 20px;
-    height: 20px;
-    background: var(--accent);
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    font-size: 10px;
-    color: #fff;
-    font-weight: 700;
-  }
-
-  .file-icon {
-    font-size: 28px;
-    margin-bottom: 10px;
-    display: block;
-  }
-
-  .file-name {
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text);
-    word-break: break-all;
-    line-height: 1.4;
-    margin-bottom: 6px;
-  }
-
-  .file-meta {
-    font-size: 10px;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-
-  .file-meta span { display: block; }
-
-  .file-source {
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid var(--border);
-    font-size: 10px;
-    color: var(--muted);
-    font-family: var(--mono);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  /* Empty / error states */
-  .empty-state {
-    text-align: center;
-    padding: 60px 24px;
-    color: var(--muted);
-    display: none;
-  }
-
-  .empty-state.show { display: block; }
-  .empty-state .big { font-size: 40px; margin-bottom: 12px; display: block; }
-  .empty-state p { font-size: 13px; }
-
-  /* Log */
-  .log-panel {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 16px;
-    max-height: 120px;
-    overflow-y: auto;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-    line-height: 1.7;
-    display: none;
-    margin-top: 16px;
-  }
-
-  .log-panel.show { display: block; }
-  .log-entry.ok { color: var(--success); }
-  .log-entry.err { color: var(--danger); }
-  .log-entry.info { color: var(--accent); }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: var(--surface); }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
-
-  /* Responsive */
-  @media (max-width: 640px) {
-    .controls-row { grid-template-columns: 1fr; }
-    .stats-bar { grid-template-columns: repeat(2,1fr); }
-    .files-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-    .results-toolbar { flex-direction: column; align-items: flex-start; }
-  }
-
-  /* Toast */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    padding: 12px 18px;
-    font-size: 13px;
-    color: var(--text);
-    z-index: 999;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    pointer-events: none;
-  }
-
-  .toast.show {
-    transform: translateY(0);
-    opacity: 1;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #08080a;
+  --s1: #0f0f13;
+  --s2: #15151b;
+  --s3: #1c1c25;
+  --b1: #1e1e28;
+  --b2: #28283a;
+  --ac: #7c6cfc;
+  --ac2: #5d4ef0;
+  --acg: rgba(124,108,252,.12);
+  --acg2: rgba(124,108,252,.06);
+  --tx: #eeeef5;
+  --t2: #a0a0b8;
+  --t3: #5a5a72;
+  --ok: #4ade80;
+  --err: #f87171;
+  --mono: 'Space Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:var(--sans);min-height:100vh;line-height:1.5}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(124,108,252,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(124,108,252,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+.app{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:36px 24px 80px}
+
+/* header */
+.hdr{display:flex;align-items:center;gap:14px;margin-bottom:40px}
+.hdr-logo{width:48px;height:48px;background:linear-gradient(135deg,var(--ac),#a78bfa);border-radius:14px;display:grid;place-items:center;font-size:22px;box-shadow:0 0 32px rgba(124,108,252,.3),inset 0 1px 0 rgba(255,255,255,.1);flex-shrink:0}
+.hdr h1{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:-.5px}
+.hdr p{font-size:12px;color:var(--t3);margin-top:2px}
+
+/* card */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:24px;margin-bottom:16px}
+.chip{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--ac);background:var(--acg2);border:1px solid rgba(124,108,252,.2);border-radius:6px;padding:3px 8px;margin-bottom:18px}
+
+/* setup */
+.setup-grid{display:grid;grid-template-columns:1fr 220px;gap:12px;margin-bottom:20px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;color:var(--t3);letter-spacing:.5px;font-weight:500}
+input[type=text]{background:var(--s2);border:1px solid var(--b2);border-radius:8px;color:var(--tx);font-family:var(--mono);font-size:13px;padding:10px 14px;outline:none;transition:border-color .15s,box-shadow .15s;width:100%}
+input[type=text]:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--acg)}
+input[type=text]::placeholder{color:var(--t3)}
+
+/* drop */
+.drop{border:1.5px dashed var(--b2);border-radius:14px;padding:48px 24px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;overflow:hidden;background:var(--s2)}
+.drop.over,.drop:hover{border-color:var(--ac);background:var(--acg)}
+.drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop-icon{font-size:40px;display:block;margin-bottom:10px}
+.drop h3{font-size:15px;font-weight:600;margin-bottom:4px}
+.drop p{font-size:12px;color:var(--t3)}
+.drop-badge{display:inline-block;margin-top:12px;background:var(--acg);border:1px solid rgba(124,108,252,.25);border-radius:99px;padding:4px 12px;font-size:11px;color:var(--ac);font-weight:600}
+
+/* progress */
+.prog-wrap{display:none;margin-top:20px}
+.prog-wrap.on{display:block}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prog-msg{font-size:12px;color:var(--t2)}
+.prog-pct{font-family:var(--mono);font-size:12px;color:var(--ac)}
+.prog-bar{height:3px;background:var(--s3);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--ac),#a78bfa,var(--ac));background-size:200% 100%;animation:shimmer 1.5s linear infinite;border-radius:99px;transition:width .15s;width:0%}
+@keyframes shimmer{to{background-position:-200% 0}}
+.prog-sub{margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--t3);display:flex;gap:16px;flex-wrap:wrap}
+.prog-sub span{color:var(--ac)}
+
+/* stats */
+.stats{display:none;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--b1);border-radius:14px;overflow:hidden;margin-bottom:16px;border:1px solid var(--b1)}
+.stats.on{display:grid}
+.stat{background:var(--s1);padding:20px 18px;text-align:center}
+.stat-v{font-family:var(--mono);font-size:26px;font-weight:700;display:block;line-height:1}
+.stat-l{font-size:10px;color:var(--t3);margin-top:5px;display:block;letter-spacing:.5px}
+
+/* toolbar */
+.toolbar{display:none;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.toolbar.on{display:flex}
+.toolbar-l{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.toolbar-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cb-label{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;color:var(--t2);transition:color .15s;user-select:none}
+.cb-label:hover{color:var(--tx)}
+.cb-label input{accent-color:var(--ac);width:15px;height:15px;cursor:pointer}
+.sel-count{font-size:12px;color:var(--t3);font-family:var(--mono)}
+.filter-wrap{display:flex;align-items:center;gap:8px}
+.filter-wrap label{font-size:11px;color:var(--t3);white-space:nowrap}
+.filter-wrap input{width:160px;padding:8px 12px;font-size:12px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
+.btn-ok{background:rgba(74,222,128,.1);color:var(--ok);border:1px solid rgba(74,222,128,.2)}
+.btn-ok:hover{background:rgba(74,222,128,.18)}
+.btn-ok:disabled{opacity:.3;cursor:not-allowed}
+
+/* grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.fc{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:14px;cursor:pointer;transition:border-color .12s,background .12s;position:relative;animation:fadeUp .2s ease both;user-select:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fc:hover{border-color:var(--b2);background:var(--s2)}
+.fc.sel{border-color:var(--ac);background:var(--acg)}
+.fc.sel::after{content:'✓';position:absolute;top:9px;right:9px;width:18px;height:18px;background:var(--ac);border-radius:50%;display:grid;place-items:center;font-size:9px;color:#fff;font-weight:700}
+.fc-icon{font-size:26px;display:block;margin-bottom:8px}
+.fc-name{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--tx);word-break:break-all;line-height:1.4;margin-bottom:5px}
+.fc-meta{font-size:10px;color:var(--t3)}
+.fc-meta b{color:var(--ac);font-weight:400}
+.fc-src{margin-top:8px;padding-top:8px;border-top:1px solid var(--b1);font-size:9px;color:var(--t3);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* empty */
+.empty{display:none;text-align:center;padding:72px 24px;color:var(--t3)}
+.empty.on{display:block}
+.empty .big{font-size:48px;display:block;margin-bottom:14px}
+.empty p{font-size:13px}
+
+/* toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--s2);border:1px solid var(--b2);border-radius:10px;padding:11px 18px;font-size:13px;z-index:999;transform:translateY(70px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);pointer-events:none;max-width:320px}
+.toast.on{transform:translateY(0);opacity:1}
+
+@media(max-width:640px){
+  .setup-grid{grid-template-columns:1fr}
+  .stats.on{grid-template-columns:repeat(2,1fr)}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+}
 </style>
 </head>
 <body>
+<div class="app">
 
-<div class="container">
-  <header>
-    <div class="logo">⛏️</div>
-    <div class="header-text">
+  <header class="hdr">
+    <div class="hdr-logo">⛏️</div>
+    <div>
       <h1>ZipMiner</h1>
-      <p>Extrai arquivos de centenas de ZIPs por extensão</p>
+      <p>Extrai ficheiros de 1000+ ZIPs por extensão — tudo no browser</p>
     </div>
   </header>
 
-  <!-- Config panel -->
-  <div class="panel">
-    <div class="panel-label">Configuração</div>
-
-    <div class="controls-row" style="margin-bottom:20px;">
-      <div class="field-group">
-        <label>Extensões a extrair (separadas por vírgula)</label>
-        <input type="text" id="extInput" placeholder="ex: .ttf, .otf, .woff2" value=".ttf">
+  <div class="card">
+    <div class="chip">Configuração</div>
+    <div class="setup-grid">
+      <div class="field">
+        <label>Extensões (separadas por vírgula)</label>
+        <input type="text" id="extInput" placeholder=".ttf, .otf, .woff2, .png …" value=".ttf">
       </div>
-      <div class="field-group">
-        <label>Pasta de destino no ZIP</label>
-        <input type="text" id="folderInput" placeholder="ex: fontes/" style="width:180px;">
+      <div class="field">
+        <label>Pasta de destino no ZIP exportado</label>
+        <input type="text" id="outFolder" placeholder="ex: fontes/">
       </div>
     </div>
 
-    <!-- Upload zone -->
-    <div class="upload-zone" id="dropZone">
-      <input type="file" id="zipFiles" multiple accept=".zip">
-      <span class="upload-icon">📦</span>
-      <h3>Arraste os ZIPs aqui ou clique para selecionar</h3>
-      <p>Suporta mais de 1000 ZIPs simultaneamente • Processado 100% no browser</p>
+    <div class="drop" id="drop">
+      <input type="file" id="fileInput" multiple accept=".zip">
+      <span class="drop-icon">📦</span>
+      <h3>Arrastar ZIPs aqui ou clicar para selecionar</h3>
+      <p>Seleciona tudo de uma vez no explorador de ficheiros — sem limite</p>
+      <span class="drop-badge">✦ 32 ZIPs em paralelo simultaneamente</span>
     </div>
 
-    <!-- Progress -->
-    <div class="progress-wrap" id="progressWrap">
-      <div class="progress-header">
-        <span class="progress-label" id="progressLabel">Aguardando…</span>
-        <span class="progress-count" id="progressCount">0 / 0</span>
+    <div class="prog-wrap" id="progWrap">
+      <div class="prog-top">
+        <span class="prog-msg" id="progMsg">Aguardando…</span>
+        <span class="prog-pct" id="progPct">0%</span>
       </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
+      <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+      <div class="prog-sub">
+        ZIPs: <span id="subZips">0/0</span>
+        &nbsp;|&nbsp; Encontrados: <span id="subFound">0</span>
+        &nbsp;|&nbsp; Erros: <span id="subErr">0</span>
       </div>
-    </div>
-
-    <!-- Log -->
-    <div class="log-panel" id="logPanel"></div>
-  </div>
-
-  <!-- Stats -->
-  <div class="stats-bar" id="statsBar">
-    <div class="stat">
-      <span class="stat-value" id="statZips">0</span>
-      <span class="stat-label">ZIPs processados</span>
-    </div>
-    <div class="stat">
-      <span class="stat-value" id="statFound">0</span>
-      <span class="stat-label">Ficheiros encontrados</span>
-    </div>
-    <div class="stat">
-      <span class="stat-value" id="statSelected">0</span>
-      <span class="stat-label">Selecionados</span>
-    </div>
-    <div class="stat">
-      <span class="stat-value" id="statSize">0 KB</span>
-      <span class="stat-label">Tamanho total</span>
     </div>
   </div>
 
-  <!-- Toolbar -->
-  <div class="results-toolbar" id="resultsToolbar">
-    <div class="toolbar-left">
-      <label class="checkbox-label">
-        <input type="checkbox" id="selectAll"> Selecionar tudo
-      </label>
-      <span id="selectedCount" style="font-size:12px;color:var(--muted);"></span>
+  <div class="stats" id="stats">
+    <div class="stat"><span class="stat-v" id="svZips">0</span><span class="stat-l">ZIPs varridos</span></div>
+    <div class="stat"><span class="stat-v" id="svFound">0</span><span class="stat-l">Ficheiros encontrados</span></div>
+    <div class="stat"><span class="stat-v" id="svSel">0</span><span class="stat-l">Selecionados</span></div>
+    <div class="stat"><span class="stat-v" id="svSize">—</span><span class="stat-l">Tamanho estimado</span></div>
+  </div>
+
+  <div class="toolbar" id="toolbar">
+    <div class="toolbar-l">
+      <label class="cb-label"><input type="checkbox" id="cbAll"> Selecionar tudo</label>
+      <span class="sel-count" id="selCount"></span>
     </div>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <div class="folder-input-wrap">
+    <div class="toolbar-r">
+      <div class="filter-wrap">
         <label>Pasta no ZIP:</label>
-        <input type="text" id="zipFolderInput" placeholder="ex: fontes/">
+        <input type="text" id="zipFolder" placeholder="fontes/">
       </div>
-      <button class="btn btn-success" id="downloadBtn" disabled>
-        ⬇ Baixar selecionados
-      </button>
+      <button class="btn btn-ok" id="dlBtn" disabled>⬇ Baixar ZIP</button>
     </div>
   </div>
 
-  <!-- Results grid -->
-  <div class="files-grid" id="filesGrid"></div>
-
-  <!-- Empty state -->
-  <div class="empty-state" id="emptyState">
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty">
     <span class="big">🔍</span>
-    <p>Nenhum ficheiro encontrado com essas extensões.</p>
+    <p>Nenhum ficheiro encontrado com essas extensões nos ZIPs carregados.</p>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── State ───────────────────────────────────────────────────────────
-const state = {
-  extractedFiles: [],   // { name, ext, size, zipName, zipIndex, data: Uint8Array }
-  selected: new Set()
-};
+const S = { files:[], selected:new Set(), totalZips:0, doneZips:0, errZips:0 };
+const $  = id => document.getElementById(id);
+const grid=\$('grid'), progWrap=\$('progWrap'), progFill=\$('progFill'),
+      progMsg=\$('progMsg'), progPct=\$('progPct'), stats=\$('stats'),
+      toolbar=\$('toolbar'), empty=\$('empty'), dlBtn=\$('dlBtn'),
+      cbAll=\$('cbAll'), drop=\$('drop'), fileInput=\$('fileInput');
 
-// ─── Elem refs ───────────────────────────────────────────────────────
-const $ = id => document.getElementById(id);
-const filesGrid     = $('filesGrid');
-const progressWrap  = $('progressWrap');
-const progressFill  = $('progressFill');
-const progressLabel = $('progressLabel');
-const progressCount = $('progressCount');
-const logPanel      = $('logPanel');
-const statsBar      = $('statsBar');
-const resultsToolbar= $('resultsToolbar');
-const emptyState    = $('emptyState');
-const downloadBtn   = $('downloadBtn');
-const selectAllCb   = $('selectAll');
-const zipFilesInput = $('zipFiles');
-const dropZone      = $('dropZone');
+const fmt = b => b<1024?b+'B':b<1048576?(b/1024).toFixed(1)+'KB':(b/1048576).toFixed(2)+'MB';
+const ICONS={'.ttf':'🔤','.otf':'🔤','.woff':'🔤','.woff2':'🔤','.eot':'🔤','.png':'🖼','.jpg':'🖼','.jpeg':'🖼','.gif':'🖼','.webp':'🖼','.svg':'🖼','.ico':'🖼','.mp3':'🎵','.wav':'🎵','.ogg':'🎵','.flac':'🎵','.mp4':'🎬','.mov':'🎬','.avi':'🎬','.mkv':'🎬','.pdf':'📄','.doc':'📄','.docx':'📄','.json':'📋','.xml':'📋','.csv':'📋','.js':'📜','.ts':'📜','.css':'📜','.html':'📜','.py':'📜'};
+const icn = e => ICONS[e.toLowerCase()]||'📁';
 
-// ─── Helpers ─────────────────────────────────────────────────────────
-function formatSize(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
-  return (bytes/(1024*1024)).toFixed(2) + ' MB';
+function toast(msg,ms=3200){const t=\$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),ms)}
+
+function getExts(){return \$('extInput').value.split(',').map(e=>e.trim().toLowerCase()).filter(Boolean).map(e=>e.startsWith('.')?e:'.'+e)}
+
+function updateStats(){
+  \$('svZips').textContent=S.totalZips;
+  \$('svFound').textContent=S.files.length;
+  \$('svSel').textContent=S.selected.size;
+  let bytes=0; S.selected.forEach(i=>bytes+=(S.files[i].size||0));
+  \$('svSize').textContent=bytes?fmt(bytes):'—';
+  dlBtn.disabled=S.selected.size===0;
+  \$('selCount').textContent=S.selected.size?S.selected.size+' selecionado(s)':'';
+  cbAll.checked=S.selected.size===S.files.length&&S.files.length>0;
+  cbAll.indeterminate=S.selected.size>0&&S.selected.size<S.files.length;
 }
 
-function getIcon(ext) {
-  const map = {
-    '.ttf':'🔤', '.otf':'🔤', '.woff':'🔤', '.woff2':'🔤',
-    '.png':'🖼️', '.jpg':'🖼️', '.jpeg':'🖼️', '.gif':'🖼️', '.webp':'🖼️', '.svg':'🖼️',
-    '.mp3':'🎵', '.wav':'🎵', '.ogg':'🎵', '.flac':'🎵',
-    '.mp4':'🎬', '.mov':'🎬', '.avi':'🎬',
-    '.json':'📋', '.xml':'📋', '.csv':'📋',
-    '.pdf':'📄', '.docx':'📄', '.xlsx':'📄',
-    '.js':'📜', '.ts':'📜', '.css':'📜', '.html':'📜',
-    '.sh':'⚙️', '.py':'⚙️',
-  };
-  return map[ext.toLowerCase()] || '📁';
+function updateProg(){
+  const pct=S.totalZips?Math.round((S.doneZips/S.totalZips)*100):0;
+  progFill.style.width=pct+'%'; progPct.textContent=pct+'%';
+  \$('subZips').textContent=S.doneZips+'/'+S.totalZips;
+  \$('subFound').textContent=S.files.length;
+  \$('subErr').textContent=S.errZips;
 }
 
-function log(msg, type = 'info') {
-  logPanel.classList.add('show');
-  const el = document.createElement('div');
-  el.className = 'log-entry ' + type;
-  const ts = new Date().toLocaleTimeString('pt-PT', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-  el.textContent = `[${ts}] ${msg}`;
-  logPanel.appendChild(el);
-  logPanel.scrollTop = logPanel.scrollHeight;
+function makeCard(f,i){
+  const d=document.createElement('div');
+  d.className='fc'+(S.selected.has(i)?' sel':'');
+  d.dataset.i=i;
+  d.innerHTML=`<span class="fc-icon">${icn(f.ext)}</span><div class="fc-name">${f.name}</div><div class="fc-meta">${f.size?fmt(f.size):'?'} &nbsp;·&nbsp; <b>${f.ext}</b></div><div class="fc-src" title="${f.zipName}">📦 ${f.zipName}</div>`;
+  d.addEventListener('click',()=>{
+    if(S.selected.has(i)){S.selected.delete(i);d.classList.remove('sel')}
+    else{S.selected.add(i);d.classList.add('sel')}
+    updateStats();
+  });
+  return d;
 }
 
-function showToast(msg) {
-  const t = $('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
+async function processAll(rawFiles){
+  const exts=getExts();
+  if(!exts.length){toast('⚠ Insere pelo menos uma extensão.');return}
+  const zips=Array.from(rawFiles).filter(f=>f.name.toLowerCase().endsWith('.zip'));
+  if(!zips.length){toast('Nenhum ficheiro .zip encontrado.');return}
 
-function updateStats() {
-  $('statZips').textContent   = state.totalZips || 0;
-  $('statFound').textContent  = state.extractedFiles.length;
-  $('statSelected').textContent = state.selected.size;
+  S.files=[];S.selected.clear();S.totalZips=zips.length;S.doneZips=0;S.errZips=0;
+  grid.innerHTML='';
+  stats.classList.add('on');toolbar.classList.remove('on');empty.classList.remove('on');
+  progWrap.classList.add('on');
+  progMsg.textContent='Varrendo '+zips.length+' ZIPs…';
+  updateProg();
 
-  let totalBytes = 0;
-  state.selected.forEach(i => totalBytes += state.extractedFiles[i].size);
-  $('statSize').textContent = formatSize(totalBytes);
+  let idx=0, prevCount=0;
 
-  downloadBtn.disabled = state.selected.size === 0;
-  $('selectedCount').textContent = state.selected.size > 0
-    ? `${state.selected.size} selecionado(s)` : '';
-
-  selectAllCb.checked = state.selected.size === state.extractedFiles.length && state.extractedFiles.length > 0;
-  selectAllCb.indeterminate = state.selected.size > 0 && state.selected.size < state.extractedFiles.length;
-}
-
-// ─── Parse extensions ────────────────────────────────────────────────
-function getExtensions() {
-  return $('extInput').value
-    .split(',')
-    .map(e => e.trim().toLowerCase())
-    .filter(Boolean)
-    .map(e => e.startsWith('.') ? e : '.' + e);
-}
-
-// ─── Process ZIPs ────────────────────────────────────────────────────
-async function processFiles(files) {
-  const exts = getExtensions();
-  if (!exts.length) { showToast('⚠ Insere pelo menos uma extensão.'); return; }
-
-  // reset
-  state.extractedFiles = [];
-  state.selected.clear();
-  filesGrid.innerHTML = '';
-  logPanel.innerHTML = '';
-  statsBar.classList.remove('show');
-  resultsToolbar.classList.remove('show');
-  emptyState.classList.remove('show');
-  progressWrap.classList.add('show');
-  logPanel.classList.add('show');
-
-  const zipList = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.zip'));
-  state.totalZips = zipList.length;
-
-  if (!zipList.length) { showToast('Nenhum ficheiro .zip encontrado.'); return; }
-
-  log(`Iniciando — ${zipList.length} ZIPs, extensões: ${exts.join(', ')}`, 'info');
-
-  let processed = 0;
-
-  // Process in batches of 20 to avoid memory issues
-  const BATCH = 20;
-
-  for (let b = 0; b < zipList.length; b += BATCH) {
-    const batch = zipList.slice(b, b + BATCH);
-    await Promise.all(batch.map(async (file) => {
-      try {
-        const ab = await file.arrayBuffer();
-        const zip = await JSZip.loadAsync(ab);
-
-        zip.forEach((relativePath, zipEntry) => {
-          if (zipEntry.dir) return;
-          const lp = relativePath.toLowerCase();
-          const matched = exts.find(e => lp.endsWith(e));
-          if (!matched) return;
-
-          state.extractedFiles.push({
-            name: relativePath.split('/').pop(),
-            fullPath: relativePath,
-            ext: matched,
-            size: zipEntry._data ? zipEntry._data.uncompressedSize || 0 : 0,
-            zipName: file.name,
-            zipEntry  // store reference for lazy load
+  async function worker(){
+    while(idx<zips.length){
+      const file=zips[idx++];
+      try{
+        const ab=await file.arrayBuffer();
+        const zip=await JSZip.loadAsync(ab);
+        zip.forEach((path,entry)=>{
+          if(entry.dir)return;
+          const lp=path.toLowerCase();
+          const matched=exts.find(e=>lp.endsWith(e));
+          if(!matched)return;
+          S.files.push({
+            name:path.split('/').pop(),
+            fullPath:path,
+            ext:matched,
+            size:entry._data?.uncompressedSize||0,
+            zipName:file.name,
+            zipEntry:entry
           });
         });
-
-        processed++;
-        const pct = Math.round((processed / zipList.length) * 100);
-        progressFill.style.width = pct + '%';
-        progressLabel.textContent = `Processando ZIPs…`;
-        progressCount.textContent = `${processed} / ${zipList.length}`;
-
-        if (processed % 10 === 0 || processed === zipList.length) {
-          log(`✔ ${file.name} — total até agora: ${state.extractedFiles.length} ficheiros`, 'ok');
-        }
-      } catch (err) {
-        log(`✘ Erro em ${file.name}: ${err.message}`, 'err');
-        processed++;
+      }catch(e){S.errZips++}
+      S.doneZips++;
+      updateProg();
+      if(S.files.length>prevCount){
+        const frag=document.createDocumentFragment();
+        for(let i=prevCount;i<S.files.length;i++)frag.appendChild(makeCard(S.files[i],i));
+        grid.appendChild(frag);
+        prevCount=S.files.length;
       }
-    }));
-
-    // Yield to browser
-    await new Promise(r => setTimeout(r, 0));
-  }
-
-  progressLabel.textContent = 'Concluído!';
-  progressCount.textContent = `${zipList.length} / ${zipList.length}`;
-  progressFill.style.width = '100%';
-
-  log(`Finalizado — ${state.extractedFiles.length} ficheiro(s) encontrado(s) em ${zipList.length} ZIP(s).`, 'info');
-
-  renderGrid();
-  statsBar.classList.add('show');
-  if (state.extractedFiles.length > 0) {
-    resultsToolbar.classList.add('show');
-  } else {
-    emptyState.classList.add('show');
-  }
-
-  updateStats();
-}
-
-// ─── Render ──────────────────────────────────────────────────────────
-function renderGrid() {
-  filesGrid.innerHTML = '';
-  state.extractedFiles.forEach((f, i) => {
-    const card = document.createElement('div');
-    card.className = 'file-card';
-    card.dataset.index = i;
-    card.innerHTML = `
-      <span class="file-icon">${getIcon(f.ext)}</span>
-      <div class="file-name">${f.name}</div>
-      <div class="file-meta">
-        <span>${formatSize(f.size)}</span>
-        <span style="color:var(--accent);font-family:var(--mono);">${f.ext}</span>
-      </div>
-      <div class="file-source" title="${f.zipName}">📦 ${f.zipName}</div>
-    `;
-    card.addEventListener('click', () => toggleSelect(i, card));
-    filesGrid.appendChild(card);
-  });
-}
-
-function toggleSelect(i, card) {
-  if (state.selected.has(i)) {
-    state.selected.delete(i);
-    card.classList.remove('selected');
-  } else {
-    state.selected.add(i);
-    card.classList.add('selected');
-  }
-  updateStats();
-}
-
-// ─── Select all ──────────────────────────────────────────────────────
-selectAllCb.addEventListener('change', () => {
-  const cards = filesGrid.querySelectorAll('.file-card');
-  if (selectAllCb.checked) {
-    state.extractedFiles.forEach((_, i) => state.selected.add(i));
-    cards.forEach(c => c.classList.add('selected'));
-  } else {
-    state.selected.clear();
-    cards.forEach(c => c.classList.remove('selected'));
-  }
-  updateStats();
-});
-
-// ─── Download ────────────────────────────────────────────────────────
-downloadBtn.addEventListener('click', async () => {
-  if (!state.selected.size) return;
-
-  downloadBtn.disabled = true;
-  downloadBtn.textContent = '⏳ Preparando…';
-
-  const outputZip = new JSZip();
-  const folderName = $('zipFolderInput').value.trim().replace(/\/+$/, '');
-  const prefix = folderName ? folderName + '/' : '';
-
-  const indices = Array.from(state.selected);
-  const nameCount = {};
-
-  try {
-    for (const i of indices) {
-      const f = state.extractedFiles[i];
-      // Deduplicate names
-      let finalName = f.name;
-      if (nameCount[finalName] !== undefined) {
-        nameCount[finalName]++;
-        const base = finalName.replace(new RegExp('\\' + f.ext + '$'), '');
-        finalName = `${base}_(${nameCount[finalName]})${f.ext}`;
-      } else {
-        nameCount[finalName] = 0;
-      }
-
-      // Lazily extract data
-      const data = await f.zipEntry.async('uint8array');
-      outputZip.file(prefix + finalName, data);
     }
-
-    const blob = await outputZip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `zipminer_export_${Date.now()}.zip`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast(`✅ ${indices.length} ficheiro(s) exportados!`);
-  } catch (err) {
-    showToast('❌ Erro ao gerar ZIP: ' + err.message);
   }
 
-  downloadBtn.disabled = false;
-  downloadBtn.textContent = '⬇ Baixar selecionados';
+  const W=Math.min(32,zips.length);
+  await Promise.all(Array.from({length:W},worker));
+
+  progMsg.textContent='Concluído — '+S.files.length+' ficheiro(s) em '+zips.length+' ZIP(s)';
+  progFill.style.width='100%'; progPct.textContent='100%';
+  updateStats();
+  if(S.files.length>0)toolbar.classList.add('on');
+  else empty.classList.add('on');
+  toast('✅ '+S.files.length+' ficheiro(s) encontrado(s) em '+zips.length+' ZIP(s)');
+}
+
+cbAll.addEventListener('change',()=>{
+  const cards=grid.querySelectorAll('.fc');
+  if(cbAll.checked){S.files.forEach((_,i)=>S.selected.add(i));cards.forEach(c=>c.classList.add('sel'))}
+  else{S.selected.clear();cards.forEach(c=>c.classList.remove('sel'))}
   updateStats();
 });
 
-// ─── File input ──────────────────────────────────────────────────────
-zipFilesInput.addEventListener('change', () => {
-  if (zipFilesInput.files.length) processFiles(zipFilesInput.files);
+dlBtn.addEventListener('click',async()=>{
+  if(!S.selected.size)return;
+  dlBtn.disabled=true; dlBtn.textContent='⏳ Gerando ZIP…';
+  const outZip=new JSZip();
+  const pfx=($('zipFolder').value.trim()||'').replace(/\/+$/,'')+'/';
+  const prefix=pfx==='/'?'':pfx;
+  const seen={};
+  try{
+    for(const i of Array.from(S.selected)){
+      const f=S.files[i];
+      let nm=f.name;
+      if(seen[nm]!==undefined){seen[nm]++;nm=nm.replace(new RegExp('\\'+f.ext+'$'),'')+'_('+seen[nm]+')'+f.ext}
+      else seen[nm]=0;
+      const data=await f.zipEntry.async('uint8array');
+      outZip.file(prefix+nm,data);
+    }
+    const blob=await outZip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
+    const url=URL.createObjectURL(blob);
+    Object.assign(document.createElement('a'),{href:url,download:'zipminer_'+Date.now()+'.zip'}).click();
+    URL.revokeObjectURL(url);
+    toast('✅ '+S.selected.size+' ficheiro(s) exportados!');
+  }catch(e){toast('❌ Erro: '+e.message)}
+  dlBtn.disabled=false; dlBtn.textContent='⬇ Baixar ZIP';
+  updateStats();
 });
 
-// ─── Drag & Drop ────────────────────────────────────────────────────
-dropZone.addEventListener('dragover', e => {
-  e.preventDefault();
-  dropZone.classList.add('drag-over');
-});
-
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-
-dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('drag-over');
-  if (e.dataTransfer.files.length) processFiles(e.dataTransfer.files);
-});
+fileInput.addEventListener('change',()=>{if(fileInput.files.length)processAll(fileInput.files)});
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over')});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files.length)processAll(e.dataTransfer.files)});
 </script>
 </body>
 </html>
