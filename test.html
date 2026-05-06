@@ -2,717 +2,746 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>NIM Chat</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0a0a0a;
-  --bg2: #111;
-  --bg3: #181818;
-  --bg4: #222;
+  --bg: #000;
+  --bg2: #0f0f0f;
+  --bg3: #1a1a1a;
+  --bg4: #252525;
   --border: #2a2a2a;
-  --accent: #76b900;
-  --text: #e8e8e8;
+  --text: #fff;
   --text2: #888;
   --text3: #444;
-  --radius: 14px;
-  --radius-sm: 8px;
+  --input-bg: #1c1c1e;
+  --user-bg: #1c1c1e;
+  --radius: 22px;
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  --font-mono: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, monospace;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Sora',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+[data-theme="light"] {
+  --bg: #f2f2f7;
+  --bg2: #fff;
+  --bg3: #e5e5ea;
+  --bg4: #d1d1d6;
+  --border: #c7c7cc;
+  --text: #000;
+  --text2: #636366;
+  --text3: #aeaeb2;
+  --input-bg: #fff;
+  --user-bg: #000;
+}
+[data-theme="light"] .msg.user { color: #fff; }
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { height:100%; overflow:hidden; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: -webkit-fill-available;
+}
 
 /* SETUP */
 #setup {
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  height:100vh; gap:20px; padding:32px;
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; height:100vh; gap:16px; padding:32px;
 }
-#setup .logo { font-size:13px; font-weight:600; letter-spacing:4px; color:var(--accent); text-transform:uppercase; }
-#setup h1 { font-size:28px; font-weight:300; color:var(--text); }
+#setup h1 { font-size:24px; font-weight:600; letter-spacing:-.5px; }
+#setup p { font-size:14px; color:var(--text2); text-align:center; line-height:1.5; }
 #setup input {
-  width:100%; max-width:480px; padding:14px 18px;
-  border-radius:var(--radius-sm); border:1px solid var(--border);
-  background:var(--bg3); color:var(--text); font-size:14px;
-  font-family:'JetBrains Mono',monospace; outline:none; transition:.2s;
+  width:100%; max-width:400px; padding:15px 18px;
+  border-radius:14px; border:1px solid var(--border);
+  background:var(--bg3); color:var(--text);
+  font-size:15px; font-family:var(--font-mono);
+  outline:none; -webkit-appearance:none;
 }
-#setup input:focus { border-color:var(--accent); }
+#setup input:focus { border-color:var(--text3); }
 #setup button {
-  padding:14px 40px; background:var(--accent); color:#000;
-  border:none; border-radius:var(--radius-sm); font-weight:600;
-  font-size:15px; cursor:pointer; font-family:'Sora',sans-serif;
-  transition:.15s;
+  width:100%; max-width:400px; padding:15px;
+  background:var(--text); color:var(--bg);
+  border:none; border-radius:14px;
+  font-size:16px; font-weight:600;
+  font-family:var(--font); cursor:pointer;
 }
-#setup button:hover { background:#89d400; }
 
-/* CHAT */
-#chat { display:none; flex-direction:column; height:100vh; }
+/* MAIN */
+#main { display:none; flex-direction:column; height:100%; }
 
+/* TOPBAR */
 #topbar {
   display:flex; align-items:center; justify-content:space-between;
-  padding:12px 18px; background:var(--bg2); border-bottom:1px solid var(--border);
-  flex-shrink:0;
+  padding:14px 16px 10px;
+  flex-shrink:0; position:relative;
 }
-#topbar .left { display:flex; align-items:center; gap:10px; }
-#topbar .model-name { font-size:13px; font-weight:600; color:var(--accent); }
-#topbar .status { font-size:11px; color:var(--text2); }
-#topbar .right { display:flex; gap:8px; }
-
-.icon-btn {
-  background:var(--bg3); border:1px solid var(--border);
-  color:var(--text2); border-radius:var(--radius-sm);
-  padding:8px 12px; cursor:pointer; font-size:13px;
-  transition:.15s; display:flex; align-items:center; gap:6px;
+#topbar .center {
+  position:absolute; left:50%; transform:translateX(-50%);
+  text-align:center;
 }
-.icon-btn:hover { border-color:var(--accent); color:var(--text); }
-.icon-btn svg { width:15px; height:15px; }
+#topbar .center .title { font-size:16px; font-weight:600; }
+#topbar .center .subtitle { font-size:11px; color:var(--text2); margin-top:1px; }
+.nav-btn {
+  background:var(--bg3); border:none; color:var(--text);
+  border-radius:50%; width:34px; height:34px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; flex-shrink:0;
+}
+.nav-btn svg { width:16px; height:16px; }
 
+/* MESSAGES */
 #messages {
-  flex:1; overflow-y:auto; padding:24px 16px;
-  display:flex; flex-direction:column; gap:20px;
+  flex:1; overflow-y:auto; overflow-x:hidden;
+  padding:12px 16px 140px;
+  display:flex; flex-direction:column; gap:4px;
+  -webkit-overflow-scrolling:touch;
   scroll-behavior:smooth;
 }
-#messages::-webkit-scrollbar { width:4px; }
-#messages::-webkit-scrollbar-track { background:transparent; }
-#messages::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+#messages::-webkit-scrollbar { display:none; }
 
-.msg-wrap { display:flex; flex-direction:column; gap:6px; max-width:820px; width:100%; }
-.msg-wrap.user { align-self:flex-end; align-items:flex-end; }
-.msg-wrap.ai { align-self:flex-start; align-items:flex-start; }
+.msg-group { display:flex; flex-direction:column; gap:2px; margin:6px 0; }
+.msg-group.user { align-items:flex-end; }
+.msg-group.ai { align-items:flex-start; }
 
-.msg-label { font-size:11px; color:var(--text3); font-weight:500; letter-spacing:1px; text-transform:uppercase; padding:0 4px; }
+.sender-label {
+  font-size:11px; color:var(--text3); margin:0 4px 4px;
+  font-weight:500;
+}
 
 .msg {
-  padding:14px 18px; border-radius:var(--radius);
-  font-size:14px; line-height:1.75; max-width:100%;
+  max-width:85%; font-size:15px; line-height:1.6;
+  word-break:break-word;
 }
 .msg.user {
-  background:var(--accent); color:#000; font-weight:500;
-  border-bottom-right-radius:4px;
+  background:var(--user-bg);
+  color:var(--text);
+  padding:11px 16px;
+  border-radius:20px 20px 5px 20px;
+  border:1px solid var(--border);
 }
 .msg.ai {
-  background:var(--bg3); color:var(--text);
-  border:1px solid var(--border); border-bottom-left-radius:4px;
-}
-.msg.thinking {
-  background:transparent; border:1px dashed var(--border);
-  color:var(--text2); font-style:italic; font-size:13px;
+  background:transparent;
+  color:var(--text);
+  padding:4px 4px;
+  max-width:100%;
+  width:100%;
 }
 
-/* MARKDOWN STYLES dentro de .msg.ai */
-.msg.ai h1,.msg.ai h2,.msg.ai h3 {
-  font-weight:600; margin:14px 0 6px; line-height:1.3;
-}
-.msg.ai h1 { font-size:18px; color:var(--accent); }
-.msg.ai h2 { font-size:16px; color:var(--text); border-bottom:1px solid var(--border); padding-bottom:4px; }
-.msg.ai h3 { font-size:14px; color:var(--text); }
-.msg.ai p { margin:6px 0; }
-.msg.ai ul,.msg.ai ol { padding-left:20px; margin:6px 0; }
-.msg.ai li { margin:3px 0; }
-.msg.ai strong { color:#fff; font-weight:600; }
-.msg.ai em { color:var(--text2); font-style:italic; }
-.msg.ai a { color:var(--accent); text-decoration:none; }
-.msg.ai a:hover { text-decoration:underline; }
+/* AI MARKDOWN */
+.msg.ai p { margin:6px 0; font-size:15px; line-height:1.65; }
+.msg.ai p:first-child { margin-top:0; }
+.msg.ai h1 { font-size:20px; font-weight:700; margin:16px 0 6px; letter-spacing:-.3px; }
+.msg.ai h2 { font-size:17px; font-weight:600; margin:14px 0 5px; }
+.msg.ai h3 { font-size:15px; font-weight:600; margin:12px 0 4px; color:var(--text2); }
+.msg.ai strong { font-weight:600; }
+.msg.ai em { font-style:italic; color:var(--text2); }
+.msg.ai ul,.msg.ai ol { padding-left:22px; margin:8px 0; }
+.msg.ai li { margin:3px 0; font-size:15px; line-height:1.5; }
 .msg.ai blockquote {
-  border-left:3px solid var(--accent); padding:8px 14px;
-  margin:10px 0; background:var(--bg4); border-radius:0 var(--radius-sm) var(--radius-sm) 0;
-  color:var(--text2);
+  border-left:3px solid var(--border);
+  padding:8px 14px; margin:10px 0;
+  color:var(--text2); font-style:italic;
 }
-.msg.ai hr { border:none; border-top:1px solid var(--border); margin:12px 0; }
+.msg.ai hr { border:none; border-top:1px solid var(--border); margin:14px 0; }
+.msg.ai a { color:var(--text); text-decoration:underline; text-decoration-color:var(--text3); }
 .msg.ai table { width:100%; border-collapse:collapse; margin:10px 0; font-size:13px; }
-.msg.ai th { background:var(--bg4); padding:8px 12px; text-align:left; border:1px solid var(--border); color:var(--accent); }
-.msg.ai td { padding:8px 12px; border:1px solid var(--border); }
-.msg.ai tr:nth-child(even) { background:var(--bg4); }
+.msg.ai th { padding:8px 12px; border-bottom:1px solid var(--border); text-align:left; font-weight:600; font-size:12px; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; }
+.msg.ai td { padding:8px 12px; border-bottom:1px solid var(--bg3); }
 
 /* INLINE CODE */
-.msg.ai code:not(.block-code) {
-  background:var(--bg4); color:#f9a825;
-  padding:2px 7px; border-radius:5px;
-  font-family:'JetBrains Mono',monospace; font-size:12px;
-  border:1px solid var(--border);
+.msg.ai code {
+  font-family:var(--font-mono); font-size:13px;
+  background:var(--bg3); padding:2px 6px;
+  border-radius:5px; color:var(--text);
 }
 
 /* CODE CANVAS */
 .code-canvas {
-  background:var(--bg); border:1px solid var(--border);
-  border-radius:var(--radius); overflow:hidden; margin:10px 0; width:100%;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  margin:10px 0;
+  width:100%;
+  font-family:var(--font-mono);
 }
-.code-header {
+.code-canvas-header {
   display:flex; align-items:center; justify-content:space-between;
-  padding:10px 14px; background:var(--bg4); border-bottom:1px solid var(--border);
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
 }
-.code-lang {
-  font-size:11px; font-weight:600; color:var(--accent);
-  letter-spacing:2px; text-transform:uppercase;
-  font-family:'JetBrains Mono',monospace;
+.code-lang-label {
+  font-size:12px; font-weight:500;
+  color:var(--text2); text-transform:uppercase;
+  letter-spacing:1px; font-family:var(--font-mono);
 }
-.code-copy {
-  background:var(--bg3); border:1px solid var(--border);
-  color:var(--text2); padding:4px 12px; border-radius:5px;
-  font-size:11px; cursor:pointer; font-family:'Sora',sans-serif;
-  transition:.15s;
+.code-copy-btn {
+  font-size:12px; color:var(--text2);
+  background:var(--bg3); border:none;
+  padding:4px 12px; border-radius:6px;
+  cursor:pointer; font-family:var(--font);
 }
-.code-copy:hover { border-color:var(--accent); color:var(--text); }
-.code-body {
-  padding:16px; overflow-x:auto; font-family:'JetBrains Mono',monospace;
-  font-size:13px; line-height:1.8; color:#e8e8e8;
+.code-content {
+  padding:14px 16px;
+  overflow-x:auto;
+  font-size:13px;
+  line-height:1.8;
+  color:var(--text);
+  white-space:pre;
 }
-.code-body::-webkit-scrollbar { height:4px; }
-.code-body::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+.code-content::-webkit-scrollbar { height:3px; }
+.code-content::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 
-/* SYNTAX HIGHLIGHT básico */
-.tok-keyword { color:#c792ea; }
-.tok-string { color:#c3e88d; }
-.tok-comment { color:#546e7a; font-style:italic; }
-.tok-number { color:#f78c6c; }
-.tok-function { color:#82aaff; }
-.tok-tag { color:#f07178; }
-.tok-attr { color:#ffcb6b; }
+/* SYNTAX */
+.k { color:#fff; font-weight:500; }
+.s { color:#aaa; }
+.c { color:#555; font-style:italic; }
+.n { color:#ddd; }
+.f { color:#ddd; }
+[data-theme="light"] .k { color:#000; }
+[data-theme="light"] .s { color:#333; }
+[data-theme="light"] .c { color:#888; }
+[data-theme="light"] .n { color:#111; }
 
-/* BOTTOM */
-#bottom {
-  padding:14px 16px; background:var(--bg2);
-  border-top:1px solid var(--border); flex-shrink:0;
+/* THINKING */
+.thinking-indicator {
+  display:flex; align-items:center; gap:6px;
+  padding:4px 0; color:var(--text3); font-size:14px;
 }
-.input-wrap {
-  display:flex; align-items:flex-end; gap:10px;
-  background:var(--bg3); border:1px solid var(--border);
-  border-radius:var(--radius); padding:10px 14px;
-  transition:.2s;
+.dots { display:flex; gap:4px; }
+.dots span {
+  width:5px; height:5px; background:var(--text3);
+  border-radius:50%; animation:dot 1.2s infinite;
 }
-.input-wrap:focus-within { border-color:var(--accent); }
-#input {
-  flex:1; background:transparent; border:none; color:var(--text);
-  font-size:14px; font-family:'Sora',sans-serif; outline:none;
-  resize:none; min-height:22px; max-height:160px; line-height:1.6;
-}
-#input::placeholder { color:var(--text3); }
-#send {
-  background:var(--accent); border:none; border-radius:var(--radius-sm);
-  padding:9px 16px; cursor:pointer; display:flex; align-items:center;
-  transition:.15s; flex-shrink:0;
-}
-#send:hover { background:#89d400; }
-#send:disabled { opacity:.35; cursor:not-allowed; }
-#send svg { width:16px; height:16px; color:#000; }
+.dots span:nth-child(2) { animation-delay:.2s; }
+.dots span:nth-child(3) { animation-delay:.4s; }
+@keyframes dot { 0%,80%,100%{opacity:.3;transform:scale(.8)} 40%{opacity:1;transform:scale(1)} }
 
-.bottom-info {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-top:8px; padding:0 4px;
+/* CURSOR */
+.stream-cursor {
+  display:inline-block; width:2px; height:15px;
+  background:var(--text); border-radius:1px;
+  vertical-align:middle; margin-left:1px;
+  animation:blink .8s infinite;
 }
-.bottom-info span { font-size:11px; color:var(--text3); }
-.mode-pills { display:flex; gap:6px; }
-.pill {
-  font-size:10px; padding:3px 10px; border-radius:20px;
-  border:1px solid var(--border); color:var(--text3); cursor:pointer;
-  transition:.15s; background:transparent; font-family:'Sora',sans-serif;
-}
-.pill.active { border-color:var(--accent); color:var(--accent); background:rgba(118,185,0,.08); }
-
-/* SETTINGS PANEL */
-#settings-panel {
-  position:fixed; top:0; right:0; width:320px; height:100vh;
-  background:var(--bg2); border-left:1px solid var(--border);
-  z-index:100; transform:translateX(100%); transition:.3s ease;
-  display:flex; flex-direction:column; overflow:hidden;
-}
-#settings-panel.open { transform:translateX(0); }
-
-.settings-header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:18px 20px; border-bottom:1px solid var(--border);
-}
-.settings-header h2 { font-size:14px; font-weight:600; color:var(--text); }
-.close-btn {
-  background:transparent; border:none; color:var(--text2);
-  cursor:pointer; font-size:20px; line-height:1;
-}
-
-.settings-body { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:24px; }
-.settings-body::-webkit-scrollbar { width:3px; }
-.settings-body::-webkit-scrollbar-thumb { background:var(--border); }
-
-.setting-group h3 { font-size:11px; font-weight:600; color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:12px; }
-
-.setting-item { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
-.setting-item label { font-size:13px; color:var(--text2); display:flex; justify-content:space-between; }
-.setting-item label span { color:var(--accent); font-family:'JetBrains Mono',monospace; font-size:12px; }
-
-.setting-item input[type=range] {
-  width:100%; accent-color:var(--accent); height:4px; cursor:pointer;
-}
-.setting-item select {
-  background:var(--bg3); border:1px solid var(--border); color:var(--text);
-  padding:9px 12px; border-radius:var(--radius-sm); font-size:13px;
-  font-family:'Sora',sans-serif; outline:none; cursor:pointer;
-}
-.setting-item select:focus { border-color:var(--accent); }
-
-.toggle-row {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:10px 0; border-bottom:1px solid var(--border);
-}
-.toggle-row .info { display:flex; flex-direction:column; gap:2px; }
-.toggle-row .info strong { font-size:13px; color:var(--text); }
-.toggle-row .info small { font-size:11px; color:var(--text3); }
-
-.toggle {
-  width:40px; height:22px; background:var(--bg4);
-  border-radius:11px; border:1px solid var(--border);
-  cursor:pointer; position:relative; transition:.2s;
-}
-.toggle.on { background:var(--accent); border-color:var(--accent); }
-.toggle::after {
-  content:''; position:absolute; width:16px; height:16px;
-  background:#fff; border-radius:50%; top:2px; left:2px; transition:.2s;
-}
-.toggle.on::after { left:20px; }
-
-.clear-btn {
-  width:100%; padding:12px; background:transparent;
-  border:1px solid #ff444433; color:#ff4444; border-radius:var(--radius-sm);
-  font-size:13px; cursor:pointer; font-family:'Sora',sans-serif; transition:.15s;
-}
-.clear-btn:hover { background:#ff444411; }
-
-/* OVERLAY */
-#overlay {
-  display:none; position:fixed; inset:0; background:rgba(0,0,0,.5);
-  z-index:99; backdrop-filter:blur(2px);
-}
-#overlay.show { display:block; }
-
-/* CURSOR BLINK */
-.cursor { display:inline-block; width:2px; height:14px; background:var(--accent); animation:blink .7s infinite; vertical-align:middle; margin-left:2px; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-/* RESPONSIVE */
-@media(max-width:600px) {
-  #settings-panel { width:100%; }
-  .msg-wrap { max-width:100%; }
-  #topbar .model-name { font-size:11px; }
+/* BOTTOM FLOAT */
+#bottom {
+  position:fixed; bottom:0; left:0; right:0;
+  padding:8px 12px 28px;
+  background:linear-gradient(transparent, var(--bg) 30%);
 }
+.input-bar {
+  display:flex; align-items:flex-end; gap:8px;
+  background:var(--input-bg);
+  border:1px solid var(--border);
+  border-radius:26px;
+  padding:10px 10px 10px 18px;
+  box-shadow:0 2px 20px rgba(0,0,0,.3);
+}
+#input {
+  flex:1; background:transparent; border:none;
+  color:var(--text); font-size:16px;
+  font-family:var(--font); outline:none;
+  resize:none; min-height:24px; max-height:120px;
+  line-height:1.5; padding:0;
+}
+#input::placeholder { color:var(--text3); }
+#send-btn {
+  width:34px; height:34px; border-radius:50%;
+  background:var(--text); border:none;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; flex-shrink:0; transition:.15s;
+}
+#send-btn:disabled { opacity:.3; }
+#send-btn svg { width:16px; height:16px; }
+
+/* SETTINGS SHEET */
+#settings-sheet {
+  position:fixed; inset:0; z-index:200;
+  display:flex; flex-direction:column; justify-content:flex-end;
+  pointer-events:none;
+}
+#settings-sheet.open { pointer-events:all; }
+#sheet-backdrop {
+  position:absolute; inset:0;
+  background:rgba(0,0,0,.5);
+  opacity:0; transition:.3s;
+  backdrop-filter:blur(4px);
+}
+#settings-sheet.open #sheet-backdrop { opacity:1; }
+#sheet-body {
+  position:relative; background:var(--bg2);
+  border-radius:20px 20px 0 0;
+  padding:0 0 40px;
+  transform:translateY(100%); transition:.35s cubic-bezier(.32,1,.6,1);
+  max-height:90vh; overflow-y:auto;
+}
+#settings-sheet.open #sheet-body { transform:translateY(0); }
+#sheet-body::-webkit-scrollbar { display:none; }
+.sheet-handle {
+  width:36px; height:4px; background:var(--bg4);
+  border-radius:2px; margin:12px auto 20px;
+}
+.sheet-title { font-size:17px; font-weight:600; padding:0 20px 16px; }
+
+.setting-section { padding:0 20px; margin-bottom:28px; }
+.setting-section-title {
+  font-size:12px; font-weight:500; color:var(--text3);
+  text-transform:uppercase; letter-spacing:.8px;
+  margin-bottom:12px;
+}
+.setting-card {
+  background:var(--bg3); border-radius:14px; overflow:hidden;
+}
+.setting-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px; border-bottom:1px solid var(--border);
+}
+.setting-row:last-child { border-bottom:none; }
+.setting-row-left { display:flex; flex-direction:column; gap:2px; }
+.setting-row-left strong { font-size:15px; font-weight:500; }
+.setting-row-left small { font-size:12px; color:var(--text2); }
+
+/* TOGGLE */
+.toggle {
+  width:50px; height:28px; border-radius:14px;
+  background:var(--bg4); border:none; cursor:pointer;
+  position:relative; transition:.2s; flex-shrink:0;
+}
+.toggle.on { background:#fff; }
+[data-theme="light"] .toggle.on { background:#000; }
+.toggle::after {
+  content:''; position:absolute;
+  width:22px; height:22px; border-radius:50%;
+  background:var(--bg); top:3px; left:3px; transition:.2s;
+  box-shadow:0 1px 3px rgba(0,0,0,.3);
+}
+.toggle.on::after { left:25px; background:var(--text); }
+[data-theme="light"] .toggle.on::after { background:#fff; }
+
+/* MODEL PICKER */
+.model-options { display:flex; flex-direction:column; gap:8px; }
+.model-opt {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px; background:var(--bg3); border-radius:12px;
+  border:1px solid transparent; cursor:pointer; transition:.15s;
+}
+.model-opt.selected { border-color:var(--text); }
+.model-opt-info strong { font-size:14px; display:block; }
+.model-opt-info small { font-size:12px; color:var(--text2); }
+.model-check { width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border); display:flex; align-items:center; justify-content:center; }
+.model-opt.selected .model-check { background:var(--text); border-color:var(--text); }
+.model-check svg { width:11px; height:11px; display:none; }
+.model-opt.selected .model-check svg { display:block; }
+
+/* SLIDER */
+.slider-row { padding:0 16px 16px; background:var(--bg3); border-radius:0 0 14px 14px; }
+.slider-row label { display:flex; justify-content:space-between; font-size:13px; color:var(--text2); padding:12px 0 8px; }
+.slider-row input[type=range] { width:100%; accent-color:var(--text); }
+
+/* THEME PICKER */
+.theme-options { display:flex; gap:8px; }
+.theme-opt {
+  flex:1; padding:12px; background:var(--bg3); border-radius:12px;
+  border:1.5px solid transparent; cursor:pointer; text-align:center;
+  font-size:14px; font-weight:500; font-family:var(--font);
+  color:var(--text);
+}
+.theme-opt.selected { border-color:var(--text); }
+
+.clear-row {
+  padding:0 20px;
+}
+.clear-btn {
+  width:100%; padding:14px; background:var(--bg3);
+  border:none; border-radius:14px; color:#ff3b30;
+  font-size:16px; font-weight:500; font-family:var(--font);
+  cursor:pointer;
+}
+
+/* MODE PILLS above input */
+.mode-pills {
+  display:flex; gap:6px; padding:0 4px 8px; overflow-x:auto;
+}
+.mode-pills::-webkit-scrollbar { display:none; }
+.pill {
+  padding:5px 14px; border-radius:20px;
+  background:var(--bg3); border:1px solid var(--border);
+  font-size:13px; color:var(--text2); cursor:pointer;
+  white-space:nowrap; font-family:var(--font);
+  transition:.15s; flex-shrink:0;
+}
+.pill.active { background:var(--text); color:var(--bg); border-color:transparent; }
+
+/* EMPTY STATE */
+#empty {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:10px; color:var(--text3); padding-bottom:100px;
+}
+#empty svg { width:40px; height:40px; opacity:.3; }
+#empty p { font-size:15px; }
 </style>
 </head>
 <body>
 
 <!-- SETUP -->
 <div id="setup">
-  <div class="logo">NVIDIA NIM</div>
-  <h1>Chat Interface</h1>
+  <h1>NIM Chat</h1>
+  <p>Introduz a tua NVIDIA API key<br>para começar</p>
   <input type="password" id="apiKey" placeholder="nvapi-..." autocomplete="off"/>
-  <button onclick="iniciar()">Iniciar</button>
+  <button onclick="iniciar()">Continuar</button>
 </div>
 
-<!-- OVERLAY -->
-<div id="overlay" onclick="fecharSettings()"></div>
-
-<!-- CHAT -->
-<div id="chat">
-
+<!-- MAIN -->
+<div id="main">
   <div id="topbar">
-    <div class="left">
-      <div>
-        <div class="model-name" id="model-label">minimax-m2.7</div>
-        <div class="status" id="status-label">Pronto</div>
-      </div>
+    <button class="nav-btn" onclick="limparChat()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+    </button>
+    <div class="center">
+      <div class="title" id="top-title">NIM Chat</div>
+      <div class="subtitle" id="top-sub">MiniMax M2.7</div>
     </div>
-    <div class="right">
-      <button class="icon-btn" onclick="limparChat()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-      </button>
-      <button class="icon-btn" onclick="abrirSettings()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Definições
-      </button>
-    </div>
+    <button class="nav-btn" onclick="abrirSettings()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
   </div>
 
-  <div id="messages"></div>
+  <div id="messages">
+    <div id="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <p>Começa uma conversa</p>
+    </div>
+  </div>
 
   <div id="bottom">
-    <div class="input-wrap">
-      <textarea id="input" rows="1" placeholder="Escreve uma mensagem..."></textarea>
-      <button id="send" onclick="enviar()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      </button>
+    <div class="mode-pills">
+      <div class="pill active" id="pill-normal" onclick="setMode('normal')">Normal</div>
+      <div class="pill" id="pill-flash" onclick="setMode('flash')">Flash</div>
+      <div class="pill" id="pill-reason" onclick="setMode('reason')">Raciocínio</div>
     </div>
-    <div class="bottom-info">
-      <span id="token-info">0 tokens</span>
-      <div class="mode-pills">
-        <button class="pill active" id="pill-normal" onclick="setMode('normal')">Normal</button>
-        <button class="pill" id="pill-reason" onclick="setMode('reason')">Raciocínio</button>
-        <button class="pill" id="pill-flash" onclick="setMode('flash')">Flash</button>
-      </div>
+    <div class="input-bar">
+      <textarea id="input" rows="1" placeholder="Pergunta algo..."></textarea>
+      <button id="send-btn" onclick="enviar()">
+        <svg viewBox="0 0 24 24" fill="var(--bg)" stroke="none"><path d="M12 4l8 16-8-4-8 4z"/></svg>
+      </button>
     </div>
   </div>
 </div>
 
-<!-- SETTINGS PANEL -->
-<div id="settings-panel">
-  <div class="settings-header">
-    <h2>Definições</h2>
-    <button class="close-btn" onclick="fecharSettings()">✕</button>
-  </div>
-  <div class="settings-body">
+<!-- SETTINGS SHEET -->
+<div id="settings-sheet">
+  <div id="sheet-backdrop" onclick="fecharSettings()"></div>
+  <div id="sheet-body">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Definições</div>
 
-    <div class="setting-group">
-      <h3>Modelo</h3>
-      <div class="setting-item">
-        <select id="cfg-model" onchange="updateModel()">
-          <option value="minimaxai/minimax-m2.7">MiniMax M2.7 — 230B</option>
-          <option value="deepseek-ai/deepseek-r1">DeepSeek R1 — Raciocínio</option>
-          <option value="deepseek-ai/deepseek-v3-0324">DeepSeek V3 — Flash</option>
-          <option value="meta/llama-3.3-70b-instruct">Llama 3.3 70B</option>
-          <option value="mistralai/mistral-large-2-instruct">Mistral Large 2</option>
-          <option value="nvidia/llama-3.1-nemotron-ultra-253b-v1">Nemotron Ultra 253B</option>
-          <option value="google/gemma-3-27b-it">Gemma 3 27B</option>
-          <option value="qwen/qwen2.5-72b-instruct">Qwen 2.5 72B</option>
-        </select>
+    <div class="setting-section">
+      <div class="setting-section-title">Tema</div>
+      <div class="theme-options">
+        <button class="theme-opt selected" id="theme-dark" onclick="setTheme('dark')">Escuro</button>
+        <button class="theme-opt" id="theme-light" onclick="setTheme('light')">Claro</button>
       </div>
     </div>
 
-    <div class="setting-group">
-      <h3>Parâmetros</h3>
-      <div class="setting-item">
+    <div class="setting-section">
+      <div class="setting-section-title">Modelo</div>
+      <div class="model-options" id="model-list">
+        <div class="model-opt selected" onclick="selectModel(this,'minimaxai/minimax-m2.7')">
+          <div class="model-opt-info"><strong>MiniMax M2.7</strong><small>230B · Geral & raciocínio</small></div>
+          <div class="model-check"><svg viewBox="0 0 12 10" fill="none" stroke="var(--bg)" stroke-width="2"><polyline points="1,5 4,9 11,1"/></svg></div>
+        </div>
+        <div class="model-opt" onclick="selectModel(this,'deepseek-ai/deepseek-r1')">
+          <div class="model-opt-info"><strong>DeepSeek R1</strong><small>Raciocínio avançado</small></div>
+          <div class="model-check"><svg viewBox="0 0 12 10" fill="none" stroke="var(--bg)" stroke-width="2"><polyline points="1,5 4,9 11,1"/></svg></div>
+        </div>
+        <div class="model-opt" onclick="selectModel(this,'deepseek-ai/deepseek-v3-0324')">
+          <div class="model-opt-info"><strong>DeepSeek V3</strong><small>Rápido · Flash</small></div>
+          <div class="model-check"><svg viewBox="0 0 12 10" fill="none" stroke="var(--bg)" stroke-width="2"><polyline points="1,5 4,9 11,1"/></svg></div>
+        </div>
+        <div class="model-opt" onclick="selectModel(this,'meta/llama-3.3-70b-instruct')">
+          <div class="model-opt-info"><strong>Llama 3.3 70B</strong><small>Meta · Geral</small></div>
+          <div class="model-check"><svg viewBox="0 0 12 10" fill="none" stroke="var(--bg)" stroke-width="2"><polyline points="1,5 4,9 11,1"/></svg></div>
+        </div>
+        <div class="model-opt" onclick="selectModel(this,'nvidia/llama-3.1-nemotron-ultra-253b-v1')">
+          <div class="model-opt-info"><strong>Nemotron Ultra 253B</strong><small>NVIDIA · Alta precisão</small></div>
+          <div class="model-check"><svg viewBox="0 0 12 10" fill="none" stroke="var(--bg)" stroke-width="2"><polyline points="1,5 4,9 11,1"/></svg></div>
+        </div>
+        <div class="model-opt" onclick="selectModel(this,'mistralai/mistral-large-2-instruct')">
+          <div class="model-opt-info"><strong>Mistral Large 2</strong><small>Mistral AI</small></div>
+          <div class="model-check"><svg viewBox="0 0 12 10" fill="none" stroke="var(--bg)" stroke-width="2"><polyline points="1,5 4,9 11,1"/></svg></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="setting-section">
+      <div class="setting-section-title">Parâmetros</div>
+      <div class="setting-card">
+        <div class="setting-row">
+          <div class="setting-row-left"><strong>Streaming</strong><small>Resposta em tempo real</small></div>
+          <button class="toggle on" id="tog-stream" onclick="tog('stream')"></button>
+        </div>
+        <div class="setting-row">
+          <div class="setting-row-left"><strong>Histórico</strong><small>Manter contexto</small></div>
+          <button class="toggle on" id="tog-history" onclick="tog('history')"></button>
+        </div>
+      </div>
+      <div class="slider-row" style="margin-top:8px;border-radius:14px;">
         <label>Temperatura <span id="lbl-temp">0.7</span></label>
-        <input type="range" id="cfg-temp" min="0" max="2" step="0.05" value="0.7" oninput="document.getElementById('lbl-temp').textContent=this.value"/>
-      </div>
-      <div class="setting-item">
+        <input type="range" min="0" max="2" step="0.05" value="0.7" id="cfg-temp" oninput="document.getElementById('lbl-temp').textContent=this.value">
         <label>Top P <span id="lbl-topp">0.95</span></label>
-        <input type="range" id="cfg-topp" min="0" max="1" step="0.01" value="0.95" oninput="document.getElementById('lbl-topp').textContent=this.value"/>
-      </div>
-      <div class="setting-item">
-        <label>Max Tokens <span id="lbl-maxtok">4096</span></label>
-        <input type="range" id="cfg-maxtok" min="256" max="32768" step="256" value="4096" oninput="document.getElementById('lbl-maxtok').textContent=this.value"/>
-      </div>
-      <div class="setting-item">
-        <label>Frequency Penalty <span id="lbl-freq">0</span></label>
-        <input type="range" id="cfg-freq" min="-2" max="2" step="0.1" value="0" oninput="document.getElementById('lbl-freq').textContent=this.value"/>
-      </div>
-      <div class="setting-item">
-        <label>Presence Penalty <span id="lbl-pres">0</span></label>
-        <input type="range" id="cfg-pres" min="-2" max="2" step="0.1" value="0" oninput="document.getElementById('lbl-pres').textContent=this.value"/>
+        <input type="range" min="0" max="1" step="0.01" value="0.95" id="cfg-topp" oninput="document.getElementById('lbl-topp').textContent=this.value">
+        <label>Max Tokens <span id="lbl-tok">4096</span></label>
+        <input type="range" min="512" max="32768" step="512" value="4096" id="cfg-tok" oninput="document.getElementById('lbl-tok').textContent=this.value">
       </div>
     </div>
 
-    <div class="setting-group">
-      <h3>Comportamento</h3>
-      <div class="toggle-row">
-        <div class="info"><strong>Streaming</strong><small>Resposta em tempo real</small></div>
-        <div class="toggle on" id="tog-stream" onclick="toggleSetting('stream')"></div>
-      </div>
-      <div class="toggle-row">
-        <div class="info"><strong>Raciocínio avançado</strong><small>Chain-of-thought interno</small></div>
-        <div class="toggle" id="tog-reason" onclick="toggleSetting('reason')"></div>
-      </div>
-      <div class="toggle-row">
-        <div class="info"><strong>Modo Flash</strong><small>Respostas mais rápidas</small></div>
-        <div class="toggle" id="tog-flash" onclick="toggleSetting('flash')"></div>
-      </div>
-      <div class="toggle-row">
-        <div class="info"><strong>Histórico</strong><small>Manter contexto da conversa</small></div>
-        <div class="toggle on" id="tog-history" onclick="toggleSetting('history')"></div>
-      </div>
+    <div class="setting-section">
+      <div class="setting-section-title">Prompt de Sistema</div>
+      <textarea id="cfg-system" style="width:100%;background:var(--bg3);border:none;color:var(--text);padding:14px 16px;border-radius:14px;font-size:14px;font-family:var(--font);resize:vertical;min-height:80px;outline:none;" placeholder="Opcional..."></textarea>
     </div>
 
-    <div class="setting-group">
-      <h3>Sistema</h3>
-      <div class="setting-item">
-        <label>Prompt de sistema</label>
-        <textarea id="cfg-system" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:13px;font-family:'Sora',sans-serif;resize:vertical;min-height:80px;outline:none;width:100%;" placeholder="Opcional..."></textarea>
-      </div>
+    <div class="clear-row">
+      <button class="clear-btn" onclick="limparChat();fecharSettings()">Limpar conversa</button>
     </div>
-
-    <div class="setting-group">
-      <h3>Dados</h3>
-      <button class="clear-btn" onclick="limparChat()">Limpar conversa</button>
-    </div>
-
   </div>
 </div>
 
 <script>
 let apiKey = "";
 let messages = [];
-let totalTokens = 0;
+let currentModel = "minimaxai/minimax-m2.7";
 let isStreaming = false;
-
-const settings = {
-  stream: true,
-  reason: false,
-  flash: false,
-  history: true
-};
+const cfg = { stream: true, history: true };
 
 function iniciar() {
   const k = document.getElementById("apiKey").value.trim();
-  if (!k.startsWith("nvapi-")) { alert("Key inválida. Deve começar com nvapi-"); return; }
+  if (!k.startsWith("nvapi-")) { alert("Key inválida."); return; }
   apiKey = k;
   document.getElementById("setup").style.display = "none";
-  document.getElementById("chat").style.display = "flex";
+  document.getElementById("main").style.display = "flex";
 }
 
 function abrirSettings() {
-  document.getElementById("settings-panel").classList.add("open");
-  document.getElementById("overlay").classList.add("show");
+  document.getElementById("settings-sheet").classList.add("open");
 }
 function fecharSettings() {
-  document.getElementById("settings-panel").classList.remove("open");
-  document.getElementById("overlay").classList.remove("show");
+  document.getElementById("settings-sheet").classList.remove("open");
 }
 
-function toggleSetting(key) {
-  settings[key] = !settings[key];
-  document.getElementById("tog-" + key).classList.toggle("on", settings[key]);
+function tog(key) {
+  cfg[key] = !cfg[key];
+  document.getElementById("tog-" + key).classList.toggle("on", cfg[key]);
 }
 
-function updateModel() {
-  const m = document.getElementById("cfg-model").value;
-  const label = document.getElementById("cfg-model").options[document.getElementById("cfg-model").selectedIndex].text.split(" —")[0];
-  document.getElementById("model-label").textContent = label;
+function setTheme(t) {
+  document.documentElement.setAttribute("data-theme", t === "light" ? "light" : "");
+  document.getElementById("theme-dark").classList.toggle("selected", t === "dark");
+  document.getElementById("theme-light").classList.toggle("selected", t === "light");
 }
+
+function selectModel(el, model) {
+  document.querySelectorAll(".model-opt").forEach(o => o.classList.remove("selected"));
+  el.classList.add("selected");
+  currentModel = model;
+  const name = el.querySelector("strong").textContent;
+  document.getElementById("top-sub").textContent = name;
+}
+
+const MODE_MODELS = {
+  normal: { model: "minimaxai/minimax-m2.7", temp: 0.7, tok: 4096 },
+  flash:  { model: "deepseek-ai/deepseek-v3-0324", temp: 0.3, tok: 1024 },
+  reason: { model: "minimaxai/minimax-m2.7", temp: 0.9, tok: 16384 }
+};
 
 function setMode(mode) {
   document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
   document.getElementById("pill-" + mode).classList.add("active");
-  if (mode === "reason") {
-    settings.reason = true; settings.flash = false;
-    document.getElementById("tog-reason").classList.add("on");
-    document.getElementById("tog-flash").classList.remove("on");
-    document.getElementById("cfg-model").value = "deepseek-ai/deepseek-r1";
-    updateModel();
-  } else if (mode === "flash") {
-    settings.flash = true; settings.reason = false;
-    document.getElementById("tog-flash").classList.add("on");
-    document.getElementById("tog-reason").classList.remove("on");
-    document.getElementById("cfg-model").value = "deepseek-ai/deepseek-v3-0324";
-    updateModel();
-  } else {
-    settings.reason = false; settings.flash = false;
-    document.getElementById("tog-reason").classList.remove("on");
-    document.getElementById("tog-flash").classList.remove("on");
-    document.getElementById("cfg-model").value = "minimaxai/minimax-m2.7";
-    updateModel();
-  }
+  const m = MODE_MODELS[mode];
+  currentModel = m.model;
+  document.getElementById("cfg-temp").value = m.temp;
+  document.getElementById("lbl-temp").textContent = m.temp;
+  document.getElementById("cfg-tok").value = m.tok;
+  document.getElementById("lbl-tok").textContent = m.tok;
+  const name = mode === "flash" ? "DeepSeek V3" : mode === "reason" ? "MiniMax M2.7 — Raciocínio" : "MiniMax M2.7";
+  document.getElementById("top-sub").textContent = name;
 }
 
 function limparChat() {
   messages = [];
-  document.getElementById("messages").innerHTML = "";
-  totalTokens = 0;
-  document.getElementById("token-info").textContent = "0 tokens";
-  fecharSettings();
+  const msgs = document.getElementById("messages");
+  msgs.innerHTML = `<div id="empty">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <p>Começa uma conversa</p>
+  </div>`;
 }
 
-// AUTO RESIZE TEXTAREA
 const inputEl = document.getElementById("input");
 inputEl.addEventListener("input", function() {
   this.style.height = "auto";
-  this.style.height = Math.min(this.scrollHeight, 160) + "px";
+  this.style.height = Math.min(this.scrollHeight, 120) + "px";
 });
 inputEl.addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); enviar(); }
 });
 
-function addUserMsg(text) {
-  const wrap = document.createElement("div");
-  wrap.className = "msg-wrap user";
-  wrap.innerHTML = `<div class="msg-label">Tu</div><div class="msg user">${escapeHtml(text)}</div>`;
-  document.getElementById("messages").appendChild(wrap);
-  wrap.scrollIntoView({ behavior: "smooth", block: "end" });
-}
-
-function createAiMsgEl() {
-  const wrap = document.createElement("div");
-  wrap.className = "msg-wrap ai";
-  const label = document.createElement("div");
-  label.className = "msg-label";
-  label.textContent = document.getElementById("cfg-model").options[document.getElementById("cfg-model").selectedIndex].text.split(" —")[0];
-  const msg = document.createElement("div");
-  msg.className = "msg ai";
-  wrap.appendChild(label);
-  wrap.appendChild(msg);
-  document.getElementById("messages").appendChild(wrap);
-  return msg;
-}
-
-function escapeHtml(str) {
-  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+function escHtml(s) {
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
 function highlight(code, lang) {
-  let h = escapeHtml(code);
-  if (["js","javascript","ts","typescript","jsx","tsx"].includes(lang)) {
-    h = h.replace(/\/\/.*/g, m => `<span class="tok-comment">${m}</span>`);
-    h = h.replace(/('.*?'|".*?"|`[\s\S]*?`)/g, m => `<span class="tok-string">${m}</span>`);
-    h = h.replace(/\b(const|let|var|function|return|if|else|for|while|class|import|export|default|from|async|await|new|typeof|instanceof|true|false|null|undefined|try|catch|finally|throw|of|in|=>)\b/g, m => `<span class="tok-keyword">${m}</span>`);
-    h = h.replace(/\b(\d+\.?\d*)\b/g, m => `<span class="tok-number">${m}</span>`);
-    h = h.replace(/\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?=\()/g, m => `<span class="tok-function">${m}</span>`);
-  } else if (["html","xml"].includes(lang)) {
-    h = h.replace(/(&lt;\/?[a-zA-Z][^&]*?&gt;)/g, tag => {
-      return tag.replace(/^(&lt;\/?[a-zA-Z0-9-]+)/, m => `<span class="tok-tag">${m}</span>`)
-                .replace(/([a-zA-Z-]+=)/g, m => `<span class="tok-attr">${m}</span>`)
-                .replace(/(".*?")/g, m => `<span class="tok-string">${m}</span>`);
-    });
-  } else if (["py","python"].includes(lang)) {
-    h = h.replace(/#.*/g, m => `<span class="tok-comment">${m}</span>`);
-    h = h.replace(/('.*?'|".*?")/g, m => `<span class="tok-string">${m}</span>`);
-    h = h.replace(/\b(def|class|import|from|return|if|elif|else|for|while|in|not|and|or|True|False|None|try|except|finally|with|as|lambda|pass|break|continue|raise|yield|async|await)\b/g, m => `<span class="tok-keyword">${m}</span>`);
-    h = h.replace(/\b(\d+\.?\d*)\b/g, m => `<span class="tok-number">${m}</span>`);
-  } else if (["css"].includes(lang)) {
-    h = h.replace(/(\/\*[\s\S]*?\*\/)/g, m => `<span class="tok-comment">${m}</span>`);
-    h = h.replace(/([.#]?[a-zA-Z][a-zA-Z0-9-_]*)\s*\{/g, m => `<span class="tok-function">${m}</span>`);
-    h = h.replace(/(:\s*)([^;{]+)/g, (_, colon, val) => `${colon}<span class="tok-string">${val}</span>`);
-  }
+  let h = escHtml(code);
+  const kw = {
+    js: /\b(const|let|var|function|return|if|else|for|while|class|import|export|default|from|async|await|new|typeof|true|false|null|undefined|try|catch|throw|of|in)\b/g,
+    py: /\b(def|class|import|from|return|if|elif|else|for|while|in|not|and|or|True|False|None|try|except|with|as|lambda|pass|yield|async|await)\b/g,
+    html: null, css: null
+  };
+  const l = lang.toLowerCase().replace("javascript","js").replace("typescript","js").replace("python","py");
+  h = h.replace(/(\/\/[^\n]*|#[^\n]*)/g, '<span class="c">$1</span>');
+  h = h.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/g, '<span class="s">$1</span>');
+  if (kw[l]) h = h.replace(kw[l], '<span class="k">$1</span>');
+  h = h.replace(/\b(\d+\.?\d*)\b/g, '<span class="n">$1</span>');
   return h;
 }
 
-function renderMarkdown(text) {
-  let html = text;
-
-  // Code blocks
-  html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
-    const l = (lang || "code").toLowerCase();
-    const highlighted = highlight(code.trim(), l);
-    const id = "code_" + Math.random().toString(36).slice(2);
-    return `<div class="code-canvas">
-      <div class="code-header">
-        <span class="code-lang">${l}</span>
-        <button class="code-copy" onclick="copiarCodigo('${id}')">Copiar</button>
-      </div>
-      <pre class="code-body" id="${id}">${highlighted}</pre>
-    </div>`;
-  });
-
-  // Headings
-  html = html.replace(/^### (.+)$/gm, "<h3>$1</h3>");
-  html = html.replace(/^## (.+)$/gm, "<h2>$1</h2>");
-  html = html.replace(/^# (.+)$/gm, "<h1>$1</h1>");
-
-  // Bold / italic
-  html = html.replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>");
-  html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-  html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
-  html = html.replace(/_(.+?)_/g, "<em>$1</em>");
-
-  // Blockquote
-  html = html.replace(/^> (.+)$/gm, "<blockquote>$1</blockquote>");
-
-  // Horizontal rule
-  html = html.replace(/^---$/gm, "<hr>");
-
-  // Inline code
-  html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
-
-  // Links
-  html = html.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
-
-  // Tables
-  html = html.replace(/(\|.+\|\n\|[-| :]+\|\n(?:\|.+\|\n?)+)/g, tableStr => {
-    const rows = tableStr.trim().split("\n");
-    let table = "<table>";
-    rows.forEach((row, i) => {
-      if (i === 1) return;
-      const cells = row.split("|").filter((_, ci) => ci > 0 && ci < row.split("|").length - 1);
-      const tag = i === 0 ? "th" : "td";
-      table += "<tr>" + cells.map(c => `<${tag}>${c.trim()}</${tag}>`).join("") + "</tr>";
-    });
-    return table + "</table>";
-  });
-
-  // Lists
-  html = html.replace(/^(\d+)\. (.+)$/gm, "<li>$2</li>");
-  html = html.replace(/(<li>.*<\/li>\n?)+/g, m => `<ol>${m}</ol>`);
-  html = html.replace(/^[-*] (.+)$/gm, "<li>$1</li>");
-  html = html.replace(/(<li>.*<\/li>\n?)+/g, m => `<ul>${m}</ul>`);
-
-  // Paragraphs
-  html = html.replace(/\n\n+/g, "</p><p>");
-  html = "<p>" + html + "</p>";
-  html = html.replace(/<p>\s*(<(?:h[1-3]|ul|ol|blockquote|hr|div|table|pre)[^>]*>)/g, "$1");
-  html = html.replace(/(<\/(?:h[1-3]|ul|ol|blockquote|div|table|pre)>)\s*<\/p>/g, "$1");
-  html = html.replace(/<p>\s*<\/p>/g, "");
-
+// Parse code blocks em tempo real (split por ``` tag)
+function parseRealtime(raw) {
+  const parts = raw.split(/(```[\s\S]*?```|```[\w]*\n[\s\S]*$)/);
+  let html = "";
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (part.startsWith("```")) {
+      const complete = part.endsWith("```") && part.length > 6;
+      const firstLine = part.slice(3).split("\n")[0];
+      const lang = firstLine.trim() || "code";
+      const code = complete
+        ? part.slice(3 + firstLine.length + 1, -3).trim()
+        : part.slice(3 + firstLine.length + 1);
+      const id = "cc_" + Math.random().toString(36).slice(2,8);
+      html += `<div class="code-canvas">
+        <div class="code-canvas-header">
+          <span class="code-lang-label">${escHtml(lang)}</span>
+          <button class="code-copy-btn" onclick="copyCc('${id}')">Copiar</button>
+        </div>
+        <div class="code-content" id="${id}">${highlight(code, lang)}</div>
+      </div>`;
+      if (!complete) html += '<span class="stream-cursor"></span>';
+    } else if (part) {
+      html += renderMd(part);
+    }
+  }
   return html;
 }
 
-function copiarCodigo(id) {
+function renderMd(text) {
+  let h = text;
+  h = h.replace(/^### (.+)$/gm, "<h3>$1</h3>");
+  h = h.replace(/^## (.+)$/gm, "<h2>$1</h2>");
+  h = h.replace(/^# (.+)$/gm, "<h1>$1</h1>");
+  h = h.replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>");
+  h = h.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  h = h.replace(/\*(.+?)\*/g, "<em>$1</em>");
+  h = h.replace(/^> (.+)$/gm, "<blockquote>$1</blockquote>");
+  h = h.replace(/^---$/gm, "<hr>");
+  h = h.replace(/`([^`]+)`/g, "<code>$1</code>");
+  h = h.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
+  h = h.replace(/^[-*] (.+)$/gm, "<li>$1</li>");
+  h = h.replace(/^(\d+)\. (.+)$/gm, "<li>$2</li>");
+  h = h.replace(/(<li>[\s\S]+?<\/li>)/g, "<ul>$1</ul>");
+  h = h.replace(/\n{2,}/g, "</p><p>");
+  h = "<p>" + h + "</p>";
+  h = h.replace(/<p>\s*(<(?:h[1-3]|ul|ol|blockquote|hr|div)[^>]*>)/g, "$1");
+  h = h.replace(/<p>\s*<\/p>/g, "");
+  return h;
+}
+
+function copyCc(id) {
   const el = document.getElementById(id);
-  const text = el.innerText;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = el.parentElement.querySelector(".code-copy");
-    btn.textContent = "Copiado!";
+  if (!el) return;
+  navigator.clipboard.writeText(el.innerText).then(() => {
+    const btn = el.parentElement.querySelector(".code-copy-btn");
+    btn.textContent = "Copiado";
     setTimeout(() => btn.textContent = "Copiar", 2000);
   });
+}
+
+function hideEmpty() {
+  const e = document.getElementById("empty");
+  if (e) e.remove();
+}
+
+function addUserMsg(text) {
+  hideEmpty();
+  const g = document.createElement("div");
+  g.className = "msg-group user";
+  g.innerHTML = `<div class="msg user">${escHtml(text)}</div>`;
+  document.getElementById("messages").appendChild(g);
+  g.scrollIntoView({ behavior: "smooth", block: "end" });
+}
+
+function createAiEl() {
+  const g = document.createElement("div");
+  g.className = "msg-group ai";
+  const m = document.createElement("div");
+  m.className = "msg ai";
+  m.innerHTML = `<div class="thinking-indicator"><div class="dots"><span></span><span></span><span></span></div></div>`;
+  g.appendChild(m);
+  document.getElementById("messages").appendChild(g);
+  g.scrollIntoView({ behavior: "smooth", block: "end" });
+  return m;
 }
 
 async function enviar() {
   const text = inputEl.value.trim();
   if (!text || isStreaming) return;
-
-  inputEl.value = "";
-  inputEl.style.height = "auto";
-  document.getElementById("send").disabled = true;
+  inputEl.value = ""; inputEl.style.height = "auto";
+  document.getElementById("send-btn").disabled = true;
   isStreaming = true;
-  document.getElementById("status-label").textContent = "A gerar...";
 
   addUserMsg(text);
+  if (cfg.history) messages.push({ role: "user", content: text });
 
-  if (settings.history) {
-    messages.push({ role: "user", content: text });
-  }
+  const msgEl = createAiEl();
+  let full = "";
 
-  const msgEl = createAiMsgEl();
-  msgEl.innerHTML = '<span class="cursor"></span>';
-
-  const systemPrompt = document.getElementById("cfg-system").value.trim();
-  const model = document.getElementById("cfg-model").value;
+  const sys = document.getElementById("cfg-system").value.trim();
   const temp = parseFloat(document.getElementById("cfg-temp").value);
   const topp = parseFloat(document.getElementById("cfg-topp").value);
-  const maxTok = parseInt(document.getElementById("cfg-maxtok").value);
-  const freq = parseFloat(document.getElementById("cfg-freq").value);
-  const pres = parseFloat(document.getElementById("cfg-pres").value);
+  const maxTok = parseInt(document.getElementById("cfg-tok").value);
 
   const msgs = [];
-  if (systemPrompt) msgs.push({ role: "system", content: systemPrompt });
-  if (settings.history) {
-    msgs.push(...messages);
-  } else {
-    msgs.push({ role: "user", content: text });
-  }
-
-  let fullText = "";
+  if (sys) msgs.push({ role: "system", content: sys });
+  if (cfg.history) msgs.push(...messages);
+  else msgs.push({ role: "user", content: text });
 
   try {
-    if (settings.stream) {
+    if (cfg.stream) {
       const res = await fetch("http://localhost:3000", {
         method: "POST",
         headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" },
-        body: JSON.stringify({ model, messages: msgs, temperature: temp, top_p: topp, max_tokens: maxTok, frequency_penalty: freq, presence_penalty: pres, stream: true })
+        body: JSON.stringify({ model: currentModel, messages: msgs, temperature: temp, top_p: topp, max_tokens: maxTok, stream: true })
       });
-
       const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-
+      const dec = new TextDecoder();
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n").filter(l => l.startsWith("data: "));
+        const lines = dec.decode(value).split("\n").filter(l => l.startsWith("data: "));
         for (const line of lines) {
           const json = line.slice(6);
           if (json === "[DONE]") continue;
           try {
-            const parsed = JSON.parse(json);
-            const delta = parsed.choices?.[0]?.delta?.content;
+            const delta = JSON.parse(json).choices?.[0]?.delta?.content;
             if (delta) {
-              fullText += delta;
-              msgEl.innerHTML = renderMarkdown(fullText) + '<span class="cursor"></span>';
+              full += delta;
+              msgEl.innerHTML = parseRealtime(full);
               msgEl.scrollIntoView({ behavior: "smooth", block: "end" });
-            }
-            if (parsed.usage) {
-              totalTokens += parsed.usage.total_tokens || 0;
-              document.getElementById("token-info").textContent = totalTokens + " tokens";
             }
           } catch {}
         }
@@ -721,26 +750,19 @@ async function enviar() {
       const res = await fetch("http://localhost:3000", {
         method: "POST",
         headers: { "Authorization": "Bearer " + apiKey, "Content-Type": "application/json" },
-        body: JSON.stringify({ model, messages: msgs, temperature: temp, top_p: topp, max_tokens: maxTok, frequency_penalty: freq, presence_penalty: pres, stream: false })
+        body: JSON.stringify({ model: currentModel, messages: msgs, temperature: temp, top_p: topp, max_tokens: maxTok, stream: false })
       });
       const data = await res.json();
-      fullText = data.choices?.[0]?.message?.content ?? "Sem resposta.";
-      if (data.usage) {
-        totalTokens += data.usage.total_tokens || 0;
-        document.getElementById("token-info").textContent = totalTokens + " tokens";
-      }
+      full = data.choices?.[0]?.message?.content ?? "Sem resposta.";
     }
-
-    msgEl.innerHTML = renderMarkdown(fullText);
-    if (settings.history) messages.push({ role: "assistant", content: fullText });
-
+    msgEl.innerHTML = parseRealtime(full);
+    if (cfg.history) messages.push({ role: "assistant", content: full });
   } catch (e) {
-    msgEl.innerHTML = `<span style="color:#ff4444">Erro: ${e.message}</span>`;
+    msgEl.innerHTML = `<span style="color:#ff3b30">Erro: ${e.message}</span>`;
   }
 
   isStreaming = false;
-  document.getElementById("send").disabled = false;
-  document.getElementById("status-label").textContent = "Pronto";
+  document.getElementById("send-btn").disabled = false;
   inputEl.focus();
 }
 </script>
