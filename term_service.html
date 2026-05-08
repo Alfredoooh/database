@@ -9,345 +9,64 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --card: #222222;
-    --border: #2e2e2e;
-    --accent: #4ade80;
-    --accent2: #22d3ee;
-    --text: #e8e8e8;
-    --muted: #888;
-    --danger: #f87171;
-    --radius: 10px;
-    --font: 'Sora', sans-serif;
-    --mono: 'JetBrains Mono', monospace;
+    --bg: #0f0f0f; --surface: #1a1a1a; --card: #222; --border: #2e2e2e;
+    --accent: #4ade80; --accent2: #22d3ee; --text: #e8e8e8; --muted: #888;
+    --danger: #f87171; --radius: 10px;
+    --font: 'Sora', sans-serif; --mono: 'JetBrains Mono', monospace;
   }
-
-  html, body {
-    min-height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font);
-    font-size: 14px;
-    line-height: 1.6;
-  }
-
-  body {
-    padding: 32px 16px 80px;
-  }
-
-  .container {
-    max-width: 760px;
-    margin: 0 auto;
-  }
-
-  header {
-    margin-bottom: 40px;
-    text-align: center;
-  }
-
-  header .badge {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent);
-    border: 1px solid var(--accent);
-    padding: 3px 10px;
-    border-radius: 999px;
-    margin-bottom: 14px;
-    letter-spacing: .08em;
-  }
-
-  header h1 {
-    font-size: clamp(22px, 5vw, 34px);
-    font-weight: 600;
-    letter-spacing: -.02em;
-    color: #fff;
-  }
-
-  header p {
-    color: var(--muted);
-    margin-top: 8px;
-    font-size: 13px;
-  }
-
-  .section {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    margin-bottom: 20px;
-  }
-
-  .section-title {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--accent2);
-    margin-bottom: 18px;
-    font-family: var(--mono);
-  }
-
-  .grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
-
-  .grid-3 {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 14px;
-  }
-
-  @media (max-width: 560px) {
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
+  html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.6; }
+  body { padding: 32px 16px 80px; }
+  .container { max-width: 760px; margin: 0 auto; }
+  header { margin-bottom: 40px; text-align: center; }
+  header .badge { display: inline-block; font-family: var(--mono); font-size: 11px; color: var(--accent); border: 1px solid var(--accent); padding: 3px 10px; border-radius: 999px; margin-bottom: 14px; letter-spacing: .08em; }
+  header h1 { font-size: clamp(22px, 5vw, 34px); font-weight: 600; letter-spacing: -.02em; color: #fff; }
+  header p { color: var(--muted); margin-top: 8px; font-size: 13px; }
+  .section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+  .section-title { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent2); margin-bottom: 18px; font-family: var(--mono); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px) { .grid-2 { grid-template-columns: 1fr; } }
+  .field { display: flex; flex-direction: column; gap: 6px; }
   .field.full { grid-column: 1 / -1; }
-
-  label {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--muted);
-    letter-spacing: .05em;
-    text-transform: uppercase;
-  }
-
+  label { font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
   label span.required { color: var(--accent); margin-left: 2px; }
-
-  input[type="text"],
-  input[type="email"],
-  input[type="number"],
-  select,
-  textarea {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    color: var(--text);
-    font-family: var(--font);
-    font-size: 13px;
-    padding: 9px 12px;
-    outline: none;
-    transition: border-color .15s;
-    width: 100%;
+  input[type="text"], input[type="email"], input[type="number"], select, textarea {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 7px;
+    color: var(--text); font-family: var(--font); font-size: 13px; padding: 9px 12px;
+    outline: none; transition: border-color .15s; width: 100%;
   }
-
-  input[type="text"]:focus,
-  input[type="email"]:focus,
-  input[type="number"]:focus,
-  select:focus,
-  textarea:focus {
-    border-color: var(--accent2);
-  }
-
-  input[type="text"].mono,
-  input[type="email"].mono {
-    font-family: var(--mono);
-    font-size: 12px;
-  }
-
-  textarea {
-    resize: vertical;
-    min-height: 70px;
-    font-family: var(--mono);
-    font-size: 12px;
-  }
-
+  input[type="text"]:focus, input[type="email"]:focus, input[type="number"]:focus, select:focus, textarea:focus { border-color: var(--accent2); }
+  input.mono { font-family: var(--mono); font-size: 12px; }
+  textarea { resize: vertical; min-height: 70px; font-family: var(--mono); font-size: 12px; }
   select option { background: var(--surface); }
-
-  .hint {
-    font-size: 11px;
-    color: #555;
-    font-family: var(--mono);
-  }
-
-  /* Toggle */
-  .toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-  }
-
+  .hint { font-size: 11px; color: #555; font-family: var(--mono); }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
   .toggle-row:last-child { border-bottom: none; }
-
   .toggle-label { font-size: 13px; color: var(--text); }
   .toggle-desc { font-size: 11px; color: var(--muted); margin-top: 1px; }
-
-  .switch {
-    position: relative;
-    width: 40px;
-    height: 22px;
-    flex-shrink: 0;
-  }
-
+  .switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
   .switch input { opacity: 0; width: 0; height: 0; }
-
-  .slider {
-    position: absolute;
-    inset: 0;
-    background: var(--border);
-    border-radius: 999px;
-    cursor: pointer;
-    transition: background .2s;
-  }
-
-  .slider::before {
-    content: '';
-    position: absolute;
-    width: 16px; height: 16px;
-    left: 3px; top: 3px;
-    background: #fff;
-    border-radius: 50%;
-    transition: transform .2s;
-  }
-
+  .slider { position: absolute; inset: 0; background: var(--border); border-radius: 999px; cursor: pointer; transition: background .2s; }
+  .slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform .2s; }
   .switch input:checked + .slider { background: var(--accent); }
   .switch input:checked + .slider::before { transform: translateX(18px); }
-
-  /* Icon upload */
-  .icon-upload {
-    border: 2px dashed var(--border);
-    border-radius: 10px;
-    padding: 24px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color .15s, background .15s;
-    position: relative;
-  }
-
-  .icon-upload:hover { border-color: var(--accent2); background: rgba(34,211,238,.04); }
-
-  .icon-upload input { display: none; }
-
-  .icon-preview {
-    width: 64px; height: 64px;
-    border-radius: 14px;
-    object-fit: cover;
-    margin: 0 auto 8px;
-    display: none;
-  }
-
-  .icon-upload-text { font-size: 12px; color: var(--muted); }
-  .icon-upload-text strong { color: var(--accent2); }
-
-  .icon-skip {
-    font-size: 11px;
-    color: #555;
-    margin-top: 6px;
-  }
-
-  /* Keystore */
-  .keystore-info {
-    background: rgba(74,222,128,.05);
-    border: 1px solid rgba(74,222,128,.15);
-    border-radius: 8px;
-    padding: 12px 14px;
-    font-size: 12px;
-    color: #9be6b4;
-    font-family: var(--mono);
-    margin-bottom: 14px;
-    line-height: 1.7;
-  }
-
-  /* Generate button */
-  .generate-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    padding: 15px;
-    background: var(--accent);
-    color: #000;
-    font-family: var(--font);
-    font-size: 15px;
-    font-weight: 600;
-    border: none;
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: opacity .15s, transform .1s;
-    margin-top: 8px;
-  }
-
+  .keystore-info { background: rgba(74,222,128,.05); border: 1px solid rgba(74,222,128,.15); border-radius: 8px; padding: 12px 14px; font-size: 12px; color: #9be6b4; font-family: var(--mono); margin-bottom: 14px; line-height: 1.7; }
+  .generate-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 15px; background: var(--accent); color: #000; font-family: var(--font); font-size: 15px; font-weight: 600; border: none; border-radius: var(--radius); cursor: pointer; transition: opacity .15s, transform .1s; margin-top: 8px; }
   .generate-btn:hover { opacity: .9; }
   .generate-btn:active { transform: scale(.99); }
   .generate-btn:disabled { opacity: .4; cursor: not-allowed; }
-
   .generate-btn svg { width: 18px; height: 18px; }
-
-  /* Progress */
-  #progress-wrap {
-    display: none;
-    margin-top: 20px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px 24px;
-  }
-
+  #progress-wrap { display: none; margin-top: 20px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; }
   #progress-wrap.show { display: block; }
-
-  .progress-title {
-    font-size: 12px;
-    font-family: var(--mono);
-    color: var(--muted);
-    margin-bottom: 12px;
-  }
-
-  .progress-bar-outer {
-    background: var(--border);
-    border-radius: 999px;
-    height: 6px;
-    overflow: hidden;
-    margin-bottom: 10px;
-  }
-
-  .progress-bar-inner {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    border-radius: 999px;
-    width: 0%;
-    transition: width .3s ease;
-  }
-
-  .progress-log {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: #555;
-    line-height: 1.9;
-    max-height: 140px;
-    overflow-y: auto;
-  }
-
+  .progress-title { font-size: 12px; font-family: var(--mono); color: var(--muted); margin-bottom: 12px; }
+  .progress-bar-outer { background: var(--border); border-radius: 999px; height: 6px; overflow: hidden; margin-bottom: 10px; }
+  .progress-bar-inner { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 999px; width: 0%; transition: width .3s ease; }
+  .progress-log { font-family: var(--mono); font-size: 11px; color: #555; line-height: 1.9; max-height: 140px; overflow-y: auto; }
   .progress-log .ok { color: var(--accent); }
   .progress-log .info { color: var(--accent2); }
-
-  /* Error */
-  .error-msg {
-    background: rgba(248,113,113,.08);
-    border: 1px solid rgba(248,113,113,.25);
-    border-radius: 8px;
-    padding: 12px 14px;
-    font-size: 12px;
-    color: var(--danger);
-    font-family: var(--mono);
-    margin-top: 14px;
-    display: none;
-  }
-
+  .error-msg { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); border-radius: 8px; padding: 12px 14px; font-size: 12px; color: var(--danger); font-family: var(--mono); margin-top: 14px; display: none; }
   .error-msg.show { display: block; }
+  .icon-note { font-size: 11px; color: #555; margin-top: 8px; font-family: var(--mono); line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -406,7 +125,7 @@
       </div>
       <div class="field full">
         <label>Descrição curta (opcional)</label>
-        <textarea id="appDesc" placeholder="Breve descrição do que a app faz..."></textarea>
+        <textarea id="appDesc" placeholder="Breve descrição..."></textarea>
       </div>
     </div>
   </div>
@@ -428,23 +147,19 @@
 
   <!-- ÍCONE -->
   <div class="section">
-    <div class="section-title">03 · Ícone da app (opcional)</div>
-    <label class="icon-upload" id="iconDropZone">
-      <input type="file" id="iconFile" accept="image/png,image/jpeg,image/webp" />
-      <img id="iconPreview" class="icon-preview" alt="preview" />
-      <div class="icon-upload-text">
-        <strong>Clica para escolher</strong> ou arrasta aqui<br>
-        PNG/JPG/WEBP · mínimo 192×192 px recomendado
-      </div>
-    </label>
-    <p class="icon-skip">Se não forneceres ícone, será usado o ícone padrão do Android.</p>
+    <div class="section-title">03 · Ícone da app</div>
+    <p class="icon-note">
+      Coloca o teu ficheiro de ícone com o nome <strong style="color:var(--accent2)">ic_launcher.png</strong> na raiz do ZIP após o download.<br>
+      O gerador cria automaticamente um script <strong style="color:var(--accent2)">resize_icon.sh</strong> (Linux/macOS) e <strong style="color:var(--accent2)">resize_icon.bat</strong> (Windows)<br>
+      que usa ImageMagick para redimensionar o ícone para todos os DPIs necessários.
+    </p>
   </div>
 
   <!-- KEYSTORE -->
   <div class="section">
     <div class="section-title">04 · Keystore de release</div>
     <div class="keystore-info">
-      ✓ Um ficheiro keystore (.jks) será gerado automaticamente com os dados abaixo.<br>
+      ✓ Scripts para gerar o keystore (.jks) serão incluídos no ZIP.<br>
       ✓ As credenciais ficam também configuradas no codemagic.yaml.
     </div>
     <div class="grid-2">
@@ -479,78 +194,47 @@
   <div class="section">
     <div class="section-title">05 · Dependências e funcionalidades</div>
     <div class="toggle-row">
-      <div>
-        <div class="toggle-label">ViewBinding</div>
-        <div class="toggle-desc">Acesso type-safe às views sem findViewById</div>
-      </div>
+      <div><div class="toggle-label">ViewBinding</div><div class="toggle-desc">Acesso type-safe às views sem findViewById</div></div>
       <label class="switch"><input type="checkbox" id="featViewBinding" checked /><span class="slider"></span></label>
     </div>
     <div class="toggle-row">
-      <div>
-        <div class="toggle-label">Material 3</div>
-        <div class="toggle-desc">Biblioteca Material Design 3 do Google</div>
-      </div>
+      <div><div class="toggle-label">Material 3</div><div class="toggle-desc">Biblioteca Material Design 3 do Google</div></div>
       <label class="switch"><input type="checkbox" id="featMaterial" checked /><span class="slider"></span></label>
     </div>
     <div class="toggle-row">
-      <div>
-        <div class="toggle-label">ConstraintLayout</div>
-        <div class="toggle-desc">Layout flexível e performático</div>
-      </div>
+      <div><div class="toggle-label">ConstraintLayout</div><div class="toggle-desc">Layout flexível e performático</div></div>
       <label class="switch"><input type="checkbox" id="featConstraint" checked /><span class="slider"></span></label>
     </div>
     <div class="toggle-row">
-      <div>
-        <div class="toggle-label">Coroutines</div>
-        <div class="toggle-desc">kotlinx.coroutines para código assíncrono</div>
-      </div>
-      <label class="switch"><input type="checkbox" id="featCoroutines" /></label>
+      <div><div class="toggle-label">Coroutines</div><div class="toggle-desc">kotlinx.coroutines para código assíncrono</div></div>
+      <label class="switch"><input type="checkbox" id="featCoroutines" /><span class="slider"></span></label>
     </div>
     <div class="toggle-row">
-      <div>
-        <div class="toggle-label">Retrofit + Gson</div>
-        <div class="toggle-desc">Cliente HTTP para chamadas a APIs REST</div>
-      </div>
-      <label class="switch"><input type="checkbox" id="featRetrofit" /></label>
+      <div><div class="toggle-label">Retrofit + Gson</div><div class="toggle-desc">Cliente HTTP para chamadas a APIs REST</div></div>
+      <label class="switch"><input type="checkbox" id="featRetrofit" /><span class="slider"></span></label>
     </div>
     <div class="toggle-row">
-      <div>
-        <div class="toggle-label">Glide</div>
-        <div class="toggle-desc">Carregamento e cache de imagens</div>
-      </div>
-      <label class="switch"><input type="checkbox" id="featGlide" /></label>
+      <div><div class="toggle-label">Glide</div><div class="toggle-desc">Carregamento e cache de imagens</div></div>
+      <label class="switch"><input type="checkbox" id="featGlide" /><span class="slider"></span></label>
     </div>
     <div class="toggle-row">
-      <div>
-        <div class="toggle-label">Room Database</div>
-        <div class="toggle-desc">Base de dados local SQLite com ORM</div>
-      </div>
-      <label class="switch"><input type="checkbox" id="featRoom" /></label>
+      <div><div class="toggle-label">Room Database</div><div class="toggle-desc">Base de dados local SQLite com ORM</div></div>
+      <label class="switch"><input type="checkbox" id="featRoom" /><span class="slider"></span></label>
     </div>
     <div class="toggle-row">
-      <div>
-        <div class="toggle-label">Internet permission</div>
-        <div class="toggle-desc">Permissão INTERNET no AndroidManifest</div>
-      </div>
-      <label class="switch"><input type="checkbox" id="featInternet" /></label>
+      <div><div class="toggle-label">Internet permission</div><div class="toggle-desc">Permissão INTERNET no AndroidManifest</div></div>
+      <label class="switch"><input type="checkbox" id="featInternet" /><span class="slider"></span></label>
     </div>
     <div class="toggle-row">
-      <div>
-        <div class="toggle-label">Codemagic CI/CD</div>
-        <div class="toggle-desc">Gera codemagic.yaml com build de release</div>
-      </div>
+      <div><div class="toggle-label">Codemagic CI/CD</div><div class="toggle-desc">Gera codemagic.yaml com build de release</div></div>
       <label class="switch"><input type="checkbox" id="featCodemagic" checked /><span class="slider"></span></label>
     </div>
     <div class="toggle-row">
-      <div>
-        <div class="toggle-label">README.md</div>
-        <div class="toggle-desc">Ficheiro README gerado automaticamente</div>
-      </div>
+      <div><div class="toggle-label">README.md</div><div class="toggle-desc">Ficheiro README gerado automaticamente</div></div>
       <label class="switch"><input type="checkbox" id="featReadme" checked /><span class="slider"></span></label>
     </div>
   </div>
 
-  <!-- GENERATE -->
   <button class="generate-btn" id="generateBtn" onclick="generateProject()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
       <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
@@ -559,7 +243,6 @@
   </button>
 
   <div id="error-msg" class="error-msg"></div>
-
   <div id="progress-wrap">
     <div class="progress-title">A gerar projeto...</div>
     <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar"></div></div>
@@ -567,190 +250,74 @@
   </div>
 
 </div>
-
 <script>
-// ─── helpers ────────────────────────────────────────────────────────────────
-
-function val(id, fallback = '') {
-  return (document.getElementById(id)?.value || '').trim() || fallback;
-}
-
-function chk(id) {
-  return document.getElementById(id)?.checked ?? false;
-}
-
-function log(msg, type = '') {
-  const el = document.getElementById('progressLog');
-  el.innerHTML += `<div class="${type}">${msg}</div>`;
-  el.scrollTop = el.scrollHeight;
-}
-
-function setProgress(pct) {
-  document.getElementById('progressBar').style.width = pct + '%';
-}
-
-function showError(msg) {
-  const el = document.getElementById('error-msg');
-  el.textContent = msg;
-  el.classList.add('show');
-}
-
-function hideError() {
-  document.getElementById('error-msg').classList.remove('show');
-}
-
-// ─── icon drag & drop ───────────────────────────────────────────────────────
-
-const iconFile = document.getElementById('iconFile');
-const iconPreview = document.getElementById('iconPreview');
-const iconDropZone = document.getElementById('iconDropZone');
-
-iconFile.addEventListener('change', () => {
-  const f = iconFile.files[0];
-  if (!f) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    iconPreview.src = e.target.result;
-    iconPreview.style.display = 'block';
-  };
-  reader.readAsDataURL(f);
-});
-
-iconDropZone.addEventListener('dragover', e => { e.preventDefault(); iconDropZone.style.borderColor = 'var(--accent2)'; });
-iconDropZone.addEventListener('dragleave', () => { iconDropZone.style.borderColor = ''; });
-iconDropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  iconDropZone.style.borderColor = '';
-  const f = e.dataTransfer.files[0];
-  if (f) { iconFile.files = e.dataTransfer.files; iconFile.dispatchEvent(new Event('change')); }
-});
-
-// ─── image to base64 ────────────────────────────────────────────────────────
-
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result.split(',')[1]);
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
-}
-
-// ─── simple PNG generator (solid color placeholder icon) ────────────────────
-// Creates a minimal 1x1 green PNG when no icon is provided.
-// Real icon from user is embedded as-is.
-
-function placeholderIconBase64(size) {
-  // Returns a simple colored square PNG as base64 using canvas
-  const canvas = document.createElement('canvas');
-  canvas.width = size; canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  const grad = ctx.createLinearGradient(0, 0, size, size);
-  grad.addColorStop(0, '#4ade80');
-  grad.addColorStop(1, '#22d3ee');
-  ctx.fillStyle = grad;
-  ctx.beginPath();
-  ctx.roundRect(0, 0, size, size, size * 0.22);
-  ctx.fill();
-  ctx.fillStyle = 'rgba(0,0,0,0.35)';
-  ctx.font = `bold ${Math.floor(size * 0.38)}px sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('A', size / 2, size / 2);
-  return canvas.toDataURL('image/png').split(',')[1];
-}
-
-// ─── validation ─────────────────────────────────────────────────────────────
+function val(id, fb='') { return (document.getElementById(id)?.value||'').trim()||fb; }
+function chk(id) { return document.getElementById(id)?.checked??false; }
+function log(msg, type='') { const el=document.getElementById('progressLog'); el.innerHTML+=`<div class="${type}">${msg}</div>`; el.scrollTop=el.scrollHeight; }
+function setProgress(p) { document.getElementById('progressBar').style.width=p+'%'; }
+function showError(m) { const el=document.getElementById('error-msg'); el.textContent=m; el.classList.add('show'); }
+function hideError() { document.getElementById('error-msg').classList.remove('show'); }
 
 function validate() {
-  const appName = val('appName');
-  const pkg = val('packageId');
-  const alias = val('ksAlias');
-  const keyPass = val('ksKeyPass');
-  const storePass = val('ksStorePass');
-
+  const appName=val('appName'), pkg=val('packageId'), alias=val('ksAlias'), kp=val('ksKeyPass'), sp=val('ksStorePass');
   if (!appName) { showError('❌ O nome do app é obrigatório.'); return false; }
-  if (!pkg || !/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*){1,}$/.test(pkg)) {
-    showError('❌ Package ID inválido. Ex: com.empresa.app (minúsculas, pontos, sem espaços)'); return false;
-  }
+  if (!pkg||!/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*){1,}$/.test(pkg)) { showError('❌ Package ID inválido. Ex: com.empresa.app'); return false; }
   if (!alias) { showError('❌ O alias do keystore é obrigatório.'); return false; }
-  if (!keyPass || keyPass.length < 6) { showError('❌ Key password deve ter pelo menos 6 caracteres.'); return false; }
-  if (!storePass || storePass.length < 6) { showError('❌ Store password deve ter pelo menos 6 caracteres.'); return false; }
+  if (!kp||kp.length<6) { showError('❌ Key password deve ter pelo menos 6 caracteres.'); return false; }
+  if (!sp||sp.length<6) { showError('❌ Store password deve ter pelo menos 6 caracteres.'); return false; }
   return true;
 }
-
-// ─── MAIN GENERATOR ─────────────────────────────────────────────────────────
 
 async function generateProject() {
   hideError();
   if (!validate()) return;
-
-  const btn = document.getElementById('generateBtn');
-  btn.disabled = true;
-
-  const pw = document.getElementById('progress-wrap');
+  const btn=document.getElementById('generateBtn');
+  btn.disabled=true;
+  const pw=document.getElementById('progress-wrap');
   pw.classList.add('show');
-  document.getElementById('progressLog').innerHTML = '';
+  document.getElementById('progressLog').innerHTML='';
   setProgress(0);
-
-  try {
-    await _generate();
-  } catch (e) {
-    showError('Erro inesperado: ' + e.message);
-    console.error(e);
-  } finally {
-    btn.disabled = false;
-  }
+  try { await _generate(); } catch(e) { showError('Erro: '+e.message); console.error(e); } finally { btn.disabled=false; }
 }
 
 async function _generate() {
-  // ── read fields ────────────────────────────────────────────────────────
-  const appName       = val('appName', 'MyApp');
-  const activityName  = val('activityName', 'MainActivity');
-  const packageId     = val('packageId', 'com.example.app');
-  const versionName   = val('versionName', '1.0.0');
-  const versionCode   = parseInt(val('versionCode', '1')) || 1;
-  const minSdk        = val('minSdk', '24');
-  const targetSdk     = val('targetSdk', '34');
-  const devName       = val('devName', 'Developer');
-  const devEmail      = val('devEmail', 'dev@example.com');
-  const appDesc       = val('appDesc', '');
+  const appName      = val('appName','MyApp');
+  const activityName = val('activityName','MainActivity');
+  const packageId    = val('packageId','com.example.app');
+  const versionName  = val('versionName','1.0.0');
+  const versionCode  = parseInt(val('versionCode','1'))||1;
+  const minSdk       = val('minSdk','24');
+  const targetSdk    = val('targetSdk','34');
+  const devName      = val('devName','Developer');
+  const devEmail     = val('devEmail','dev@example.com');
+  const appDesc      = val('appDesc','');
+  const ksAlias      = val('ksAlias','release');
+  const ksKeyPass    = val('ksKeyPass','keypass123');
+  const ksStorePass  = val('ksStorePass','storepass123');
+  const ksValidity   = parseInt(val('ksValidity','25'))||25;
+  const ksCN         = val('ksCN',devName)||'Developer';
+  const ksCountry    = val('ksCountry','PT').toUpperCase()||'PT';
 
-  const ksAlias       = val('ksAlias', 'release');
-  const ksKeyPass     = val('ksKeyPass', 'keypass123');
-  const ksStorePass   = val('ksStorePass', 'storepass123');
-  const ksValidity    = parseInt(val('ksValidity', '25')) || 25;
-  const ksCN          = val('ksCN', devName) || 'Developer';
-  const ksCountry     = val('ksCountry', 'PT').toUpperCase() || 'PT';
+  const useViewBinding = chk('featViewBinding');
+  const useMaterial    = chk('featMaterial');
+  const useConstraint  = chk('featConstraint');
+  const useCoroutines  = chk('featCoroutines');
+  const useRetrofit    = chk('featRetrofit');
+  const useGlide       = chk('featGlide');
+  const useRoom        = chk('featRoom');
+  const useInternet    = chk('featInternet');
+  const useCodemagic   = chk('featCodemagic');
+  const useReadme      = chk('featReadme');
 
-  const useViewBinding  = chk('featViewBinding');
-  const useMaterial     = chk('featMaterial');
-  const useConstraint   = chk('featConstraint');
-  const useCoroutines   = chk('featCoroutines');
-  const useRetrofit     = chk('featRetrofit');
-  const useGlide        = chk('featGlide');
-  const useRoom         = chk('featRoom');
-  const useInternet     = chk('featInternet');
-  const useCodemagic    = chk('featCodemagic');
-  const useReadme       = chk('featReadme');
-
-  const packagePath = packageId.replace(/\./g, '/');
-  const projectSlug = appName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '').toLowerCase() || 'myapp';
+  const packagePath = packageId.replace(/\./g,'/');
+  const projectSlug = appName.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'').toLowerCase()||'myapp';
+  const themeName   = sanitizeResName(appName);
 
   const zip = new JSZip();
 
-  // ── step 1: icon ──────────────────────────────────────────────────────
-  log('📦 A processar ícone...', 'info');
+  // ── step 1: resize_icon scripts ──────────────────────────────────────
+  log('📦 A gerar scripts de ícone...','info');
   setProgress(5);
-
-  let iconBase64 = null;
-  const iconFileInput = document.getElementById('iconFile');
-  if (iconFileInput.files && iconFileInput.files[0]) {
-    iconBase64 = await fileToBase64(iconFileInput.files[0]);
-    log('✓ Ícone do utilizador carregado.', 'ok');
-  } else {
-    log('ℹ Sem ícone fornecido — a usar placeholder.', '');
-  }
 
   const iconSizes = {
     'mipmap-ldpi':    36,
@@ -761,21 +328,44 @@ async function _generate() {
     'mipmap-xxxhdpi': 192,
   };
 
-  for (const [dpi, size] of Object.entries(iconSizes)) {
-    const b64 = iconBase64 ? await resizeImageBase64(iconBase64, size) : placeholderIconBase64(size);
-    zip.file(`app/src/main/res/${dpi}/ic_launcher.png`, b64, { base64: true });
-    zip.file(`app/src/main/res/${dpi}/ic_launcher_round.png`, b64, { base64: true });
+  const resizeSh = `#!/bin/bash
+# Coloca o ficheiro ic_launcher.png na mesma pasta que este script e corre-o.
+# Requer ImageMagick instalado: https://imagemagick.org
+SRC="ic_launcher.png"
+if [ ! -f "$SRC" ]; then echo "❌ Ficheiro $SRC não encontrado."; exit 1; fi
+${Object.entries(iconSizes).map(([dpi,size])=>
+`mkdir -p app/src/main/res/${dpi}
+convert "$SRC" -resize ${size}x${size} app/src/main/res/${dpi}/ic_launcher.png
+convert "$SRC" -resize ${size}x${size} app/src/main/res/${dpi}/ic_launcher_round.png`
+).join('\n')}
+echo "✅ Ícones gerados para todos os DPIs."`;
+
+  const resizeBat = `@echo off
+REM Coloca o ficheiro ic_launcher.png na mesma pasta que este script e corre-o.
+REM Requer ImageMagick instalado: https://imagemagick.org
+set SRC=ic_launcher.png
+if not exist "%SRC%" ( echo Ficheiro %SRC% nao encontrado. && exit /b 1 )
+${Object.entries(iconSizes).map(([dpi,size])=>
+`if not exist "app\\src\\main\\res\\${dpi}" mkdir "app\\src\\main\\res\\${dpi}"
+magick "%SRC%" -resize ${size}x${size} "app\\src\\main\\res\\${dpi}\\ic_launcher.png"
+magick "%SRC%" -resize ${size}x${size} "app\\src\\main\\res\\${dpi}\\ic_launcher_round.png"`
+).join('\n')}
+echo Icones gerados com sucesso.`;
+
+  zip.file('resize_icon.sh', resizeSh, { unixPermissions: 0o755 });
+  zip.file('resize_icon.bat', resizeBat);
+
+  // placeholders vazios para cada DPI (serão preenchidos pelo script)
+  for (const dpi of Object.keys(iconSizes)) {
+    zip.file(`app/src/main/res/${dpi}/.gitkeep`, '');
   }
 
-  log('✓ Ícones gerados para todos os DPIs.', 'ok');
-  setProgress(15);
+  log('✓ Scripts resize_icon gerados para todos os DPIs.','ok');
+  setProgress(12);
 
   // ── step 2: AndroidManifest.xml ──────────────────────────────────────
-  log('📄 A gerar AndroidManifest.xml...', 'info');
-
-  const permissions = useInternet
-    ? `\n    <uses-permission android:name="android.permission.INTERNET" />\n` : '';
-
+  log('📄 A gerar AndroidManifest.xml...','info');
+  const permissions = useInternet ? `\n    <uses-permission android:name="android.permission.INTERNET" />\n` : '';
   const manifest = `<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
@@ -788,7 +378,7 @@ ${permissions}
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.${sanitizeResName(appName)}"
+        android:theme="@style/Theme.${themeName}"
         tools:targetApi="31">
 
         <activity
@@ -803,26 +393,21 @@ ${permissions}
     </application>
 
 </manifest>`;
-
   zip.file('app/src/main/AndroidManifest.xml', manifest);
-  log('✓ AndroidManifest.xml', 'ok');
-  setProgress(22);
+  log('✓ AndroidManifest.xml','ok');
+  setProgress(20);
 
   // ── step 3: MainActivity.kt ──────────────────────────────────────────
-  log('📄 A gerar MainActivity.kt...', 'info');
-
-  const viewBindingImport = useViewBinding
-    ? `import ${packageId}.databinding.ActivityMainBinding\n` : '';
-  const snackbarImport = `import com.google.android.material.snackbar.Snackbar\n`;
-
+  log('📄 A gerar MainActivity.kt...','info');
   const mainActivity = `package ${packageId}
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-${viewBindingImport}${snackbarImport}
-class ${activityName} : AppCompatActivity() {
+${useViewBinding ? `import ${packageId}.databinding.ActivityMainBinding\n` : ''}import com.google.android.material.snackbar.Snackbar
 
-${useViewBinding ? `    private lateinit var binding: ActivityMainBinding
+class ${activityName} : AppCompatActivity() {
+${useViewBinding ? `
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -832,7 +417,8 @@ ${useViewBinding ? `    private lateinit var binding: ActivityMainBinding
         binding.btnClick.setOnClickListener {
             Snackbar.make(binding.root, "Botão clicado!", Snackbar.LENGTH_SHORT).show()
         }
-    }` : `    override fun onCreate(savedInstanceState: Bundle?) {
+    }` : `
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -842,30 +428,16 @@ ${useViewBinding ? `    private lateinit var binding: ActivityMainBinding
         }
     }`}
 }`;
-
   zip.file(`app/src/main/java/${packagePath}/${activityName}.kt`, mainActivity);
-  log(`✓ ${activityName}.kt`, 'ok');
-  setProgress(30);
+  log(`✓ ${activityName}.kt`,'ok');
+  setProgress(28);
 
   // ── step 4: activity_main.xml ────────────────────────────────────────
-  log('📄 A gerar activity_main.xml...', 'info');
-
-  const rootLayout = useConstraint
-    ? `androidx.constraintlayout.widget.ConstraintLayout` : `LinearLayout`;
-
-  const layoutAttrs = useConstraint ? `` : `
-    android:orientation="vertical"
-    android:gravity="center"`;
-
-  const buttonAttrs = useConstraint ? `
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"` : ``;
-
-  const constraintNs = useConstraint
-    ? `\n    xmlns:app="http://schemas.android.com/apk/res-auto"` : ``;
-
+  log('📄 A gerar activity_main.xml...','info');
+  const rootLayout = useConstraint ? `androidx.constraintlayout.widget.ConstraintLayout` : `LinearLayout`;
+  const layoutAttrs = useConstraint ? `` : `\n    android:orientation="vertical"\n    android:gravity="center"`;
+  const buttonAttrs = useConstraint ? `\n        app:layout_constraintBottom_toBottomOf="parent"\n        app:layout_constraintLeft_toLeftOf="parent"\n        app:layout_constraintRight_toRightOf="parent"\n        app:layout_constraintTop_toTopOf="parent"` : ``;
+  const constraintNs = useConstraint ? `\n    xmlns:app="http://schemas.android.com/apk/res-auto"` : ``;
   const activityLayout = `<?xml version="1.0" encoding="utf-8"?>
 <${rootLayout}
     xmlns:android="http://schemas.android.com/apk/res/android"${constraintNs}
@@ -880,35 +452,22 @@ ${useViewBinding ? `    private lateinit var binding: ActivityMainBinding
         android:text="Clica aqui"${buttonAttrs} />
 
 </${rootLayout}>`;
-
   zip.file('app/src/main/res/layout/activity_main.xml', activityLayout);
-  log('✓ activity_main.xml', 'ok');
-  setProgress(38);
+  log('✓ activity_main.xml','ok');
+  setProgress(35);
 
   // ── step 5: resources ────────────────────────────────────────────────
-  log('📄 A gerar resources...', 'info');
-
-  zip.file('app/src/main/res/values/strings.xml', `<?xml version="1.0" encoding="utf-8"?>
+  log('📄 A gerar resources...','info');
+  zip.file('app/src/main/res/values/strings.xml',
+`<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">${escapeXml(appName)}</string>
 </resources>`);
 
-  const themeName = sanitizeResName(appName);
-  zip.file('app/src/main/res/values/themes.xml', `<?xml version="1.0" encoding="utf-8"?>
+  zip.file('app/src/main/res/values/themes.xml',
+`<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.${themeName}" parent="${useMaterial ? 'Theme.Material3.DayNight.NoActionBar' : 'Theme.AppCompat.Light.NoActionBar'}">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
-        <item name="colorOnPrimary">@color/colorOnPrimary</item>
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-    </style>
-    <style name="Theme.${themeName}.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-    <style name="Theme.${themeName}.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-</resources>`);
-
-  zip.file('app/src/main/res/values-night/themes.xml', `<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="Theme.${themeName}" parent="${useMaterial ? 'Theme.Material3.DayNight.NoActionBar' : 'Theme.AppCompat.DayNight.NoActionBar'}">
+    <style name="Theme.${themeName}" parent="${useMaterial?'Theme.Material3.DayNight.NoActionBar':'Theme.AppCompat.Light.NoActionBar'}">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
         <item name="colorOnPrimary">@color/colorOnPrimary</item>
@@ -916,7 +475,19 @@ ${useViewBinding ? `    private lateinit var binding: ActivityMainBinding
     </style>
 </resources>`);
 
-  zip.file('app/src/main/res/values/colors.xml', `<?xml version="1.0" encoding="utf-8"?>
+  zip.file('app/src/main/res/values-night/themes.xml',
+`<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.${themeName}" parent="${useMaterial?'Theme.Material3.DayNight.NoActionBar':'Theme.AppCompat.DayNight.NoActionBar'}">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryVariant">@color/colorPrimaryVariant</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+    </style>
+</resources>`);
+
+  zip.file('app/src/main/res/values/colors.xml',
+`<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#4CAF50</color>
     <color name="colorPrimaryVariant">#388E3C</color>
@@ -926,35 +497,34 @@ ${useViewBinding ? `    private lateinit var binding: ActivityMainBinding
     <color name="colorOnSecondary">#000000</color>
 </resources>`);
 
-  zip.file('app/src/main/res/xml/data_extraction_rules.xml', `<?xml version="1.0" encoding="utf-8"?>
+  zip.file('app/src/main/res/xml/data_extraction_rules.xml',
+`<?xml version="1.0" encoding="utf-8"?>
 <data-extraction-rules>
-    <cloud-backup>
-        <exclude domain="root" path="."/>
-    </cloud-backup>
+    <cloud-backup><exclude domain="root" path="."/></cloud-backup>
 </data-extraction-rules>`);
 
-  zip.file('app/src/main/res/xml/backup_rules.xml', `<?xml version="1.0" encoding="utf-8"?>
+  zip.file('app/src/main/res/xml/backup_rules.xml',
+`<?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
     <exclude domain="root" path="."/>
 </full-backup-content>`);
 
-  log('✓ strings, themes, colors, xml rules', 'ok');
-  setProgress(46);
+  log('✓ strings, themes, colors, xml rules','ok');
+  setProgress(43);
 
-  // ── step 6: build.gradle (app) ───────────────────────────────────────
-  log('📄 A gerar build.gradle...', 'info');
-
+  // ── step 6: app/build.gradle.kts ─────────────────────────────────────
+  log('📄 A gerar app/build.gradle.kts...','info');
   const deps = [];
   deps.push(`    implementation("androidx.core:core-ktx:1.13.1")`);
   deps.push(`    implementation("androidx.appcompat:appcompat:1.7.0")`);
-  if (useMaterial)    deps.push(`    implementation("com.google.android.material:material:1.12.0")`);
-  if (useConstraint)  deps.push(`    implementation("androidx.constraintlayout:constraintlayout:2.1.4")`);
-  if (useCoroutines)  deps.push(`    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")`);
+  if (useMaterial)   deps.push(`    implementation("com.google.android.material:material:1.12.0")`);
+  if (useConstraint) deps.push(`    implementation("androidx.constraintlayout:constraintlayout:2.1.4")`);
+  if (useCoroutines) deps.push(`    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")`);
   if (useRetrofit) {
     deps.push(`    implementation("com.squareup.retrofit2:retrofit:2.11.0")`);
     deps.push(`    implementation("com.squareup.retrofit2:converter-gson:2.11.0")`);
   }
-  if (useGlide)       deps.push(`    implementation("com.github.bumptech.glide:glide:4.16.0")`);
+  if (useGlide) deps.push(`    implementation("com.github.bumptech.glide:glide:4.16.0")`);
   if (useRoom) {
     deps.push(`    implementation("androidx.room:room-runtime:2.6.1")`);
     deps.push(`    implementation("androidx.room:room-ktx:2.6.1")`);
@@ -965,7 +535,6 @@ ${useViewBinding ? `    private lateinit var binding: ActivityMainBinding
   deps.push(`    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")`);
 
   const roomPlugin = useRoom ? `\n    id("kotlin-kapt")` : '';
-
   const appBuildGradle = `plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")${roomPlugin}
@@ -981,7 +550,6 @@ android {
         targetSdk = ${targetSdk}
         versionCode = ${versionCode}
         versionName = "${versionName}"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -999,10 +567,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
         getByName("debug") {
             isDebuggable = true
@@ -1021,64 +586,143 @@ ${useViewBinding ? `
     buildFeatures {
         viewBinding = true
     }
-` : ''}
-}
+` : ''}}
 
 dependencies {
 ${deps.join('\n')}
 }`;
-
   zip.file('app/build.gradle.kts', appBuildGradle);
-  log('✓ app/build.gradle.kts', 'ok');
-  setProgress(54);
+  log('✓ app/build.gradle.kts','ok');
+  setProgress(52);
 
-  // ── step 7: root build.gradle ─────────────────────────────────────────
-  const rootBuildGradle = `// Top-level build file where you can add configuration options common to all sub-projects/modules.
-plugins {
+  // ── step 7: root build.gradle.kts ────────────────────────────────────
+  zip.file('build.gradle.kts',
+`plugins {
     id("com.android.application") version "8.5.2" apply false
     id("org.jetbrains.kotlin.android") version "1.9.25" apply false
-${useRoom ? `    id("kotlin-kapt") version "1.9.25" apply false\n` : ''}}`;
+${useRoom ? `    id("kotlin-kapt") version "1.9.25" apply false\n` : ''}}`);
 
-  zip.file('build.gradle.kts', rootBuildGradle);
-
-  // ── step 8: settings.gradle ──────────────────────────────────────────
-  zip.file('settings.gradle.kts', `pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
+  // ── step 8: settings.gradle.kts ──────────────────────────────────────
+  zip.file('settings.gradle.kts',
+`pluginManagement {
+    repositories { google(); mavenCentral(); gradlePluginPortal() }
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-    }
+    repositories { google(); mavenCentral() }
 }
-
-rootProject.name = "${appName.replace(/"/g, '\\"')}"
+rootProject.name = "${appName.replace(/"/g,'\\"')}"
 include(":app")`);
 
-  // ── step 9: gradle.properties ────────────────────────────────────────
-  zip.file('gradle.properties', `org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+  // ── step 9: gradle.properties ─────────────────────────────────────────
+  zip.file('gradle.properties',
+`org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
 android.useAndroidX=true
 android.enableJetifier=true
 kotlin.code.style=official`);
 
-  // ── step 10: gradle wrapper ──────────────────────────────────────────
-  zip.file('gradle/wrapper/gradle-wrapper.properties', `distributionBase=GRADLE_USER_HOME
+  log('✓ build.gradle.kts, settings.gradle.kts, gradle.properties','ok');
+  setProgress(60);
+
+  // ── step 10: gradle wrapper + gradlew ────────────────────────────────
+  log('📄 A gerar gradle wrapper e gradlew...','info');
+  zip.file('gradle/wrapper/gradle-wrapper.properties',
+`distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 distributionUrl=https\\://services.gradle.org/distributions/gradle-8.7-bin.zip
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists`);
 
-  log('✓ settings, gradle.properties, wrapper', 'ok');
-  setProgress(62);
+  const gradlew = `#!/bin/sh
+APP_NAME="Gradle"
+APP_BASE_NAME=\${0##*/}
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+MAX_FD=maximum
+warn () { echo "$*"; } >&2
+die () { echo; echo "$*"; echo; exit 1; } >&2
+cygwin=false; msys=false; darwin=false; nonstop=false
+case "\$( uname )" in
+  CYGWIN* ) cygwin=true ;;
+  Darwin* ) darwin=true ;;
+  MSYS* | MINGW* ) msys=true ;;
+  NONSTOP* ) nonstop=true ;;
+esac
+app_path=\$0
+while [ -h "\$app_path" ]; do
+    ls=\$( ls -ld "\$app_path" )
+    link=\${ls#*' -> '}
+    case \$link in
+      /*) app_path=\$link ;;
+      *) app_path=\$( dirname "\$app_path" )"/\$link" ;;
+    esac
+done
+APP_HOME=\$( cd "\$( dirname "\$app_path" )" && pwd -P ) || exit
+CLASSPATH=\$APP_HOME/gradle/wrapper/gradle-wrapper.jar
+if [ -n "\$JAVA_HOME" ]; then
+    JAVACMD=\$JAVA_HOME/bin/java
+    [ ! -x "\$JAVACMD" ] && die "ERROR: JAVA_HOME is set to an invalid directory: \$JAVA_HOME"
+else
+    JAVACMD=java
+    command -v java >/dev/null 2>&1 || die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH."
+fi
+if ! "\$cygwin" && ! "\$darwin" && ! "\$nonstop"; then
+    case \$MAX_FD in
+      max*) MAX_FD=\$( ulimit -H -n ) || warn "Could not query maximum file descriptor limit" ;;
+    esac
+    case \$MAX_FD in
+      '' | soft) ;;
+      *) ulimit -n "\$MAX_FD" || warn "Could not set maximum file descriptor limit to \$MAX_FD" ;;
+    esac
+fi
+eval set -- \$DEFAULT_JVM_OPTS \${JAVA_OPTS:+"\${JAVA_OPTS}"} \${GRADLE_OPTS:+"\${GRADLE_OPTS}"} \\
+  '"-Dorg.gradle.appname=\$APP_BASE_NAME"' \\
+  -classpath '"\$CLASSPATH"' \\
+  org.gradle.wrapper.GradleWrapperMain \\
+  '"\$@"'
+exec "\$JAVACMD" "\$@"
+`;
 
-  // ── step 11: proguard ────────────────────────────────────────────────
-  zip.file('app/proguard-rules.pro', `# Add project specific ProGuard rules here.
--keepattributes *Annotation*
+  const gradlewBat = `@rem Gradle startup script for Windows
+@if "%DEBUG%"=="" @echo off
+setlocal
+set DIRNAME=%~dp0
+if "%DIRNAME%"=="" set DIRNAME=.
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+if defined JAVA_HOME goto findJavaFromJavaHome
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if %ERRORLEVEL% equ 0 goto execute
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found.
+goto fail
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+if exist "%JAVA_EXE%" goto execute
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME%
+goto fail
+:execute
+set CLASSPATH=%APP_HOME%\\gradle\\wrapper\\gradle-wrapper.jar
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
+:end
+if %ERRORLEVEL% equ 0 goto mainEnd
+:fail
+exit /b 1
+:mainEnd
+endlocal
+:omega
+`;
+
+  zip.file('gradlew', gradlew, { unixPermissions: 0o755 });
+  zip.file('gradlew.bat', gradlewBat);
+  log('✓ gradlew, gradlew.bat, gradle-wrapper.properties','ok');
+  setProgress(68);
+
+  // ── step 11: proguard + .gitignore ───────────────────────────────────
+  zip.file('app/proguard-rules.pro',
+`-keepattributes *Annotation*
 -keepclassmembers class * {
     @android.webkit.JavascriptInterface <methods>;
 }
@@ -1089,14 +733,12 @@ ${useRetrofit ? `
 -keep interface retrofit2.** { *; }
 -keepclassmembers,allowobfuscation interface * {
     @retrofit2.http.* <methods>;
-}
-` : ''}${useRoom ? `
+}` : ''}${useRoom ? `
 -keep class * extends androidx.room.RoomDatabase
--keep @androidx.room.Entity class *
-` : ''}`);
+-keep @androidx.room.Entity class *` : ''}`);
 
-  // ── step 12: .gitignore ──────────────────────────────────────────────
-  zip.file('.gitignore', `*.iml
+  zip.file('.gitignore',
+`*.iml
 .gradle
 /local.properties
 /.idea
@@ -1109,17 +751,13 @@ local.properties
 *.jks
 *.keystore`);
 
-  log('✓ proguard-rules.pro, .gitignore', 'ok');
-  setProgress(70);
+  log('✓ proguard-rules.pro, .gitignore','ok');
+  setProgress(74);
 
-  // ── step 13: keystore placeholder + keytool script ───────────────────
-  log('🔑 A gerar keystore info...', 'info');
-
-  // We generate a shell script that creates the keystore (can't create .jks in browser)
-  const keytoolScript = `#!/bin/bash
-# Corre este script UMA VEZ para gerar o keystore de release
-# Requer Java (keytool) instalado
-
+  // ── step 12: keystore scripts ─────────────────────────────────────────
+  log('🔑 A gerar scripts de keystore...','info');
+  zip.file('generate_keystore.sh',
+`#!/bin/bash
 keytool -genkeypair \\
   -v \\
   -alias "${ksAlias}" \\
@@ -1130,21 +768,16 @@ keytool -genkeypair \\
   -storepass "${ksStorePass}" \\
   -keypass "${ksKeyPass}" \\
   -dname "CN=${ksCN}, OU=Dev, O=${ksCN}, L=Lisboa, ST=Lisboa, C=${ksCountry}"
-
 echo ""
 echo "✅ Keystore gerado em app/release.keystore"
 echo "   Alias:          ${ksAlias}"
 echo "   Key password:   ${ksKeyPass}"
 echo "   Store password: ${ksStorePass}"
 echo ""
-echo "⚠️  Faz backup deste ficheiro — sem ele não consegues fazer update da app na Play Store!"`;
+echo "⚠️  Faz backup deste ficheiro!"`, { unixPermissions: 0o755 });
 
-  zip.file('generate_keystore.sh', keytoolScript);
-
-  const keytoolBat = `@echo off
-REM Corre este script UMA VEZ para gerar o keystore de release
-REM Requer Java (keytool) instalado
-
+  zip.file('generate_keystore.bat',
+`@echo off
 keytool -genkeypair ^
   -v ^
   -alias "${ksAlias}" ^
@@ -1155,15 +788,12 @@ keytool -genkeypair ^
   -storepass "${ksStorePass}" ^
   -keypass "${ksKeyPass}" ^
   -dname "CN=${ksCN}, OU=Dev, O=${ksCN}, L=Lisboa, ST=Lisboa, C=${ksCountry}"
-
 echo.
 echo Keystore gerado em app\\release.keystore
-pause`;
+pause`);
 
-  zip.file('generate_keystore.bat', keytoolBat);
-
-  // keystore README
-  zip.file('KEYSTORE_README.md', `# Keystore de Release
+  zip.file('KEYSTORE_README.md',
+`# Keystore de Release
 
 ## Como gerar o keystore
 
@@ -1191,18 +821,17 @@ generate_keystore.bat
 ## ⚠️ Importante
 
 - **Faz SEMPRE backup** do ficheiro \`app/release.keystore\`
-- **Nunca** commites o keystore para repositórios públicos (já está no \`.gitignore\`)
+- **Nunca** commites o keystore para repositórios públicos
 - Sem este ficheiro não consegues publicar atualizações na Google Play
 `);
+  log('✓ Scripts de keystore gerados.','ok');
+  setProgress(82);
 
-  log('✓ Scripts de keystore gerados.', 'ok');
-  setProgress(78);
-
-  // ── step 14: codemagic.yaml ──────────────────────────────────────────
+  // ── step 13: codemagic.yaml ───────────────────────────────────────────
   if (useCodemagic) {
-    log('📄 A gerar codemagic.yaml...', 'info');
-
-    const codemagicYaml = `workflows:
+    log('📄 A gerar codemagic.yaml...','info');
+    zip.file('codemagic.yaml',
+`workflows:
   android-release:
     name: Android Release Build
     max_build_duration: 60
@@ -1217,17 +846,17 @@ generate_keystore.bat
       - name: Set up keystore
         script: |
           echo $KEYSTORE_BASE64 | base64 --decode > /tmp/release.keystore
+      - name: Set executable permission
+        script: chmod +x gradlew
       - name: Build release APK
         script: |
-          chmod +x gradlew
           ./gradlew assembleRelease \\
             -PKEYSTORE_PATH=$KEYSTORE_PATH \\
             -PKEYSTORE_PASSWORD=$KEYSTORE_PASSWORD \\
             -PKEY_ALIAS=$KEY_ALIAS \\
             -PKEY_PASSWORD=$KEY_PASSWORD
       - name: Build release AAB (Play Store)
-        script: |
-          ./gradlew bundleRelease
+        script: ./gradlew bundleRelease
     artifacts:
       - app/build/outputs/apk/release/*.apk
       - app/build/outputs/bundle/release/*.aab
@@ -1235,7 +864,7 @@ generate_keystore.bat
     publishing:
       email:
         recipients:
-          - ${devEmail || 'dev@example.com'}
+          - ${devEmail||'dev@example.com'}
         notify:
           success: true
           failure: true
@@ -1246,34 +875,32 @@ generate_keystore.bat
     environment:
       java: 17
     scripts:
+      - name: Set executable permission
+        script: chmod +x gradlew
       - name: Build debug APK
-        script: |
-          chmod +x gradlew
-          ./gradlew assembleDebug
+        script: ./gradlew assembleDebug
     artifacts:
       - app/build/outputs/apk/debug/*.apk
     publishing:
       email:
         recipients:
-          - ${devEmail || 'dev@example.com'}
+          - ${devEmail||'dev@example.com'}
         notify:
           success: false
           failure: true
-`;
-
-    zip.file('codemagic.yaml', codemagicYaml);
-    log('✓ codemagic.yaml', 'ok');
+`);
+    log('✓ codemagic.yaml','ok');
   }
 
-  setProgress(86);
+  setProgress(90);
 
-  // ── step 15: README.md ───────────────────────────────────────────────
+  // ── step 14: README.md ────────────────────────────────────────────────
   if (useReadme) {
-    log('📄 A gerar README.md...', 'info');
-
-    const readme = `# ${appName}
-
-${appDesc ? appDesc + '\n\n' : ''}## Informações do projeto
+    log('📄 A gerar README.md...','info');
+    zip.file('README.md',
+`# ${appName}
+${appDesc ? '\n' + appDesc + '\n' : ''}
+## Informações do projeto
 
 | Campo        | Valor                    |
 |--------------|--------------------------|
@@ -1284,108 +911,70 @@ ${appDesc ? appDesc + '\n\n' : ''}## Informações do projeto
 | Linguagem    | Kotlin                   |
 | Developer    | ${devName}               |
 
-## Estrutura
+## Ícone
 
+1. Coloca o ficheiro \`ic_launcher.png\` (mínimo 192×192 px) na raiz do projeto.
+2. Corre o script de redimensionamento:
+
+**Linux / macOS:**
+\`\`\`bash
+chmod +x resize_icon.sh
+./resize_icon.sh
 \`\`\`
-app/
-├── src/main/
-│   ├── java/${packagePath}/
-│   │   └── ${activityName}.kt
-│   ├── res/
-│   │   ├── layout/activity_main.xml
-│   │   ├── values/
-│   │   └── mipmap-*/
-│   └── AndroidManifest.xml
-├── build.gradle.kts
-└── proguard-rules.pro
-build.gradle.kts
-settings.gradle.kts
-${useCodemagic ? 'codemagic.yaml\n' : ''}\`\`\`
 
-## Como começar
+**Windows:**
+\`\`\`
+resize_icon.bat
+\`\`\`
 
-### 1. Gerar o keystore
+## Keystore
 
 \`\`\`bash
-# Linux / macOS
 chmod +x generate_keystore.sh
 ./generate_keystore.sh
 \`\`\`
 
-### 2. Abrir no Android Studio
+Ver \`KEYSTORE_README.md\` para mais detalhes.
 
-Abre a pasta raiz do projeto no Android Studio (File > Open).
-
-### 3. Build de debug
+## Build
 
 \`\`\`bash
 ./gradlew assembleDebug
-\`\`\`
-
-### 4. Build de release
-
-\`\`\`bash
 ./gradlew assembleRelease
 \`\`\`
 
 ## Dependências incluídas
 
-${deps.map(d => `- \`${d.trim().replace(/implementation\("|"\)/g, '').replace(/"/g, '')}\``).join('\n')}
+${deps.map(d=>`- \`${d.trim().replace(/implementation\("|"\)/g,'').replace(/"/g,'')}\``).join('\n')}
 
 ---
-
 *Projeto gerado automaticamente por Android Project Generator*
-`;
-
-    zip.file('README.md', readme);
-    log('✓ README.md', 'ok');
+`);
+    log('✓ README.md','ok');
   }
 
-  setProgress(93);
+  setProgress(96);
 
-  // ── step 16: generate ZIP & download ─────────────────────────────────
-  log('🗜 A compactar ZIP...', 'info');
-
-  const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = `${projectSlug}.zip`;
-  a.click();
+  // ── step 15: gerar ZIP e download ─────────────────────────────────────
+  log('🗜 A compactar ZIP...','info');
+  const blob = await zip.generateAsync({ type:'blob', compression:'DEFLATE', platform:'UNIX' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${projectSlug}.zip`; a.click();
   URL.revokeObjectURL(url);
 
   setProgress(100);
-  log('', '');
-  log(`✅ ZIP gerado com sucesso: ${projectSlug}.zip`, 'ok');
-  log(`   ${Object.keys(zip.files).length} ficheiros incluídos.`, 'ok');
+  log('','');
+  log(`✅ ZIP gerado com sucesso: ${projectSlug}.zip`,'ok');
+  log(`   ${Object.keys(zip.files).length} ficheiros incluídos.`,'ok');
 }
-
-// ─── resize image for icons ──────────────────────────────────────────────────
-
-function resizeImageBase64(base64, size) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = size; canvas.height = size;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, size, size);
-      resolve(canvas.toDataURL('image/png').split(',')[1]);
-    };
-    img.src = 'data:image/png;base64,' + base64;
-  });
-}
-
-// ─── xml escape ─────────────────────────────────────────────────────────────
 
 function escapeXml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ─── resource name sanitizer ─────────────────────────────────────────────────
-
 function sanitizeResName(name) {
-  return name.replace(/[^a-zA-Z0-9]/g, '').replace(/^[0-9]/, 'A') || 'App';
+  return name.replace(/[^a-zA-Z0-9]/g,'').replace(/^[0-9]/,'A')||'App';
 }
 </script>
 </body>
