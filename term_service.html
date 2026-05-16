@@ -243,7 +243,7 @@ select option { background:#1a1a1a; }
 <div id="tab-icons" class="tab-panel">
   <div class="section">
     <div class="section-header"><span class="section-num">01</span><span class="section-title">Launcher Icon</span></div>
-    <p style="font-size:12.5px;color:var(--text2);margin-bottom:14px">PNG quadrado mín. 512×512px.</p>
+    <p style="font-size:12.5px;color:var(--text2);margin-bottom:14px">PNG quadrado mín. 512×512px. Se fizeste Pull, o ícone é carregado automaticamente.</p>
     <div class="upload-area" id="launcher-drop" ondragover="handleDrag(event,'launcher-drop',true)" ondragleave="handleDrag(event,'launcher-drop',false)" ondrop="handleDrop(event,'launcher')">
       <input type="file" accept="image/png,image/jpeg,image/webp" onchange="handleFileInput(event,'launcher')">
       <div id="launcher-ph"><div class="upload-icon">🖼</div><div class="upload-label"><strong>Clica ou arrasta</strong> ic_launcher.png</div><div class="upload-hint">PNG · mín. 512×512px</div></div>
@@ -252,7 +252,7 @@ select option { background:#1a1a1a; }
   </div>
   <div class="section">
     <div class="section-header"><span class="section-num">02</span><span class="section-title">Splash Icon</span></div>
-    <p style="font-size:12.5px;color:var(--text2);margin-bottom:14px">Copiado para <code style="font-family:var(--mono);color:var(--cyan);font-size:11px">res/drawable/splash_icon.png</code>.</p>
+    <p style="font-size:12.5px;color:var(--text2);margin-bottom:14px">Copiado para <code style="font-family:var(--mono);color:var(--cyan);font-size:11px">res/drawable/splash_icon.png</code>. Se fizeste Pull, é carregado automaticamente.</p>
     <div class="upload-area" id="splash-drop" ondragover="handleDrag(event,'splash-drop',true)" ondragleave="handleDrag(event,'splash-drop',false)" ondrop="handleDrop(event,'splash')">
       <input type="file" accept="image/png,image/jpeg,image/webp" onchange="handleFileInput(event,'splash')">
       <div id="splash-ph"><div class="upload-icon">✨</div><div class="upload-label"><strong>Clica ou arrasta</strong> splash_icon.png</div><div class="upload-hint">PNG transparente recomendado</div></div>
@@ -265,7 +265,7 @@ select option { background:#1a1a1a; }
 <div id="tab-keystore" class="tab-panel">
   <div class="section">
     <div class="section-header"><span class="section-num">01</span><span class="section-title">Keystore de Release</span></div>
-    <div class="info-box">✓ Gerado em runtime no CI com keytool — sem binários no repo.<br>✓ gradle-wrapper.jar também é baixado automaticamente pelo CI.</div>
+    <div class="info-box">✓ Gerado em runtime no CI com keytool — sem binários no repo.<br>✓ gradle-wrapper.jar também é baixado automaticamente pelo CI (Gradle 8.9).</div>
     <div class="grid-2">
       <div class="field"><label>Nome do ficheiro <span class="req">*</span></label><input type="text" id="ksFile" class="mono-input" placeholder="release.keystore"></div>
       <div class="field"><label>Key alias <span class="req">*</span></label><input type="text" id="ksAlias" class="mono-input" placeholder="release_key"></div>
@@ -323,7 +323,7 @@ select option { background:#1a1a1a; }
       <div class="toggle-row"><div class="tl"><div class="tl-name">usesCleartextTraffic</div><div class="tl-desc">Permitir HTTP não encriptado</div></div><label class="switch"><input type="checkbox" id="permCleartext" checked><span class="slider"></span></label></div>
       <div class="toggle-row"><div class="tl"><div class="tl-name">ViewBinding</div><div class="tl-desc">Acesso type-safe às views</div></div><label class="switch"><input type="checkbox" id="depViewBinding" checked><span class="slider"></span></label></div>
       <div class="toggle-row"><div class="tl"><div class="tl-name">kotlin-parcelize</div><div class="tl-desc">Plugin Parcelize para data classes</div></div><label class="switch"><input type="checkbox" id="depParcelize"><span class="slider"></span></label></div>
-      <div class="toggle-row"><div class="tl"><div class="tl-name">Codemagic YAML</div><div class="tl-desc">Gera codemagic.yaml com keystore + ícones + gradle wrapper fix</div></div><label class="switch"><input type="checkbox" id="depCodemagic" checked><span class="slider"></span></label></div>
+      <div class="toggle-row"><div class="tl"><div class="tl-name">Codemagic YAML</div><div class="tl-desc">Gera codemagic.yaml com keystore + ícones + gradle wrapper fix (Gradle 8.9 + AGP 8.7.0)</div></div><label class="switch"><input type="checkbox" id="depCodemagic" checked><span class="slider"></span></label></div>
     </div>
   </div>
 </div>
@@ -424,26 +424,26 @@ select option { background:#1a1a1a; }
 
 </div>
 <script>
+// ─── VERSÕES FIXAS ──────────────────────────────────────────────────────────────
+const GRADLE_VERSION   = '8.9';
+const AGP_VERSION      = '8.7.0';
+const KOTLIN_VERSION   = '1.9.25';
+
 // ─── STATE ─────────────────────────────────────────────────────────────────────
 const S={
-  launcher:null,launcherUrl:null,
-  splash:null,splashUrl:null,
-  ghToken:'',ghUser:null,ghRepo:null,
+  launcher:null, launcherUrl:null,
+  splash:null,   splashUrl:null,
+  ghToken:'', ghUser:null, ghRepo:null,
   pulledFiles:{},
   originalPkg:'',
   remoteFileShas:{}
 };
 
-// Lista COMPLETA de ficheiros obrigatórios para build Android
 const REQUIRED_FILES=[
-  'gradlew',
-  'gradlew.bat',
+  'gradlew','gradlew.bat',
   'gradle/wrapper/gradle-wrapper.properties',
-  'build.gradle',
-  'settings.gradle',
-  'gradle.properties',
-  'app/build.gradle',
-  'app/proguard-rules.pro',
+  'build.gradle','settings.gradle','gradle.properties',
+  'app/build.gradle','app/proguard-rules.pro',
   'app/src/main/AndroidManifest.xml',
   'app/src/main/res/values/strings.xml',
   'app/src/main/res/values/colors.xml',
@@ -456,12 +456,8 @@ const REQUIRED_FILES=[
   'app/src/main/res/anim/slide_out_left.xml',
   'app/src/main/res/anim/slide_in_left.xml',
   'app/src/main/res/anim/slide_out_right.xml',
-  '.gitignore',
-  'README.md',
+  '.gitignore','README.md',
 ];
-
-// gradle-wrapper.jar é binário — não é gerado como texto, mas é verificado como presença
-const BINARY_REQUIRED=['gradle/wrapper/gradle-wrapper.jar'];
 
 // ─── TEMPLATE ──────────────────────────────────────────────────────────────────
 function loadTemplate(){
@@ -538,22 +534,50 @@ function applyPackageRename(){
   document.getElementById('progress-wrap').classList.add('show');showError('');
 }
 
-// ─── UPLOAD ─────────────────────────────────────────────────────────────────────
+// ─── UPLOAD / ÍCONES ────────────────────────────────────────────────────────────
 function handleDrag(e,id,on){e.preventDefault();document.getElementById(id).classList.toggle('drag',on);}
 function handleDrop(e,type){e.preventDefault();document.getElementById(type+'-drop').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)processImg(f,type);}
 function handleFileInput(e,type){const f=e.target.files[0];if(f)processImg(f,type);}
 function processImg(file,type){
   if(!file.type.startsWith('image/')){showError('Ficheiro inválido.');return;}
   const r=new FileReader();
-  r.onload=ev=>{S[type]=file;S[type+'Url']=ev.target.result;renderPreview(type,file,ev.target.result);};
+  r.onload=ev=>{
+    S[type]=file;
+    S[type+'Url']=ev.target.result;
+    renderPreview(type,file.name,ev.target.result,file.size);
+  };
   r.readAsDataURL(file);
 }
-function renderPreview(type,file,dataUrl){
-  document.getElementById(type+'-ph').style.display='none';
-  const pv=document.getElementById(type+'-pv');pv.style.display='block';
-  pv.innerHTML=`<div class="upload-preview"><img src="${dataUrl}"><div class="upload-preview-info"><div class="upload-preview-name">${file.name}</div><div class="upload-preview-size">${(file.size/1024).toFixed(0)}KB</div></div><button class="upload-clear" onclick="clearImg('${type}')">✕</button></div>`;
+
+// Carrega ícone pulled do GitHub (base64 raw → dataURL)
+function loadPulledIcon(type, filename, b64Data){
+  // Detectar mime type pelo header dos bytes
+  const raw = atob(b64Data.substring(0,16));
+  let mime = 'image/png';
+  if(raw.charCodeAt(0)===0xFF && raw.charCodeAt(1)===0xD8) mime='image/jpeg';
+  else if(raw.substring(0,4)==='RIFF') mime='image/webp';
+  const dataUrl = `data:${mime};base64,${b64Data}`;
+  S[type+'Url'] = dataUrl;
+  // Tamanho aproximado
+  const approxSize = Math.round(b64Data.length * 0.75);
+  renderPreview(type, filename, dataUrl, approxSize, true);
+  logMsg(`  ✓ Ícone pulled: ${filename} (${(approxSize/1024).toFixed(0)}KB)`,'ok');
 }
-function clearImg(type){S[type]=null;S[type+'Url']=null;document.getElementById(type+'-ph').style.display='';document.getElementById(type+'-pv').style.display='none';document.getElementById(type+'-pv').innerHTML='';}
+
+function renderPreview(type, name, dataUrl, size, fromPull=false){
+  document.getElementById(type+'-ph').style.display='none';
+  const pv=document.getElementById(type+'-pv');
+  pv.style.display='block';
+  const tag = fromPull ? ' <span style="color:var(--cyan);font-size:10px">[pulled]</span>' : '';
+  pv.innerHTML=`<div class="upload-preview"><img src="${dataUrl}"><div class="upload-preview-info"><div class="upload-preview-name">${name}${tag}</div><div class="upload-preview-size">${(size/1024).toFixed(0)}KB</div></div><button class="upload-clear" onclick="clearImg('${type}')">✕</button></div>`;
+}
+
+function clearImg(type){
+  S[type]=null;S[type+'Url']=null;
+  document.getElementById(type+'-ph').style.display='';
+  document.getElementById(type+'-pv').style.display='none';
+  document.getElementById(type+'-pv').innerHTML='';
+}
 
 // ─── GITHUB ─────────────────────────────────────────────────────────────────────
 async function ghFetch(url,opts={}){
@@ -632,28 +656,63 @@ async function pullFromRepo(){
     setProgress(15,'A carregar tree...');
     const treeData=await ghFetch(`https://api.github.com/repos/${S.ghRepo.full_name}/git/trees/${treeSha}?recursive=1`);
     const blobs=treeData.tree.filter(t=>t.type==='blob');
-    logMsg(`  → ${blobs.length} ficheiros encontrados`,'info');setProgress(25);
-    const skipExts=['.png','.jpg','.jpeg','.webp','.gif','.ico','.keystore','.jks','.zip','.apk','.aab','.class','.jar','.aar','.so','.db'];
-    const relevant=blobs.filter(b=>!skipExts.some(e=>b.path.toLowerCase().endsWith(e))&&b.size<500000);
+    logMsg(`  → ${blobs.length} ficheiros encontrados`,'info');
+    setProgress(25);
+
+    // Registar todos os SHAs remotos
     blobs.forEach(b=>{S.remoteFileShas[b.path]=b.sha;});
-    logMsg(`  → ${relevant.length} ficheiros de texto a baixar`,'info');
+
+    // Separar: ícones da raiz (binários PNG que queremos), texto, e o resto a ignorar
+    const iconFiles  = blobs.filter(b=>['ic_launcher.png','splash_icon.png'].includes(b.path));
+    const skipExts   = ['.keystore','.jks','.zip','.apk','.aab','.class','.jar','.aar','.so','.db','.gif','.ico','.webp','.jpg','.jpeg'];
+    // PNGs genéricos (mipmap, drawable etc) ignoramos — só ícones da raiz
+    const skipPaths  = /^app\/src\/main\/res\/(mipmap|drawable)/;
+    const textFiles  = blobs.filter(b=>{
+      if(['ic_launcher.png','splash_icon.png'].includes(b.path)) return false; // tratados separadamente
+      if(skipExts.some(e=>b.path.toLowerCase().endsWith(e))) return false;
+      if(skipPaths.test(b.path)) return false;
+      if(b.size>500000) return false;
+      return true;
+    });
+
+    logMsg(`  → ${textFiles.length} ficheiros de texto + ${iconFiles.length} ícone(s) a baixar`,'info');
+
     let done=0;
-    for(let i=0;i<relevant.length;i+=10){
-      const chunk=relevant.slice(i,i+10);
+    const total=textFiles.length+iconFiles.length;
+
+    // Baixar ficheiros de texto
+    for(let i=0;i<textFiles.length;i+=10){
+      const chunk=textFiles.slice(i,i+10);
       await Promise.all(chunk.map(async b=>{
         try{
           const bData=await ghFetch(`https://api.github.com/repos/${S.ghRepo.full_name}/git/blobs/${b.sha}`);
           let content='';
-          if(bData.encoding==='base64')content=decodeBase64Utf8(bData.content.replace(/\n/g,''));
+          if(bData.encoding==='base64') content=decodeBase64Utf8(bData.content.replace(/\n/g,''));
           else content=bData.content;
-          S.pulledFiles[b.path]={content,sha:b.sha,encoding:bData.encoding};
+          S.pulledFiles[b.path]={content,sha:b.sha,encoding:'utf-8'};
         }catch(e){logMsg(`  ⚠ Falha: ${b.path}: ${e.message}`,'warn');}
       }));
       done+=chunk.length;
-      setProgress(25+Math.round((done/relevant.length)*50),`A baixar... (${done}/${relevant.length})`);
+      setProgress(25+Math.round((done/total)*45),`A baixar texto... (${done}/${total})`);
     }
+
+    // Baixar ícones como base64
+    for(const b of iconFiles){
+      try{
+        const bData=await ghFetch(`https://api.github.com/repos/${S.ghRepo.full_name}/git/blobs/${b.sha}`);
+        const b64=bData.content.replace(/\n/g,'');
+        const type=b.path==='ic_launcher.png'?'launcher':'splash';
+        loadPulledIcon(type, b.path, b64);
+        // Guardar como pulled file também (base64 raw para push posterior)
+        S.pulledFiles[b.path]={content:null, b64, sha:b.sha, isBinary:true};
+        done++;
+        setProgress(25+Math.round((done/total)*45),`A baixar ícones...`);
+      }catch(e){logMsg(`  ⚠ Falha ícone ${b.path}: ${e.message}`,'warn');}
+    }
+
     logMsg(`  ✓ ${Object.keys(S.pulledFiles).length} ficheiros baixados`,'ok');
-    setProgress(80,'A extrair dados...');extractProjectData();
+    setProgress(80,'A extrair dados...');
+    extractProjectData();
     setProgress(100,'Pull concluído!');
     logMsg('✅ Pull completo! Dados carregados nos campos.','ok');
     logMsg('   Podes editar e fazer "Push GitHub" — apenas ficheiros alterados serão enviados.','info');
@@ -671,42 +730,45 @@ function decodeBase64Utf8(b64){
   }catch{return atob(b64);}
 }
 
-// ─── EXTRAIR DADOS ─────────────────────────────────────────────────────────────
+// ─── EXTRAIR DADOS DO PULL ─────────────────────────────────────────────────────
 function extractProjectData(){
   const files=S.pulledFiles;
-  const buildGradle=files['app/build.gradle'];
-  if(buildGradle){
-    const c=buildGradle.content;
+  const appBuild=files['app/build.gradle'];
+  if(appBuild){
+    const c=appBuild.content||'';
     const pkg=c.match(/applicationId\s+["']([^"']+)["']/);
     if(pkg){setField('packageId',pkg[1]);S.originalPkg=pkg[1];logMsg(`  → packageId: ${pkg[1]}`,'ok');}
-    const verName=c.match(/versionName\s+["']([^"']+)["']/);
-    if(verName)setField('versionName',verName[1]);
-    const verCode=c.match(/versionCode\s+(\d+)/);
-    if(verCode)setField('versionCode',verCode[1]);
-    const minSdk=c.match(/minSdk\s+(\d+)/);
-    if(minSdk){const el=document.getElementById('minSdk');if(el)el.value=minSdk[1];}
-    const targetSdk=c.match(/targetSdk\s+(\d+)/);
-    if(targetSdk){const el=document.getElementById('targetSdk');if(el)el.value=targetSdk[1];}
+    const verName=c.match(/versionName\s+["']([^"']+)["']/);if(verName)setField('versionName',verName[1]);
+    const verCode=c.match(/versionCode\s+(\d+)/);if(verCode)setField('versionCode',verCode[1]);
+    const minSdk=c.match(/minSdk\s+(\d+)/);if(minSdk){const el=document.getElementById('minSdk');if(el)el.value=minSdk[1];}
+    const targetSdk=c.match(/targetSdk\s+(\d+)/);if(targetSdk){const el=document.getElementById('targetSdk');if(el)el.value=targetSdk[1];}
     const ksAlias=c.match(/keyAlias\s+["']([^"']+)["']/);if(ksAlias)setField('ksAlias',ksAlias[1]);
     const ksKeyPass=c.match(/keyPassword\s+["']([^"']+)["']/);if(ksKeyPass)setField('ksKeyPass',ksKeyPass[1]);
     const ksStorePass=c.match(/storePassword\s+["']([^"']+)["']/);if(ksStorePass)setField('ksStorePass',ksStorePass[1]);
     const ksFile=c.match(/storeFile\s+file\(["']([^"']+)["']\)/);if(ksFile)setField('ksFile',ksFile[1]);
-    setChk('depMaterial',c.includes('material:'));setChk('depConstraint',c.includes('constraintlayout'));
-    setChk('depSplash',c.includes('core-splashscreen'));setChk('depFragment',c.includes('fragment-ktx'));
-    setChk('depSwipe',c.includes('swiperefreshlayout'));setChk('depGlide',c.includes('glide'));
-    setChk('depLottie',c.includes('lottie'));setChk('depSvg',c.includes('androidsvg'));
-    setChk('depMedia3',c.includes('media3'));setChk('depOkHttp',c.includes('okhttp'));
-    setChk('depRetrofit',c.includes('retrofit'));setChk('depCoroutines',c.includes('coroutines'));
-    setChk('depRoom',c.includes('room-runtime'));setChk('depViewBinding',c.includes('viewBinding true'));
+    setChk('depMaterial',c.includes('material:'));
+    setChk('depConstraint',c.includes('constraintlayout'));
+    setChk('depSplash',c.includes('core-splashscreen'));
+    setChk('depFragment',c.includes('fragment-ktx'));
+    setChk('depSwipe',c.includes('swiperefreshlayout'));
+    setChk('depGlide',c.includes('glide'));
+    setChk('depLottie',c.includes('lottie'));
+    setChk('depSvg',c.includes('androidsvg'));
+    setChk('depMedia3',c.includes('media3'));
+    setChk('depOkHttp',c.includes('okhttp'));
+    setChk('depRetrofit',c.includes('retrofit'));
+    setChk('depCoroutines',c.includes('coroutines'));
+    setChk('depRoom',c.includes('room-runtime'));
+    setChk('depViewBinding',c.includes('viewBinding true'));
     setChk('depParcelize',c.includes('kotlin-parcelize'));
   }
   const settings=files['settings.gradle'];
-  if(settings){const name=settings.content.match(/rootProject\.name\s*=\s*["']([^"']+)["']/);if(name)setField('appName',name[1]);}
+  if(settings){const name=(settings.content||'').match(/rootProject\.name\s*=\s*["']([^"']+)["']/);if(name)setField('appName',name[1]);}
   const strings=files['app/src/main/res/values/strings.xml'];
-  if(strings&&!settings){const name=strings.content.match(/<string name="app_name">([^<]+)<\/string>/);if(name)setField('appName',name[1]);}
+  if(strings&&!settings){const name=(strings.content||'').match(/<string name="app_name">([^<]+)<\/string>/);if(name)setField('appName',name[1]);}
   const colors=files['app/src/main/res/values/colors.xml'];
   if(colors){
-    const c=colors.content;
+    const c=colors.content||'';
     const cp=c.match(/<color name="colorPrimary">([^<]+)<\/color>/);if(cp){setField('colorPrimary',cp[1].trim());trySetPicker('colorPrimaryPicker',cp[1].trim());}
     const ca=c.match(/<color name="dialog_accent">([^<]+)<\/color>/);if(ca){setField('colorAccent',ca[1].trim());trySetPicker('colorAccentPicker',ca[1].trim());}
     const cs=c.match(/<color name="splash_background_light">([^<]+)<\/color>/);if(cs){setField('colorSplash',cs[1].trim());trySetPicker('colorSplashPicker',cs[1].trim());}
@@ -714,15 +776,17 @@ function extractProjectData(){
   }
   const manifest=files['app/src/main/AndroidManifest.xml'];
   if(manifest){
-    const c=manifest.content;
-    setChk('permInternet',c.includes('INTERNET'));setChk('permNetwork',c.includes('ACCESS_NETWORK_STATE'));
-    setChk('permFg',c.includes('FOREGROUND_SERVICE'));setChk('permNotif',c.includes('POST_NOTIFICATIONS'));
+    const c=manifest.content||'';
+    setChk('permInternet',c.includes('INTERNET'));
+    setChk('permNetwork',c.includes('ACCESS_NETWORK_STATE'));
+    setChk('permFg',c.includes('FOREGROUND_SERVICE'));
+    setChk('permNotif',c.includes('POST_NOTIFICATIONS'));
     setChk('permCleartext',c.includes('usesCleartextTraffic="true"'));
     const act=c.match(/android:name="\.([\w]+)"/);if(act)setField('activityName',act[1]);
   }
   setChk('depCodemagic',!!files['codemagic.yaml']);
   const yaml=files['codemagic.yaml'];
-  if(yaml){const email=yaml.content.match(/- ([\w.+-]+@[\w.-]+\.\w+)/);if(email)setField('devEmail',email[1]);}
+  if(yaml){const email=(yaml.content||'').match(/- ([\w.+-]+@[\w.-]+\.\w+)/);if(email)setField('devEmail',email[1]);}
 }
 function trySetPicker(id,val){const el=document.getElementById(id);if(el&&/^#[0-9A-Fa-f]{6}$/.test(val))el.value=val;}
 
@@ -730,49 +794,88 @@ function trySetPicker(id,val){const el=document.getElementById(id);if(el&&/^#[0-
 async function analyzeRepo(){
   if(!S.ghRepo){showError('Seleciona um repositório primeiro.');return;}
   document.getElementById('progress-wrap').classList.add('show');
-  document.getElementById('progressLog').innerHTML='';setProgress(0,'A analisar...');
+  document.getElementById('progressLog').innerHTML='';
+  setProgress(0,'A analisar...');
   logMsg(`🔍 A analisar ${S.ghRepo.full_name}@${v('ghBranch')}...`,'info');
-  if(Object.keys(S.pulledFiles).length===0){logMsg('  → Sem dados — a fazer pull primeiro...','warn');await pullFromRepo();}
+  if(Object.keys(S.pulledFiles).length===0){
+    logMsg('  → Sem dados — a fazer pull primeiro...','warn');
+    await pullFromRepo();
+  }
   setProgress(60,'A verificar ficheiros...');
   const present=[],missing=[],warnings=[];
-  const pkg=v('packageId','com.example.app');const actName=v('activityName','MainActivity');
-  const pkgPath=pkg.replace(/\./g,'/');const actPath=`app/src/main/java/${pkgPath}/${actName}.kt`;
+  const pkg=v('packageId','com.example.app');
+  const actName=v('activityName','MainActivity');
+  const pkgPath=pkg.replace(/\./g,'/');
+  const actPath=`app/src/main/java/${pkgPath}/${actName}.kt`;
 
   REQUIRED_FILES.forEach(f=>{
-    if(S.pulledFiles[f]||S.remoteFileShas[f])present.push(f);
+    if(S.pulledFiles[f]||S.remoteFileShas[f]) present.push(f);
     else missing.push(f);
   });
 
-  // gradle-wrapper.jar é binário — verificar só por SHA remoto
+  // gradle-wrapper.jar — binário
   if(S.remoteFileShas['gradle/wrapper/gradle-wrapper.jar']){
     present.push('gradle/wrapper/gradle-wrapper.jar ✓ (binário no repo)');
   }else{
-    // Não é erro fatal se o YAML o baixar, mas é aviso
-    warnings.push({file:'gradle/wrapper/gradle-wrapper.jar',msg:'Binário ausente no repo — o YAML faz download automaticamente antes do build'});
+    warnings.push({file:'gradle/wrapper/gradle-wrapper.jar',msg:'Ausente no repo — o codemagic.yaml faz download automático antes do build'});
   }
 
   // Activity principal
   const hasAct=Object.keys(S.pulledFiles).some(k=>k.endsWith(`${actName}.kt`))||S.remoteFileShas[actPath];
-  if(!hasAct)missing.push(actPath);else present.push(actPath);
+  if(!hasAct) missing.push(actPath);
+  else present.push(actPath);
 
-  // Ícones CI
-  if(!S.remoteFileShas['ic_launcher.png']&&!S.launcherUrl)
+  // Ícones
+  const hasLauncher = S.launcherUrl || S.remoteFileShas['ic_launcher.png'];
+  const hasSplash   = S.splashUrl   || S.remoteFileShas['splash_icon.png'];
+  if(!hasLauncher)
     warnings.push({file:'ic_launcher.png (raiz)',msg:'Necessário na raiz do repo para o CI processar — faz upload na tab Ícones'});
-  if(!S.remoteFileShas['splash_icon.png']&&!S.splashUrl)
+  else
+    present.push('ic_launcher.png (raiz)');
+  if(!hasSplash)
     warnings.push({file:'splash_icon.png (raiz)',msg:'Opcional — CI cria placeholder se ausente'});
+  else
+    present.push('splash_icon.png (raiz)');
 
   // codemagic.yaml
   if(chk('depCodemagic')&&!S.pulledFiles['codemagic.yaml']&&!S.remoteFileShas['codemagic.yaml'])
     missing.push('codemagic.yaml');
 
-  setProgress(90,'A renderizar...');renderAnalysis(present,missing,warnings);setProgress(100,'Análise concluída!');
+  // Verificar versões Gradle no wrapper se existir
+  const wrapperProps=S.pulledFiles['gradle/wrapper/gradle-wrapper.properties'];
+  if(wrapperProps){
+    const content=wrapperProps.content||'';
+    const match=content.match(/gradle-(\d+\.\d+(?:\.\d+)?)-/);
+    if(match&&match[1]!==GRADLE_VERSION){
+      warnings.push({file:'gradle/wrapper/gradle-wrapper.properties',msg:`Gradle ${match[1]} — devia ser ${GRADLE_VERSION} para compatibilidade com AGP ${AGP_VERSION}`});
+    }
+  }
+
+  // Verificar AGP no build.gradle raiz
+  const rootBuild=S.pulledFiles['build.gradle'];
+  if(rootBuild){
+    const content=rootBuild.content||'';
+    if(content.includes('allprojects')&&content.includes('repositories')){
+      warnings.push({file:'build.gradle (raiz)',msg:'Contém allprojects{repositories{}} — conflitua com settings.gradle FAIL_ON_PROJECT_REPOS'});
+    }
+    const agpMatch=content.match(/com\.android\.tools\.build:gradle:([\d.]+)/);
+    if(agpMatch&&agpMatch[1]!==AGP_VERSION){
+      warnings.push({file:'build.gradle (raiz)',msg:`AGP ${agpMatch[1]} — devia ser ${AGP_VERSION}`});
+    }
+  }
+
+  setProgress(90,'A renderizar...');
+  renderAnalysis(present,missing,warnings);
+  setProgress(100,'Análise concluída!');
   const total=missing.length+warnings.length;
-  if(total===0)logMsg('✅ Projeto em boa forma — sem ficheiros em falta!','ok');
+  if(total===0) logMsg('✅ Projeto em boa forma — sem problemas!','ok');
   else logMsg(`⚠ ${missing.length} em falta, ${warnings.length} avisos.`,'warn');
 }
 
 function renderAnalysis(present,missing,warnings){
-  const wrap=document.getElementById('analysis-wrap');const filesDiv=document.getElementById('analysis-files');const badge=document.getElementById('analysis-badge');
+  const wrap=document.getElementById('analysis-wrap');
+  const filesDiv=document.getElementById('analysis-files');
+  const badge=document.getElementById('analysis-badge');
   wrap.classList.add('show');
   const total=missing.length+warnings.length;
   if(total===0){badge.textContent='OK';badge.className='badge badge-ok';}
@@ -785,7 +888,7 @@ function renderAnalysis(present,missing,warnings){
   }
   if(warnings.length>0){
     html+=`<div style="font-family:var(--mono);font-size:10px;color:var(--yellow);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;margin-top:12px">⚠ Avisos (${warnings.length})</div>`;
-    warnings.forEach(w=>{html+=`<div class="file-item warn"><span class="file-path">${w.file} — <span style="opacity:.7">${w.msg}</span></span></div>`;});
+    warnings.forEach(w=>{html+=`<div class="file-item warn"><span class="file-path">${w.file} — <span style="opacity:.7">${w.msg}</span></span><button class="btn btn-ghost file-action" style="padding:3px 10px;font-size:11px" onclick="fixWarning('${w.file.replace(/'/g,"\\'")}')">Corrigir</button></div>`;});
   }
   if(present.length>0){
     html+=`<div style="font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;margin-top:12px">✓ Presentes (${present.length})</div>`;
@@ -794,33 +897,68 @@ function renderAnalysis(present,missing,warnings){
   filesDiv.innerHTML=html;
 }
 
+function fixWarning(fileKey){
+  const cfg=buildCfg();
+  const generated=buildFiles(cfg);
+  // Normalizar a chave (pode ter sufixo de descrição)
+  const realKey=Object.keys(generated).find(k=>fileKey.startsWith(k)||fileKey===k)||fileKey;
+  if(generated[realKey]!==undefined){
+    S.pulledFiles[realKey]={content:generated[realKey],sha:null,encoding:'utf-8'};
+    logMsg(`✓ Corrigido: ${realKey}`,'ok');
+    document.getElementById('progress-wrap').classList.add('show');
+    analyzeRepo();
+  }else{
+    logMsg(`⚠ Não foi possível corrigir automaticamente: ${fileKey}. Regera o projeto.`,'warn');
+    document.getElementById('progress-wrap').classList.add('show');
+  }
+}
+
 function fixMissingFile(path){
-  const cfg=buildCfg();const generated=buildFiles(cfg);
+  const cfg=buildCfg();
+  const generated=buildFiles(cfg);
   if(generated[path]!==undefined){
     S.pulledFiles[path]={content:generated[path],sha:null,encoding:'utf-8'};
     logMsg(`✓ Criado: ${path}`,'ok');
-    document.getElementById('progress-wrap').classList.add('show');analyzeRepo();
-  }else{logMsg(`⚠ Não foi possível gerar: ${path}`,'warn');document.getElementById('progress-wrap').classList.add('show');}
+    document.getElementById('progress-wrap').classList.add('show');
+    analyzeRepo();
+  }else{
+    logMsg(`⚠ Não foi possível gerar: ${path}`,'warn');
+    document.getElementById('progress-wrap').classList.add('show');
+  }
 }
 
 async function fixAllMissing(){
-  const cfg=buildCfg();const generated=buildFiles(cfg);
-  const pkg=v('packageId','com.example.app');const actName=v('activityName','MainActivity');
-  const pkgPath=pkg.replace(/\./g,'/');let fixed=0;
+  const cfg=buildCfg();
+  const generated=buildFiles(cfg);
+  const pkg=v('packageId','com.example.app');
+  const actName=v('activityName','MainActivity');
+  const pkgPath=pkg.replace(/\./g,'/');
+  let fixed=0;
+  // Ficheiros obrigatórios
   REQUIRED_FILES.forEach(f=>{
     if(!S.pulledFiles[f]&&!S.remoteFileShas[f]&&generated[f]!==undefined){
       S.pulledFiles[f]={content:generated[f],sha:null,encoding:'utf-8'};fixed++;
     }
   });
+  // Activity
   const actPath=`app/src/main/java/${pkgPath}/${actName}.kt`;
   if(!Object.keys(S.pulledFiles).some(k=>k.endsWith(`${actName}.kt`))&&generated[actPath]!==undefined){
     S.pulledFiles[actPath]={content:generated[actPath],sha:null,encoding:'utf-8'};fixed++;
   }
+  // codemagic.yaml
   if(chk('depCodemagic')&&!S.pulledFiles['codemagic.yaml']&&generated['codemagic.yaml']){
     S.pulledFiles['codemagic.yaml']={content:generated['codemagic.yaml'],sha:null,encoding:'utf-8'};fixed++;
   }
-  logMsg(`✓ ${fixed} ficheiros gerados automaticamente`,'ok');
-  document.getElementById('progress-wrap').classList.add('show');await analyzeRepo();
+  // Corrigir versões (sobrescrever mesmo que existam)
+  ['build.gradle','gradle/wrapper/gradle-wrapper.properties','settings.gradle'].forEach(f=>{
+    if(generated[f]!==undefined){
+      S.pulledFiles[f]={content:generated[f],sha:S.pulledFiles[f]?.sha||null,encoding:'utf-8'};
+      fixed++;
+    }
+  });
+  logMsg(`✓ ${fixed} ficheiros gerados/corrigidos automaticamente`,'ok');
+  document.getElementById('progress-wrap').classList.add('show');
+  await analyzeRepo();
 }
 
 // ─── HELPERS ───────────────────────────────────────────────────────────────────
@@ -883,15 +1021,17 @@ function buildFiles(cfg){
     fGlide,fLottie,fSvg,fMedia3,fOkHttp,fRetrofit,fCoroutines,fRoom,
     fViewBinding,fParcelize,fCodemagic,pInternet,pNetwork,pFg,pNotif,pCleartext}=cfg;
 
-  const theme=themeId(appName);const pkgPath=pkg.replace(/\./g,'/');const useKapt=fGlide||fRoom;
+  const theme=themeId(appName);
+  const pkgPath=pkg.replace(/\./g,'/');
+  const useKapt=fGlide||fRoom;
   const files={};
 
   // ── AndroidManifest.xml ──
   const perms=[
-    pInternet?'    <uses-permission android:name="android.permission.INTERNET" />':'',
-    pNetwork?'    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />':'',
-    pFg?'    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />':'',
-    pNotif?'    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />':'',
+    pInternet ?'    <uses-permission android:name="android.permission.INTERNET" />':'',
+    pNetwork  ?'    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />':'',
+    pFg       ?'    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />':'',
+    pNotif    ?'    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />':'',
   ].filter(Boolean).join('\n');
   const clearAttr=pCleartext?'\n        android:usesCleartextTraffic="true"':'';
 
@@ -927,23 +1067,23 @@ ${perms}
   const deps=[
     `    implementation 'androidx.core:core-ktx:1.16.0'`,
     `    implementation 'androidx.appcompat:appcompat:1.7.0'`,
-    fMaterial?`    implementation 'com.google.android.material:material:1.14.0-alpha06'`:'',
-    fConstraint?`    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'`:'',
-    fTransition?`    implementation 'androidx.transition:transition-ktx:1.5.1'`:'',
-    fDynAnim?`    implementation 'androidx.dynamicanimation:dynamicanimation-ktx:1.0.0-alpha03'`:'',
-    fSwipe?`    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'`:'',
-    fRecycler?`    implementation 'androidx.recyclerview:recyclerview:1.4.0'`:'',
-    fSvg?`    implementation 'com.caverock:androidsvg-aar:1.4'`:'',
-    fGlide?`    implementation 'com.github.bumptech.glide:glide:4.16.0'\n    kapt 'com.github.bumptech.glide:compiler:4.16.0'`:'',
-    fLottie?`    implementation 'com.airbnb.android:lottie:6.6.6'`:'',
-    fFragment?`    implementation 'androidx.fragment:fragment-ktx:1.8.6'`:'',
-    fSplash?`    implementation 'androidx.core:core-splashscreen:1.0.1'`:'',
+    fMaterial   ?`    implementation 'com.google.android.material:material:1.14.0-alpha06'`:'',
+    fConstraint ?`    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'`:'',
+    fTransition ?`    implementation 'androidx.transition:transition-ktx:1.5.1'`:'',
+    fDynAnim    ?`    implementation 'androidx.dynamicanimation:dynamicanimation-ktx:1.0.0-alpha03'`:'',
+    fSwipe      ?`    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'`:'',
+    fRecycler   ?`    implementation 'androidx.recyclerview:recyclerview:1.4.0'`:'',
+    fSvg        ?`    implementation 'com.caverock:androidsvg-aar:1.4'`:'',
+    fGlide      ?`    implementation 'com.github.bumptech.glide:glide:4.16.0'\n    kapt 'com.github.bumptech.glide:compiler:4.16.0'`:'',
+    fLottie     ?`    implementation 'com.airbnb.android:lottie:6.6.6'`:'',
+    fFragment   ?`    implementation 'androidx.fragment:fragment-ktx:1.8.6'`:'',
+    fSplash     ?`    implementation 'androidx.core:core-splashscreen:1.0.1'`:'',
     fCoordinator?`    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'`:'',
-    fOkHttp?`    implementation 'com.squareup.okhttp3:okhttp:4.12.0'`:'',
-    fRetrofit?`    implementation 'com.squareup.retrofit2:retrofit:2.11.0'\n    implementation 'com.squareup.retrofit2:converter-gson:2.11.0'`:'',
-    fCoroutines?`    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1'`:'',
-    fMedia3?`    implementation 'androidx.media3:media3-exoplayer:1.3.1'\n    implementation 'androidx.media3:media3-exoplayer-hls:1.3.1'\n    implementation 'androidx.media3:media3-ui:1.3.1'`:'',
-    fRoom?`    implementation 'androidx.room:room-runtime:2.6.1'\n    implementation 'androidx.room:room-ktx:2.6.1'\n    kapt 'androidx.room:room-compiler:2.6.1'`:'',
+    fOkHttp     ?`    implementation 'com.squareup.okhttp3:okhttp:4.12.0'`:'',
+    fRetrofit   ?`    implementation 'com.squareup.retrofit2:retrofit:2.11.0'\n    implementation 'com.squareup.retrofit2:converter-gson:2.11.0'`:'',
+    fCoroutines ?`    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1'`:'',
+    fMedia3     ?`    implementation 'androidx.media3:media3-exoplayer:1.3.1'\n    implementation 'androidx.media3:media3-exoplayer-hls:1.3.1'\n    implementation 'androidx.media3:media3-ui:1.3.1'`:'',
+    fRoom       ?`    implementation 'androidx.room:room-runtime:2.6.1'\n    implementation 'androidx.room:room-ktx:2.6.1'\n    kapt 'androidx.room:room-compiler:2.6.1'`:'',
     `    testImplementation 'junit:junit:4.13.2'`,
     `    androidTestImplementation 'androidx.test.ext:junit:1.2.1'`,
     `    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'`,
@@ -953,7 +1093,7 @@ ${perms}
     `apply plugin: 'com.android.application'`,
     `apply plugin: 'kotlin-android'`,
     fParcelize?`apply plugin: 'kotlin-parcelize'`:'',
-    useKapt?`apply plugin: 'kotlin-kapt'`:'',
+    useKapt   ?`apply plugin: 'kotlin-kapt'`:'',
   ].filter(Boolean).join('\n');
 
   files['app/build.gradle']=`${plugins}
@@ -1008,24 +1148,36 @@ dependencies {
 ${deps}
 }`;
 
+  // ── build.gradle RAIZ — SEM allprojects (settings.gradle tem FAIL_ON_PROJECT_REPOS) ──
   files['build.gradle']=`buildscript {
-    repositories { google(); mavenCentral() }
+    repositories {
+        google()
+        mavenCentral()
+    }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.5.2'
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.25'
+        classpath 'com.android.tools.build:gradle:${AGP_VERSION}'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:${KOTLIN_VERSION}'
     }
 }
-allprojects {
-    repositories { google(); mavenCentral() }
-}
-task clean(type: Delete) { delete rootProject.buildDir }`;
 
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}`;
+
+  // ── settings.gradle — FAIL_ON_PROJECT_REPOS ──
   files['settings.gradle']=`pluginManagement {
-    repositories { google(); mavenCentral(); gradlePluginPortal() }
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories { google(); mavenCentral() }
+    repositories {
+        google()
+        mavenCentral()
+    }
 }
 rootProject.name = "${appName.replace(/"/g,'\\"')}"
 include ':app'`;
@@ -1035,34 +1187,22 @@ android.useAndroidX=true
 android.enableJetifier=true
 kotlin.code.style=official`;
 
+  // ── gradle-wrapper.properties — Gradle 8.9 compatível com AGP 8.7.0 ──
   files['gradle/wrapper/gradle-wrapper.properties']=`distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
-distributionUrl=https\\://services.gradle.org/distributions/gradle-8.7-bin.zip
+distributionUrl=https\\://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists`;
 
-  // gradlew — script shell real (chmod +x aplicado pelo YAML)
   files['gradlew']=`#!/usr/bin/env sh
-##############################################################################
-## Gradle start up script for UN*X
-##############################################################################
-APP_NAME="Gradle"
-APP_BASE_NAME=\`basename "\$0"\`
 APP_HOME=\`dirname "\$0"\`
 APP_HOME=\`cd "\$APP_HOME" >/dev/null && pwd\`
 CLASSPATH=\$APP_HOME/gradle/wrapper/gradle-wrapper.jar
-
-# Determine the Java command to use to start the JVM.
 if [ -n "\$JAVA_HOME" ] ; then
     JAVACMD="\$JAVA_HOME/bin/java"
-    if [ ! -x "\$JAVACMD" ] ; then
-        die "ERROR: JAVA_HOME is set to an invalid directory: \$JAVA_HOME"
-    fi
 else
     JAVACMD="java"
-    which java >/dev/null 2>&1 || die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH."
 fi
-
 exec "\$JAVACMD" -classpath "\$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "\$@"`;
 
   files['gradlew.bat']=`@rem Gradle startup script for Windows
@@ -1074,7 +1214,6 @@ set CLASSPATH=%APP_HOME%\\gradle\\wrapper\\gradle-wrapper.jar
 set JAVACMD=java
 %JAVACMD% -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*`;
 
-  // resources
   files['app/src/main/res/values/strings.xml']=`<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">${escXml(appName)}</string>
@@ -1090,7 +1229,7 @@ set JAVACMD=java
     <color name="splash_background_dark">${colorSplashDk}</color>
 </resources>`;
 
-  const thP=fMaterial?'Theme.Material3.DayNight.NoActionBar':'Theme.AppCompat.Light.NoActionBar';
+  const thP =fMaterial?'Theme.Material3.DayNight.NoActionBar':'Theme.AppCompat.Light.NoActionBar';
   const thPD=fMaterial?'Theme.Material3.DayNight.NoActionBar':'Theme.AppCompat.DayNight.NoActionBar';
   const splP=fSplash?'Theme.SplashScreen':thP;
 
@@ -1139,9 +1278,9 @@ set JAVACMD=java
 </FrameLayout>`;
 
   const anims={
-    'slide_in_right':'<set xmlns:android="http://schemas.android.com/apk/res/android"><translate android:fromXDelta="100%" android:toXDelta="0%" android:duration="300"/><alpha android:fromAlpha="0.0" android:toAlpha="1.0" android:duration="300"/></set>',
-    'slide_out_left':'<set xmlns:android="http://schemas.android.com/apk/res/android"><translate android:fromXDelta="0%" android:toXDelta="-100%" android:duration="300"/><alpha android:fromAlpha="1.0" android:toAlpha="0.0" android:duration="300"/></set>',
-    'slide_in_left':'<set xmlns:android="http://schemas.android.com/apk/res/android"><translate android:fromXDelta="-100%" android:toXDelta="0%" android:duration="300"/><alpha android:fromAlpha="0.0" android:toAlpha="1.0" android:duration="300"/></set>',
+    'slide_in_right' :'<set xmlns:android="http://schemas.android.com/apk/res/android"><translate android:fromXDelta="100%" android:toXDelta="0%" android:duration="300"/><alpha android:fromAlpha="0.0" android:toAlpha="1.0" android:duration="300"/></set>',
+    'slide_out_left' :'<set xmlns:android="http://schemas.android.com/apk/res/android"><translate android:fromXDelta="0%" android:toXDelta="-100%" android:duration="300"/><alpha android:fromAlpha="1.0" android:toAlpha="0.0" android:duration="300"/></set>',
+    'slide_in_left'  :'<set xmlns:android="http://schemas.android.com/apk/res/android"><translate android:fromXDelta="-100%" android:toXDelta="0%" android:duration="300"/><alpha android:fromAlpha="0.0" android:toAlpha="1.0" android:duration="300"/></set>',
     'slide_out_right':'<set xmlns:android="http://schemas.android.com/apk/res/android"><translate android:fromXDelta="0%" android:toXDelta="100%" android:duration="300"/><alpha android:fromAlpha="1.0" android:toAlpha="0.0" android:duration="300"/></set>',
   };
   Object.entries(anims).forEach(([n,c])=>{files[`app/src/main/res/anim/${n}.xml`]=`<?xml version="1.0" encoding="utf-8"?>\n${c}`;});
@@ -1150,9 +1289,9 @@ set JAVACMD=java
     files[`app/src/main/res/mipmap-${d}/.gitkeep`]='';
   });
 
-  const vbLine=fViewBinding?`import ${pkg}.databinding.ActivityMainBinding\n`:'';
-  const splLine=fSplash?`import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen\n`:'';
-  const splCall=fSplash?'installSplashScreen()\n        ':'';
+  const vbLine  =fViewBinding?`import ${pkg}.databinding.ActivityMainBinding\n`:'';
+  const splLine =fSplash?`import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen\n`:'';
+  const splCall =fSplash?'installSplashScreen()\n        ':'';
   const body=fViewBinding
     ?`\n    private lateinit var binding: ActivityMainBinding\n\n    override fun onCreate(savedInstanceState: Bundle?) {\n        ${splCall}super.onCreate(savedInstanceState)\n        binding = ActivityMainBinding.inflate(layoutInflater)\n        setContentView(binding.root)\n    }`
     :`\n    override fun onCreate(savedInstanceState: Bundle?) {\n        ${splCall}super.onCreate(savedInstanceState)\n        setContentView(R.layout.activity_main)\n    }`;
@@ -1163,29 +1302,23 @@ set JAVACMD=java
 
   files['.gitignore']=`*.iml\n.gradle\n/local.properties\n/.idea\n.DS_Store\n/build\n/captures\n.externalNativeBuild\n.cxx\nlocal.properties\n*.jks\n*.keystore`;
 
-  files['README.md']=`# ${appName}\n\n| Campo | Valor |\n|-------|-------|\n| Package | \`${pkg}\` |\n| Versão | ${verName} (${verCode}) |\n| Min SDK | API ${minSdk} |\n| Target SDK | API ${targetSdk} |\n\n*Gerado por Android Project Generator*`;
+  files['README.md']=`# ${appName}\n\n| Campo | Valor |\n|-------|-------|\n| Package | \`${pkg}\` |\n| Versão | ${verName} (${verCode}) |\n| Min SDK | API ${minSdk} |\n| Target SDK | API ${targetSdk} |\n| AGP | ${AGP_VERSION} |\n| Gradle | ${GRADLE_VERSION} |\n\n*Gerado por Android Project Generator*`;
 
-  // ── codemagic.yaml — com download automático do gradle-wrapper.jar ──
+  // ── codemagic.yaml — Gradle 8.9, AGP 8.7.0, wrapper jar v8.9.0 ──
   if(fCodemagic){
-    const GRADLE_VERSION='8.7';
-    const WRAPPER_JAR_URL=`https://raw.githubusercontent.com/gradle/gradle/v${GRADLE_VERSION}.0/gradle/wrapper/gradle-wrapper.jar`;
-
     const wrapperStep=`      - name: Download gradle-wrapper.jar
         script: |
-          WRAPPER_DIR="gradle/wrapper"
-          mkdir -p "\${CM_BUILD_DIR}/\${WRAPPER_DIR}"
-          JAR="\${CM_BUILD_DIR}/\${WRAPPER_DIR}/gradle-wrapper.jar"
+          WRAPPER_DIR="\${CM_BUILD_DIR}/gradle/wrapper"
+          mkdir -p "\$WRAPPER_DIR"
+          JAR="\$WRAPPER_DIR/gradle-wrapper.jar"
           if [ ! -f "\$JAR" ]; then
-            echo "A fazer download do gradle-wrapper.jar..."
+            echo "A fazer download do gradle-wrapper.jar (Gradle ${GRADLE_VERSION})..."
             curl -fsSL "https://github.com/gradle/gradle/raw/v${GRADLE_VERSION}.0/gradle/wrapper/gradle-wrapper.jar" -o "\$JAR" \\
               || curl -fsSL "https://raw.githubusercontent.com/gradle/gradle/v${GRADLE_VERSION}.0/gradle/wrapper/gradle-wrapper.jar" -o "\$JAR" \\
-              || (
-                echo "Download via curl falhou, a tentar com wget..."
-                wget -q "https://github.com/gradle/gradle/raw/v${GRADLE_VERSION}.0/gradle/wrapper/gradle-wrapper.jar" -O "\$JAR"
-              )
-            echo "✓ gradle-wrapper.jar: \$(du -sh \$JAR | cut -f1)"
+              || wget -q "https://github.com/gradle/gradle/raw/v${GRADLE_VERSION}.0/gradle/wrapper/gradle-wrapper.jar" -O "\$JAR"
+            echo "✅ gradle-wrapper.jar: \$(du -sh \$JAR | cut -f1)"
           else
-            echo "✓ gradle-wrapper.jar já presente no repo"
+            echo "✅ gradle-wrapper.jar já presente no repo"
           fi`;
 
     const ksStep=`      - name: Generate release keystore
@@ -1200,7 +1333,7 @@ set JAVACMD=java
             -keypass "${ksKeyPass}" \\
             -dname "CN=${ksCN}, OU=Dev, O=${ksCN}, L=${ksCity}, ST=${ksCity}, C=${ksCountry}" \\
             -noprompt
-          echo "✓ Keystore gerado: app/${ksFile}"`;
+          echo "✅ Keystore gerado: app/${ksFile}"`;
 
     const iconStep=`      - name: Install Pillow
         script: pip3 install Pillow --quiet
@@ -1273,6 +1406,14 @@ set JAVACMD=java
     const chmodStep=`      - name: Set executable permission on gradlew
         script: chmod +x "\${CM_BUILD_DIR}/gradlew"`;
 
+    const commonScripts=`${wrapperStep}
+
+${ksStep}
+
+${iconStep}
+
+${chmodStep}`;
+
     files['codemagic.yaml']=`workflows:
   android-release:
     name: Android Release Build
@@ -1280,19 +1421,13 @@ set JAVACMD=java
     environment:
       java: 17
     scripts:
-${wrapperStep}
-
-${ksStep}
-
-${iconStep}
-
-${chmodStep}
+${commonScripts}
 
       - name: Build release APK
-        script: cd "\${CM_BUILD_DIR}" && ./gradlew assembleRelease
+        script: cd "\${CM_BUILD_DIR}" && ./gradlew assembleRelease --no-daemon
 
       - name: Build release AAB
-        script: cd "\${CM_BUILD_DIR}" && ./gradlew bundleRelease
+        script: cd "\${CM_BUILD_DIR}" && ./gradlew bundleRelease --no-daemon
 
     artifacts:
       - app/build/outputs/apk/release/*.apk
@@ -1312,16 +1447,10 @@ ${chmodStep}
     environment:
       java: 17
     scripts:
-${wrapperStep}
-
-${ksStep}
-
-${iconStep}
-
-${chmodStep}
+${commonScripts}
 
       - name: Build debug APK
-        script: cd "\${CM_BUILD_DIR}" && ./gradlew assembleDebug
+        script: cd "\${CM_BUILD_DIR}" && ./gradlew assembleDebug --no-daemon
 
     artifacts:
       - app/build/outputs/apk/debug/*.apk
@@ -1340,7 +1469,8 @@ ${chmodStep}
 
 // ─── SHA BLOB GIT ───────────────────────────────────────────────────────────────
 async function computeGitBlobSha(content){
-  const enc=new TextEncoder();const contentBytes=enc.encode(content);
+  const enc=new TextEncoder();
+  const contentBytes=enc.encode(content);
   const header=enc.encode(`blob ${contentBytes.length}\0`);
   const full=new Uint8Array(header.length+contentBytes.length);
   full.set(header);full.set(contentBytes,header.length);
@@ -1354,7 +1484,8 @@ async function generateProject(pushMode){
   const btn=document.getElementById('generateBtn'),pb=document.getElementById('pushBtn');
   btn.disabled=true;pb.disabled=true;
   document.getElementById('progress-wrap').classList.add('show');
-  document.getElementById('progressLog').innerHTML='';setProgress(0,'A processar...');
+  document.getElementById('progressLog').innerHTML='';
+  setProgress(0,'A processar...');
   try{await _generate(pushMode);}catch(e){showError('Erro: '+e.message);console.error(e);}
   finally{btn.disabled=false;pb.disabled=false;}
 }
@@ -1362,29 +1493,48 @@ async function generateProject(pushMode){
 async function _generate(pushMode){
   const cfg=buildCfg();
   const slug=cfg.appName.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'').toLowerCase()||'myapp';
-  setProgress(5,'A gerar ficheiros...');logMsg('📦 A construir ficheiros do projeto...','info');
+  setProgress(5,'A gerar ficheiros...');
+  logMsg('📦 A construir ficheiros do projeto...','info');
   const generatedFiles=buildFiles(cfg);
 
-  // Merge: gerado base + pulled (pulled tem prioridade)
+  // Merge: gerado base + pulled (pulled tem prioridade para texto)
   const finalFiles={...generatedFiles};
-  Object.entries(S.pulledFiles).forEach(([path,data])=>{finalFiles[path]=typeof data==='string'?data:data.content;});
-  logMsg(`✓ ${Object.keys(finalFiles).length} ficheiros totais`,'ok');setProgress(20);
+  Object.entries(S.pulledFiles).forEach(([path,data])=>{
+    if(data.isBinary) return; // binários tratados separadamente
+    finalFiles[path]=typeof data==='string'?data:(data.content||'');
+  });
+  logMsg(`✓ ${Object.keys(finalFiles).length} ficheiros totais`,'ok');
+  setProgress(20);
 
   const zip=new JSZip();
   Object.entries(finalFiles).forEach(([path,content])=>{zip.file(path,content||'');});
-  if(S.launcherUrl){zip.file('ic_launcher.png',duToB64(S.launcherUrl),{base64:true});logMsg('✓ ic_launcher.png incluído','ok');}
-  if(S.splashUrl){zip.file('splash_icon.png',duToB64(S.splashUrl),{base64:true});logMsg('✓ splash_icon.png incluído','ok');}
+
+  // Ícones: prioridade para pulled, depois uploaded
+  if(S.launcherUrl){
+    zip.file('ic_launcher.png',duToB64(S.launcherUrl),{base64:true});
+    logMsg('✓ ic_launcher.png incluído','ok');
+  }
+  if(S.splashUrl){
+    zip.file('splash_icon.png',duToB64(S.splashUrl),{base64:true});
+    logMsg('✓ splash_icon.png incluído','ok');
+  }
   setProgress(35);
 
   if(!pushMode){
-    setProgress(40,'A compactar ZIP...');logMsg('🗜 A compactar...','info');
+    setProgress(40,'A compactar ZIP...');
+    logMsg('🗜 A compactar...','info');
     const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',platform:'UNIX'});
-    const url=URL.createObjectURL(blob);const a=document.createElement('a');
-    a.href=url;a.download=`${slug}.zip`;a.click();URL.revokeObjectURL(url);
-    setProgress(100,'Concluído!');logMsg(`✅ ZIP descarregado: ${slug}.zip`,'ok');
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=`${slug}.zip`;a.click();
+    URL.revokeObjectURL(url);
+    setProgress(100,'Concluído!');
+    logMsg(`✅ ZIP descarregado: ${slug}.zip`,'ok');
   }else{
     // ── PUSH INCREMENTAL ──────────────────────────────────────────────────────
-    const repo=S.ghRepo.full_name;const branch=v('ghBranch');const apiBase=`https://api.github.com/repos/${repo}`;
+    const repo=S.ghRepo.full_name;
+    const branch=v('ghBranch');
+    const apiBase=`https://api.github.com/repos/${repo}`;
     const CHUNK_SIZE=2*1024*1024;
     setProgress(40,`Push incremental → ${repo}@${branch}...`);
     logMsg(`🚀 Push incremental para ${repo}@${branch}...`,'info');
@@ -1392,33 +1542,63 @@ async function _generate(pushMode){
     let headSha;
     try{
       const ref=await ghFetch(`${apiBase}/git/refs/heads/${branch}`);
-      headSha=ref.object.sha;logMsg(`  → Branch "${branch}": ${headSha.slice(0,7)}`,'ok');
+      headSha=ref.object.sha;
+      logMsg(`  → Branch "${branch}": ${headSha.slice(0,7)}`,'ok');
     }catch{
       logMsg(`  → Branch "${branch}" não existe, a criar...`,'warn');
-      const repoInfo=await ghFetch(apiBase);const defaultBr=repoInfo.default_branch||'main';
-      try{const ref2=await ghFetch(`${apiBase}/git/refs/heads/${defaultBr}`);headSha=ref2.object.sha;}
-      catch{await ghFetch(`${apiBase}/contents/README.md`,{method:'PUT',body:JSON.stringify({message:'init',content:btoa('# '+cfg.appName)})});const ref3=await ghFetch(`${apiBase}/git/refs/heads/${defaultBr}`);headSha=ref3.object.sha;}
+      const repoInfo=await ghFetch(apiBase);
+      const defaultBr=repoInfo.default_branch||'main';
+      try{
+        const ref2=await ghFetch(`${apiBase}/git/refs/heads/${defaultBr}`);
+        headSha=ref2.object.sha;
+      }catch{
+        await ghFetch(`${apiBase}/contents/README.md`,{method:'PUT',body:JSON.stringify({message:'init',content:btoa('# '+cfg.appName)})});
+        const ref3=await ghFetch(`${apiBase}/git/refs/heads/${defaultBr}`);
+        headSha=ref3.object.sha;
+      }
       await ghFetch(`${apiBase}/git/refs`,{method:'POST',body:JSON.stringify({ref:`refs/heads/${branch}`,sha:headSha})});
       logMsg(`  ✓ Branch "${branch}" criado`,'ok');
     }
 
-    setProgress(48,'A calcular diferenças...');logMsg('  → A calcular ficheiros alterados...','info');
+    setProgress(48,'A calcular diferenças...');
+    logMsg('  → A calcular ficheiros alterados...','info');
     const toUpload=[];let unchanged=0;
 
+    // Ficheiros de texto
     for(const [path,content] of Object.entries(finalFiles)){
       const remoteShaBlobHex=S.remoteFileShas[path];
       if(typeof content==='string'){
         const localSha=await computeGitBlobSha(content);
-        if(!remoteShaBlobHex||localSha!==remoteShaBlobHex)toUpload.push({path,content});
+        if(!remoteShaBlobHex||localSha!==remoteShaBlobHex) toUpload.push({path,content});
         else unchanged++;
-      }else if(!remoteShaBlobHex){toUpload.push({path,content:content||''});}
+      }else if(!remoteShaBlobHex){
+        toUpload.push({path,content:content||''});
+      }
     }
 
-    if(S.launcherUrl&&!S.remoteFileShas['ic_launcher.png'])toUpload.push({path:'ic_launcher.png',isBase64:true,b64:duToB64(S.launcherUrl)});
-    if(S.splashUrl&&!S.remoteFileShas['splash_icon.png'])toUpload.push({path:'splash_icon.png',isBase64:true,b64:duToB64(S.splashUrl)});
+    // Ícones binários
+    if(S.launcherUrl&&!S.remoteFileShas['ic_launcher.png'])
+      toUpload.push({path:'ic_launcher.png',isBase64:true,b64:duToB64(S.launcherUrl)});
+    else if(S.launcherUrl&&S.remoteFileShas['ic_launcher.png']){
+      // Ícone já existe no repo e foi pulled — só push se foi alterado (novo upload manual)
+      if(S.launcher) // ficheiro novo via input manual
+        toUpload.push({path:'ic_launcher.png',isBase64:true,b64:duToB64(S.launcherUrl)});
+      else unchanged++;
+    }
+    if(S.splashUrl&&!S.remoteFileShas['splash_icon.png'])
+      toUpload.push({path:'splash_icon.png',isBase64:true,b64:duToB64(S.splashUrl)});
+    else if(S.splashUrl&&S.remoteFileShas['splash_icon.png']){
+      if(S.splash)
+        toUpload.push({path:'splash_icon.png',isBase64:true,b64:duToB64(S.splashUrl)});
+      else unchanged++;
+    }
 
     logMsg(`  → ${toUpload.length} alterados, ${unchanged} sem mudanças`,'info');
-    if(toUpload.length===0){setProgress(100,'Sem alterações!');logMsg('✅ Repo já atualizado — nenhum ficheiro alterado.','ok');return;}
+    if(toUpload.length===0){
+      setProgress(100,'Sem alterações!');
+      logMsg('✅ Repo já atualizado — nenhum ficheiro alterado.','ok');
+      return;
+    }
 
     const chunks=[];let cur=[],curSz=0;
     for(const entry of toUpload){
@@ -1431,34 +1611,48 @@ async function _generate(pushMode){
 
     let currentSha=headSha,totalUploaded=0;
     for(let ci=0;ci<chunks.length;ci++){
-      const chunk=chunks[ci];const chunkLabel=`${ci+1}/${chunks.length}`;
+      const chunk=chunks[ci];
+      const chunkLabel=`${ci+1}/${chunks.length}`;
       setProgress(50+(ci/chunks.length)*45,`Push chunk ${chunkLabel}...`);
       logMsg(`  → Chunk ${chunkLabel}: ${chunk.length} ficheiros...`,'info');
       const commitData=await ghFetch(`${apiBase}/git/commits/${currentSha}`);
-      const treeSha=commitData.tree.sha;const treeItems=[];
+      const treeSha=commitData.tree.sha;
+      const treeItems=[];
       for(const entry of chunk){
         if(entry.isBase64){
           const blobRes=await ghFetch(`${apiBase}/git/blobs`,{method:'POST',body:JSON.stringify({content:entry.b64,encoding:'base64'})});
           treeItems.push({path:entry.path,mode:'100644',type:'blob',sha:blobRes.sha});
         }else{
           const bytes=new TextEncoder().encode(entry.content||'');
-          if(bytes.length===0){treeItems.push({path:entry.path,mode:'100644',type:'blob',content:''});}
-          else if(isTextContent(bytes)){treeItems.push({path:entry.path,mode:'100644',type:'blob',content:entry.content});}
-          else{const b64=uint8ToBase64(bytes);const blobRes=await ghFetch(`${apiBase}/git/blobs`,{method:'POST',body:JSON.stringify({content:b64,encoding:'base64'})});treeItems.push({path:entry.path,mode:'100644',type:'blob',sha:blobRes.sha});}
+          if(bytes.length===0){
+            treeItems.push({path:entry.path,mode:'100644',type:'blob',content:''});
+          }else if(isTextContent(bytes)){
+            treeItems.push({path:entry.path,mode:'100644',type:'blob',content:entry.content});
+          }else{
+            const b64=uint8ToBase64(bytes);
+            const blobRes=await ghFetch(`${apiBase}/git/blobs`,{method:'POST',body:JSON.stringify({content:b64,encoding:'base64'})});
+            treeItems.push({path:entry.path,mode:'100644',type:'blob',sha:blobRes.sha});
+          }
         }
       }
       const newTree=await ghFetch(`${apiBase}/git/trees`,{method:'POST',body:JSON.stringify({base_tree:treeSha,tree:treeItems})});
       const isLast=ci===chunks.length-1;
-      const msg=isLast?`feat: ${cfg.appName} v${cfg.verName} — Android Project Generator`:`chore: project files (${chunkLabel})`;
+      const msg=isLast
+        ?`feat: ${cfg.appName} v${cfg.verName} — Android Project Generator`
+        :`chore: project files (${chunkLabel})`;
       const newCommit=await ghFetch(`${apiBase}/git/commits`,{method:'POST',body:JSON.stringify({message:msg,tree:newTree.sha,parents:[currentSha]})});
       await ghFetch(`${apiBase}/git/refs/heads/${branch}`,{method:'PATCH',body:JSON.stringify({sha:newCommit.sha,force:false})});
-      currentSha=newCommit.sha;totalUploaded+=chunk.length;
+      currentSha=newCommit.sha;
+      totalUploaded+=chunk.length;
       logMsg(`  ✓ Chunk ${chunkLabel} → ${newCommit.sha.slice(0,7)}`,'ok');
     }
     setProgress(100,'Push concluído!');
-    logMsg('','');logMsg(`✅ Push incremental completo!`,'ok');
-    logMsg(`   Repo:        ${repo}`,'ok');logMsg(`   Branch:      ${branch}`,'ok');
-    logMsg(`   Atualizados: ${totalUploaded} ficheiros`,'ok');logMsg(`   Ignorados:   ${unchanged} (sem alterações)`,'ok');
+    logMsg('','');
+    logMsg(`✅ Push incremental completo!`,'ok');
+    logMsg(`   Repo:        ${repo}`,'ok');
+    logMsg(`   Branch:      ${branch}`,'ok');
+    logMsg(`   Atualizados: ${totalUploaded} ficheiros`,'ok');
+    logMsg(`   Ignorados:   ${unchanged} (sem alterações)`,'ok');
     logMsg(`   🔗 https://github.com/${repo}/tree/${branch}`,'ok');
     // Atualizar SHAs locais
     S.remoteFileShas={...S.remoteFileShas};
