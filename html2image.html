@@ -38,7 +38,6 @@
     max-width: 720px;
   }
 
-  /* ── Dropzone ───────────────────────────────────────────── */
   .dropzone {
     border: 2px dashed var(--border);
     border-radius: 12px;
@@ -52,7 +51,21 @@
   .dropzone input { display: none; }
   .icon { width: 32px; height: 32px; margin: 0 auto; display: block; color: var(--text-dim); }
 
-  /* ── Tabs modo ──────────────────────────────────────────── */
+  /* ZIP badge */
+  .zip-badge {
+    display: inline-block;
+    background: rgba(124, 92, 255, 0.18);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    margin-left: 6px;
+    vertical-align: middle;
+    letter-spacing: 0.04em;
+  }
+
   .mode-tabs {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -75,7 +88,6 @@
     background: rgba(124, 92, 255, 0.12);
   }
 
-  /* ── Opções ─────────────────────────────────────────────── */
   .options {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -94,7 +106,6 @@
     font-size: 14px;
   }
 
-  /* ── Controlo de simplicidade / peso ───────────────────── */
   .simplify-box {
     margin-top: 16px;
     background: #0d0d0f;
@@ -116,7 +127,6 @@
   }
   .simplify-box .hint { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
 
-  /* ── Grid de itens (upload em lote) ────────────────────── */
   .batch-grid {
     display: none;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -186,7 +196,6 @@
   .batch-item.converting .status-dot { background: var(--accent); animation: pulse 0.8s ease-in-out infinite; }
   @keyframes pulse { 50% { opacity: 0.3; } }
 
-  /* Botão × de remover — canto superior direito de cada card */
   .batch-item .remove-btn {
     position: absolute;
     top: 4px;
@@ -218,7 +227,6 @@
   }
   .batch-summary.show { display: flex; }
 
-  /* Botão discreto de "adicionar mais" acima do grid */
   .add-more-btn {
     display: none;
     width: 100%;
@@ -234,7 +242,6 @@
   .add-more-btn.show { display: block; }
   .add-more-btn:active { border-color: var(--accent); color: var(--text); }
 
-  /* ── Botão principal ────────────────────────────────────── */
   button.primary {
     width: 100%;
     margin-top: 16px;
@@ -249,7 +256,6 @@
   }
   button.primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* ── Progressbar ────────────────────────────────────────── */
   .progress-wrap {
     display: none;
     margin-top: 14px;
@@ -287,7 +293,6 @@
   }
   .status.error { color: #ff6b6b; }
 
-  /* ── Preview single-file (modo 1 imagem) ───────────────── */
   .preview {
     margin-top: 20px;
     background: #ffffff;
@@ -345,25 +350,22 @@
 <body>
 
 <h1>PNG → SVG</h1>
-<p class="subtitle">Conversão 100% no navegador — 1 imagem ou lote de até 91+, sem servidor</p>
+<p class="subtitle">Conversão 100% no navegador — imagens soltas ou ZIP, sem servidor</p>
 
 <div class="card">
 
-  <!-- ═══ Dropzone (aceita múltiplos arquivos) ═══ -->
   <div class="dropzone" id="dropzone">
     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
       <path d="M12 16V4M12 4l-4 4M12 4l4 4" stroke-linecap="round" stroke-linejoin="round"/>
       <path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    <p id="dropzoneText">Toque para escolher 1 ou várias imagens<br>ou arraste aqui (PNG/JPG)</p>
-    <input type="file" id="fileInput" accept="image/png,image/jpeg" multiple>
+    <p id="dropzoneText">Toque para escolher imagens ou um <span class="zip-badge">ZIP</span><br>PNG/JPG soltos ou .zip com imagens dentro</p>
+    <input type="file" id="fileInput" accept="image/png,image/jpeg,application/zip,.zip" multiple>
   </div>
 
-  <!-- Botão para acrescentar mais imagens sem reiniciar o lote -->
-  <button type="button" class="add-more-btn" id="addMoreBtn">+ Adicionar mais imagens</button>
-  <input type="file" id="fileInputAdd" accept="image/png,image/jpeg" multiple style="display:none">
+  <button type="button" class="add-more-btn" id="addMoreBtn">+ Adicionar mais imagens ou ZIP</button>
+  <input type="file" id="fileInputAdd" accept="image/png,image/jpeg,application/zip,.zip" multiple style="display:none">
 
-  <!-- ═══ Modo de cor ═══ -->
   <div class="mode-tabs">
     <button type="button" class="mode-tab active" id="tabColorido">Colorido</button>
     <button type="button" class="mode-tab" id="tabPreto">Preto puro</button>
@@ -391,7 +393,6 @@
     </div>
   </div>
 
-  <!-- ═══ Controlo único de simplicidade/peso ═══ -->
   <div class="simplify-box">
     <div class="row">
       <span>Simplicidade da curva</span>
@@ -401,7 +402,6 @@
     <div class="hint" id="simplifyHint">Menos pontos = arquivo mais leve, mais pontos = mais fiel ao original.</div>
   </div>
 
-  <!-- ═══ Grid de itens (modo lote) ═══ -->
   <div class="batch-grid" id="batchGrid"></div>
   <div class="batch-summary" id="batchSummary">
     <span id="batchCount">0 imagens</span>
@@ -422,7 +422,6 @@
 
   <div class="status" id="status"></div>
 
-  <!-- ═══ Preview modo single-file ═══ -->
   <div class="preview" id="preview"></div>
   <div class="actions" id="actions">
     <button id="copyBtn">Copiar SVG</button>
@@ -430,7 +429,6 @@
     <button id="resetBtn">Nova imagem</button>
   </div>
 
-  <!-- ═══ Ações modo lote (depois de converter) ═══ -->
   <div class="actions" id="batchActions">
     <button id="downloadZipBtn">Baixar tudo em .zip</button>
     <button id="downloadAllOneByOneBtn" class="secondary">Baixar um por um</button>
@@ -441,160 +439,180 @@
 
 <script>
 window.addEventListener("DOMContentLoaded", () => {
-  if (typeof ImageTracer === "undefined") {
-    mostrarErroFatal("Erro: biblioteca de rastreamento não carregou (verifique a conexão)");
-  }
-  if (typeof JSZip === "undefined") {
-    mostrarErroFatal("Erro: biblioteca de zip não carregou (verifique a conexão)");
-  }
+  if (typeof ImageTracer === "undefined") mostrarErroFatal("Erro: biblioteca de rastreamento não carregou (verifique a conexão)");
+  if (typeof JSZip === "undefined") mostrarErroFatal("Erro: biblioteca de zip não carregou (verifique a conexão)");
 });
 
 function mostrarErroFatal(msg) {
-  const statusEl = document.getElementById("status");
-  statusEl.textContent = msg;
-  statusEl.classList.add("error");
+  document.getElementById("status").textContent = msg;
+  document.getElementById("status").classList.add("error");
   document.getElementById("convertBtn").disabled = true;
 }
 
-// ── Referências DOM ──────────────────────────────────────────
-const dropzone = document.getElementById("dropzone");
-const dropzoneText = document.getElementById("dropzoneText");
-const fileInput = document.getElementById("fileInput");
-const addMoreBtn = document.getElementById("addMoreBtn");
-const fileInputAdd = document.getElementById("fileInputAdd");
-const convertBtn = document.getElementById("convertBtn");
-const statusEl = document.getElementById("status");
-
-const preview = document.getElementById("preview");
-const actions = document.getElementById("actions");
-const copyBtn = document.getElementById("copyBtn");
-const downloadBtn = document.getElementById("downloadBtn");
-const resetBtn = document.getElementById("resetBtn");
-
-const tabColorido = document.getElementById("tabColorido");
-const tabPreto = document.getElementById("tabPreto");
-const optionsColorido = document.getElementById("optionsColorido");
-const optionsPreto = document.getElementById("optionsPreto");
-
-const simplifySlider = document.getElementById("simplifySlider");
-const simplifyLabel = document.getElementById("simplifyLabel");
-const simplifyHint = document.getElementById("simplifyHint");
-
-const batchGrid = document.getElementById("batchGrid");
-const batchSummary = document.getElementById("batchSummary");
-const batchCount = document.getElementById("batchCount");
-const batchTotalSize = document.getElementById("batchTotalSize");
-const batchActions = document.getElementById("batchActions");
-const downloadZipBtn = document.getElementById("downloadZipBtn");
-const downloadAllOneByOneBtn = document.getElementById("downloadAllOneByOneBtn");
-const batchResetBtn = document.getElementById("batchResetBtn");
-
-const progressWrap = document.getElementById("progressWrap");
-const progressFill = document.getElementById("progressFill");
-const progressText = document.getElementById("progressText");
-const progressCount = document.getElementById("progressCount");
+// ── DOM refs ──────────────────────────────────────────────────
+const dropzone              = document.getElementById("dropzone");
+const dropzoneText          = document.getElementById("dropzoneText");
+const fileInput             = document.getElementById("fileInput");
+const addMoreBtn            = document.getElementById("addMoreBtn");
+const fileInputAdd          = document.getElementById("fileInputAdd");
+const convertBtn            = document.getElementById("convertBtn");
+const statusEl              = document.getElementById("status");
+const preview               = document.getElementById("preview");
+const actions               = document.getElementById("actions");
+const copyBtn               = document.getElementById("copyBtn");
+const downloadBtn           = document.getElementById("downloadBtn");
+const resetBtn              = document.getElementById("resetBtn");
+const tabColorido           = document.getElementById("tabColorido");
+const tabPreto              = document.getElementById("tabPreto");
+const optionsColorido       = document.getElementById("optionsColorido");
+const optionsPreto          = document.getElementById("optionsPreto");
+const simplifySlider        = document.getElementById("simplifySlider");
+const simplifyLabel         = document.getElementById("simplifyLabel");
+const simplifyHint          = document.getElementById("simplifyHint");
+const batchGrid             = document.getElementById("batchGrid");
+const batchSummary          = document.getElementById("batchSummary");
+const batchCount            = document.getElementById("batchCount");
+const batchTotalSize        = document.getElementById("batchTotalSize");
+const batchActions          = document.getElementById("batchActions");
+const downloadZipBtn        = document.getElementById("downloadZipBtn");
+const downloadAllOneByOneBtn= document.getElementById("downloadAllOneByOneBtn");
+const batchResetBtn         = document.getElementById("batchResetBtn");
+const progressWrap          = document.getElementById("progressWrap");
+const progressFill          = document.getElementById("progressFill");
+const progressText          = document.getElementById("progressText");
+const progressCount         = document.getElementById("progressCount");
 
 // ── Estado ────────────────────────────────────────────────────
-let modoAtual = "colorido"; // "colorido" | "preto"
-
-// Modo single-file (compatibilidade com o fluxo original de 1 imagem)
+let modoAtual = "colorido";
 let arquivoSelecionado = null;
 let svgAtual = null;
-
-// Modo lote: array de { id, file, img, svg, tamanhoBytes, status, elItem, ... }
-// idCounter nunca é reiniciado enquanto o lote existir — garante que
-// cada card tem um id único mesmo depois de remover itens do meio,
-// evitando colisão entre um item apagado e um item novo adicionado.
 let lote = [];
 let idCounter = 0;
 
-// ── Presets de simplicidade ──────────────────────────────────
-const PRESETS_SIMPLIFICACAO = [
-  { nome: "Máxima economia", ltres: 4,   qtres: 4,   pathomit: 20, decimais: 0 },
-  { nome: "Leve",            ltres: 2,   qtres: 2,   pathomit: 12, decimais: 1 },
-  { nome: "Equilibrado",     ltres: 1,   qtres: 1,   pathomit: 8,  decimais: 1 },
-  { nome: "Fiel",            ltres: 0.5, qtres: 0.5, pathomit: 4,  decimais: 2 },
-  { nome: "Máxima fidelidade", ltres: 0.2, qtres: 0.2, pathomit: 1, decimais: 2 }
+// ── Presets ───────────────────────────────────────────────────
+const PRESETS = [
+  { nome: "Máxima economia",    ltres: 4,   qtres: 4,   pathomit: 20, decimais: 0 },
+  { nome: "Leve",               ltres: 2,   qtres: 2,   pathomit: 12, decimais: 1 },
+  { nome: "Equilibrado",        ltres: 1,   qtres: 1,   pathomit: 8,  decimais: 1 },
+  { nome: "Fiel",               ltres: 0.5, qtres: 0.5, pathomit: 4,  decimais: 2 },
+  { nome: "Máxima fidelidade",  ltres: 0.2, qtres: 0.2, pathomit: 1,  decimais: 2 }
 ];
 
-function presetAtual() {
-  return PRESETS_SIMPLIFICACAO[parseInt(simplifySlider.value, 10)];
-}
+function presetAtual() { return PRESETS[parseInt(simplifySlider.value, 10)]; }
 
 function atualizarLabelSimplificacao() {
   const p = presetAtual();
   simplifyLabel.textContent = p.nome;
-  if (p.decimais === 0) {
-    simplifyHint.textContent = "Arquivo o mais leve possível — pode perder curvas finas em detalhes muito pequenos.";
-  } else if (parseInt(simplifySlider.value, 10) >= 3) {
-    simplifyHint.textContent = "Mais fiel ao desenho original — arquivo maior.";
-  } else {
-    simplifyHint.textContent = "Menos pontos = arquivo mais leve, mais pontos = mais fiel ao original.";
-  }
+  const v = parseInt(simplifySlider.value, 10);
+  if (v === 0) simplifyHint.textContent = "Arquivo o mais leve possível — pode perder curvas finas.";
+  else if (v >= 3) simplifyHint.textContent = "Mais fiel ao desenho original — arquivo maior.";
+  else simplifyHint.textContent = "Menos pontos = arquivo mais leve, mais pontos = mais fiel ao original.";
 }
 simplifySlider.addEventListener("input", atualizarLabelSimplificacao);
 atualizarLabelSimplificacao();
 
-// ── Tabs de modo de cor ───────────────────────────────────────
+// ── Tabs modo cor ─────────────────────────────────────────────
 tabColorido.addEventListener("click", () => {
   modoAtual = "colorido";
-  tabColorido.classList.add("active");
-  tabPreto.classList.remove("active");
-  optionsColorido.classList.remove("hidden");
-  optionsPreto.classList.add("hidden");
+  tabColorido.classList.add("active"); tabPreto.classList.remove("active");
+  optionsColorido.classList.remove("hidden"); optionsPreto.classList.add("hidden");
 });
-
 tabPreto.addEventListener("click", () => {
   modoAtual = "preto";
-  tabPreto.classList.add("active");
-  tabColorido.classList.remove("active");
-  optionsPreto.classList.remove("hidden");
-  optionsColorido.classList.add("hidden");
+  tabPreto.classList.add("active"); tabColorido.classList.remove("active");
+  optionsPreto.classList.remove("hidden"); optionsColorido.classList.add("hidden");
 });
 
-// ── Dropzone: clique e drag&drop (seleção INICIAL) ───────────
+// ── Dropzone ──────────────────────────────────────────────────
 dropzone.addEventListener("click", () => fileInput.click());
 
-["dragover", "dragenter"].forEach(evt => {
-  dropzone.addEventListener(evt, (e) => {
-    e.preventDefault();
-    dropzone.classList.add("dragover");
-  });
+["dragover","dragenter"].forEach(e => dropzone.addEventListener(e, ev => { ev.preventDefault(); dropzone.classList.add("dragover"); }));
+["dragleave","drop"].forEach(e => dropzone.addEventListener(e, ev => { ev.preventDefault(); dropzone.classList.remove("dragover"); }));
+
+dropzone.addEventListener("drop", async (e) => {
+  const files = Array.from(e.dataTransfer.files);
+  if (files.length) await processarSelecaoInicial(files);
 });
 
-["dragleave", "drop"].forEach(evt => {
-  dropzone.addEventListener(evt, (e) => {
-    e.preventDefault();
-    dropzone.classList.remove("dragover");
-  });
-});
-
-dropzone.addEventListener("drop", (e) => {
-  const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
-  if (files.length) processarSelecaoInicial(files);
-});
-
-fileInput.addEventListener("change", (e) => {
+fileInput.addEventListener("change", async (e) => {
   const files = Array.from(e.target.files);
-  if (files.length) processarSelecaoInicial(files);
-  fileInput.value = ""; // permite escolher o mesmo arquivo de novo depois
+  if (files.length) await processarSelecaoInicial(files);
+  fileInput.value = "";
 });
 
-// Decide se entra em modo single-file (1 imagem, preview inline,
-// igual ao comportamento original) ou modo lote (grid + zip).
-// Isto só corre na PRIMEIRA seleção — depois de já estar em modo
-// lote, novas imagens entram por adicionarAoLote() sem passar aqui.
-function processarSelecaoInicial(files) {
-  if (lote.length > 0) {
-    // já havia um lote em curso: trata como "adicionar mais"
-    adicionarAoLote(files);
+// ── Extrai imagens de um ZIP, retorna array de File ───────────
+async function extrairImagensDoZip(zipFile) {
+  const zip = await JSZip.loadAsync(zipFile);
+  const imagens = [];
+  const EXTS_IMAGEM = /\.(png|jpg|jpeg)$/i;
+  // JSZip usa forEach mas precisamos de async — coletamos promises
+  const promises = [];
+  zip.forEach((caminho, entry) => {
+    if (entry.dir) return;
+    // ignora arquivos do sistema macOS (__MACOSX, .DS_Store etc.)
+    if (caminho.startsWith("__MACOSX/") || caminho.includes("/.") || /\/\._/.test(caminho)) return;
+    const nome = caminho.split("/").pop();
+    if (!EXTS_IMAGEM.test(nome)) return;
+    promises.push(
+      entry.async("blob").then(blob => {
+        const tipo = nome.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
+        return new File([blob], nome, { type: tipo });
+      })
+    );
+  });
+  const resultados = await Promise.all(promises);
+  return resultados;
+}
+
+// ── Separa ficheiros normais de ZIPs numa lista mista ─────────
+async function resolverFicheiros(files) {
+  const imagensNormais = [];
+  const zipFiles = [];
+
+  for (const f of files) {
+    if (f.type === "application/zip" || f.name.toLowerCase().endsWith(".zip")) {
+      zipFiles.push(f);
+    } else if (f.type.startsWith("image/")) {
+      imagensNormais.push(f);
+    }
+  }
+
+  // Extrai todos os zips em paralelo
+  const extraidasPorZip = await Promise.all(zipFiles.map(extrairImagensDoZip));
+  const imagensDeZip = extraidasPorZip.flat();
+
+  return [...imagensNormais, ...imagensDeZip];
+}
+
+async function processarSelecaoInicial(files) {
+  // mostra loading enquanto extrai zip
+  const temZip = files.some(f => f.type === "application/zip" || f.name.toLowerCase().endsWith(".zip"));
+  if (temZip) {
+    statusEl.classList.remove("error");
+    statusEl.innerHTML = `<span class="spinner"></span>Extraindo ZIP...`;
+  }
+
+  const todasImagens = await resolverFicheiros(files);
+
+  statusEl.textContent = "";
+
+  if (todasImagens.length === 0) {
+    statusEl.textContent = "Nenhuma imagem PNG/JPG encontrada.";
+    statusEl.classList.add("error");
     return;
   }
+
+  if (lote.length > 0) {
+    adicionarAoLote(todasImagens);
+    return;
+  }
+
   limparTudo();
-  if (files.length === 1) {
-    selecionarArquivoUnico(files[0]);
+
+  if (todasImagens.length === 1) {
+    selecionarArquivoUnico(todasImagens[0]);
   } else {
-    montarLote(files);
+    montarLote(todasImagens);
   }
 }
 
@@ -615,14 +633,12 @@ function limparTudo() {
   statusEl.classList.remove("error");
   progressWrap.classList.remove("show");
   progressFill.style.width = "0%";
-  dropzoneText.innerHTML = "Toque para escolher 1 ou várias imagens<br>ou arraste aqui (PNG/JPG)";
+  dropzoneText.innerHTML = `Toque para escolher imagens ou um <span class="zip-badge">ZIP</span><br>PNG/JPG soltos ou .zip com imagens dentro`;
   convertBtn.textContent = "Converter";
+  convertBtn.disabled = true;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// MODO SINGLE-FILE (1 imagem apenas — mesmo fluxo de antes)
-// ═══════════════════════════════════════════════════════════════
-
+// ── Single file ───────────────────────────────────────────────
 function selecionarArquivoUnico(file) {
   arquivoSelecionado = file;
   dropzoneText.innerHTML = `<strong>${escapeHtml(file.name)}</strong><br>${(file.size / 1024).toFixed(0)} KB`;
@@ -639,45 +655,30 @@ function carregarImagem(file) {
 }
 
 function paraPretoPuro(imageData, limiarAlpha) {
-  const dados = imageData.data;
-  for (let i = 0; i < dados.length; i += 4) {
-    const alpha = dados[i + 3];
-    if (alpha >= limiarAlpha) {
-      dados[i] = 0; dados[i + 1] = 0; dados[i + 2] = 0; dados[i + 3] = 255;
-    } else {
-      dados[i] = 0; dados[i + 1] = 0; dados[i + 2] = 0; dados[i + 3] = 0;
-    }
+  const d = imageData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i + 3] >= limiarAlpha) { d[i] = 0; d[i+1] = 0; d[i+2] = 0; d[i+3] = 255; }
+    else { d[i] = 0; d[i+1] = 0; d[i+2] = 0; d[i+3] = 0; }
   }
   return imageData;
 }
 
-function forcarPretoPuroNoSvg(svgTexto) {
-  return svgTexto
+function forcarPretoPuroNoSvg(svg) {
+  return svg
     .replace(/fill="rgb\([^)]*\)"/g, 'fill="#000000"')
     .replace(/<path[^>]*fill-opacity="0"[^>]*\/>/g, '');
 }
 
-function arredondarCoordenadasSvg(svgTexto, casas) {
-  return svgTexto.replace(/-?\d+\.\d+/g, (num) => {
-    const arred = parseFloat(num).toFixed(casas);
-    return parseFloat(arred).toString();
-  });
+function arredondarCoordenadasSvg(svg, casas) {
+  return svg.replace(/-?\d+\.\d+/g, n => parseFloat(parseFloat(n).toFixed(casas)).toString());
 }
 
-function removerMetadataDesnecessaria(svgTexto) {
-  return svgTexto.replace(/<desc>.*?<\/desc>/gs, "");
+function removerMetadata(svg) {
+  return svg.replace(/<desc>.*?<\/desc>/gs, "");
 }
 
 function gerarOpcoesTracer(preset) {
-  return {
-    ltres: preset.ltres,
-    qtres: preset.qtres,
-    pathomit: preset.pathomit,
-    strokewidth: 0,
-    scale: 1,
-    viewbox: true,
-    desc: false
-  };
+  return { ltres: preset.ltres, qtres: preset.qtres, pathomit: preset.pathomit, strokewidth: 0, scale: 1, viewbox: true, desc: false };
 }
 
 function converterImagemParaSvg(img, preset) {
@@ -690,19 +691,15 @@ function converterImagemParaSvg(img, preset) {
     ctx.imageSmoothingEnabled = escala > 1;
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-    const numeroCores = parseInt(document.getElementById("cores").value, 10) || 8;
     const opcoes = Object.assign(gerarOpcoesTracer(preset), {
-      numberofcolors: numeroCores,
+      numberofcolors: parseInt(document.getElementById("cores").value, 10) || 8,
       colorsampling: 2,
       mincolorratio: 0
     });
-
     let svg = ImageTracer.imagedataToSVG(imageData, opcoes);
-    svg = removerMetadataDesnecessaria(svg);
+    svg = removerMetadata(svg);
     svg = arredondarCoordenadasSvg(svg, preset.decimais);
     return svg;
-
   } else {
     const escala = parseInt(document.getElementById("scalePreto").value, 10) || 1;
     const canvas = document.createElement("canvas");
@@ -712,24 +709,14 @@ function converterImagemParaSvg(img, preset) {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-    const limiarAlpha = parseInt(document.getElementById("limiarAlpha").value, 10) || 128;
-    imageData = paraPretoPuro(imageData, limiarAlpha);
-
+    imageData = paraPretoPuro(imageData, parseInt(document.getElementById("limiarAlpha").value, 10) || 128);
     const opcoes = Object.assign(gerarOpcoesTracer(preset), {
-      numberofcolors: 2,
-      colorquantcycles: 1,
-      colorsampling: 0,
-      mincolorratio: 0,
-      pal: [
-        { r: 0, g: 0, b: 0, a: 255 },
-        { r: 0, g: 0, b: 0, a: 0 }
-      ]
+      numberofcolors: 2, colorquantcycles: 1, colorsampling: 0, mincolorratio: 0,
+      pal: [{ r:0,g:0,b:0,a:255 },{ r:0,g:0,b:0,a:0 }]
     });
-
     let svg = ImageTracer.imagedataToSVG(imageData, opcoes);
     svg = forcarPretoPuroNoSvg(svg);
-    svg = removerMetadataDesnecessaria(svg);
+    svg = removerMetadata(svg);
     svg = arredondarCoordenadasSvg(svg, preset.decimais);
     return svg;
   }
@@ -742,11 +729,9 @@ async function converterUnico() {
   statusEl.innerHTML = `<span class="spinner"></span>Convertendo...`;
   preview.classList.remove("show", "transparent-bg");
   actions.classList.remove("show");
-
   try {
     const img = await carregarImagem(arquivoSelecionado);
     svgAtual = converterImagemParaSvg(img, presetAtual());
-
     preview.innerHTML = svgAtual;
     preview.classList.add("show");
     if (modoAtual === "preto") preview.classList.add("transparent-bg");
@@ -762,26 +747,17 @@ async function converterUnico() {
 
 copyBtn.addEventListener("click", async () => {
   if (!svgAtual) return;
-  const textoOriginal = copyBtn.textContent;
-  try {
-    await navigator.clipboard.writeText(svgAtual);
-  } catch {
-    const textarea = document.createElement("textarea");
-    textarea.value = svgAtual;
-    textarea.style.position = "fixed";
-    textarea.style.opacity = "0";
-    document.body.appendChild(textarea);
-    textarea.focus();
-    textarea.select();
+  const orig = copyBtn.textContent;
+  try { await navigator.clipboard.writeText(svgAtual); }
+  catch {
+    const ta = document.createElement("textarea");
+    ta.value = svgAtual; ta.style.cssText = "position:fixed;opacity:0";
+    document.body.appendChild(ta); ta.focus(); ta.select();
     try { document.execCommand("copy"); } catch {}
-    document.body.removeChild(textarea);
+    document.body.removeChild(ta);
   }
-  copyBtn.textContent = "Copiado!";
-  copyBtn.classList.add("copied");
-  setTimeout(() => {
-    copyBtn.textContent = textoOriginal;
-    copyBtn.classList.remove("copied");
-  }, 1500);
+  copyBtn.textContent = "Copiado!"; copyBtn.classList.add("copied");
+  setTimeout(() => { copyBtn.textContent = orig; copyBtn.classList.remove("copied"); }, 1500);
 });
 
 downloadBtn.addEventListener("click", () => {
@@ -791,34 +767,15 @@ downloadBtn.addEventListener("click", () => {
 
 resetBtn.addEventListener("click", limparTudo);
 
-// ═══════════════════════════════════════════════════════════════
-// MODO LOTE (várias imagens — grid com nome + progressbar + zip)
-// ═══════════════════════════════════════════════════════════════
-
+// ── Lote ──────────────────────────────────────────────────────
 function escapeHtml(str) {
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
+  const d = document.createElement("div"); d.textContent = str; return d.innerHTML;
 }
 
-function nomeSugerido(filename) {
-  return filename.replace(/\.[^/.]+$/, "");
-}
+function nomeSugerido(filename) { return filename.replace(/\.[^/.]+$/, ""); }
 
-// Cria o objeto de estado de um item + o card DOM correspondente,
-// mas NÃO mexe no array `lote` nem no grid existente — quem chama
-// decide onde encaixar (montarLote apaga tudo primeiro, já
-// adicionarAoLote só faz push). Isto é o que permite reaproveitar
-// a mesma função de criação de card nos dois fluxos sem duplicar.
 function criarItemLote(file) {
-  const item = {
-    id: idCounter++,
-    file,
-    img: null,
-    svg: null,
-    tamanhoBytes: 0,
-    status: "pendente" // pendente | convertendo | pronto | erro
-  };
+  const item = { id: idCounter++, file, img: null, svg: null, tamanhoBytes: 0, status: "pendente" };
 
   const el = document.createElement("div");
   el.className = "batch-item";
@@ -834,109 +791,55 @@ function criarItemLote(file) {
   const statusDot = document.createElement("div");
   statusDot.className = "status-dot";
 
-  // Botão de remover — × simples em círculo, canto sup. direito.
-  // Ao clicar: remove o item do array `lote` e o card do grid,
-  // sem tocar em mais nada (outros itens já convertidos continuam
-  // intactos, prontos para zip/download).
   const removeBtn = document.createElement("button");
-  removeBtn.type = "button";
-  removeBtn.className = "remove-btn";
+  removeBtn.type = "button"; removeBtn.className = "remove-btn";
   removeBtn.setAttribute("aria-label", "Remover imagem");
   removeBtn.textContent = "×";
-  removeBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    removerItemLote(item.id);
-  });
+  removeBtn.addEventListener("click", (e) => { e.stopPropagation(); removerItemLote(item.id); });
 
   const nomeInput = document.createElement("input");
   nomeInput.type = "text";
   nomeInput.value = nomeSugerido(file.name);
   nomeInput.placeholder = "nome-do-icone";
-  nomeInput.addEventListener("input", () => {
-    nomeInput.value = nomeInput.value.replace(/[\/\\:*?"<>|]/g, "");
-  });
+  nomeInput.addEventListener("input", () => { nomeInput.value = nomeInput.value.replace(/[\/\\:*?"<>|]/g, ""); });
 
   const sizeLabel = document.createElement("div");
   sizeLabel.className = "file-size";
   sizeLabel.textContent = (file.size / 1024).toFixed(0) + " KB original";
 
-  el.appendChild(thumbWrap);
-  el.appendChild(statusDot);
-  el.appendChild(removeBtn);
-  el.appendChild(nomeInput);
-  el.appendChild(sizeLabel);
+  el.appendChild(thumbWrap); el.appendChild(statusDot);
+  el.appendChild(removeBtn); el.appendChild(nomeInput); el.appendChild(sizeLabel);
 
-  item.elItem = el;
-  item.elStatusDot = statusDot;
-  item.elNomeInput = nomeInput;
-  item.elSizeLabel = sizeLabel;
-
+  item.elItem = el; item.elStatusDot = statusDot;
+  item.elNomeInput = nomeInput; item.elSizeLabel = sizeLabel;
   return item;
 }
 
 function montarLote(files) {
-  lote = [];
-  idCounter = 0;
-  batchGrid.innerHTML = "";
-
-  files.forEach(file => {
-    const item = criarItemLote(file);
-    lote.push(item);
-    batchGrid.appendChild(item.elItem);
-  });
-
+  lote = []; idCounter = 0; batchGrid.innerHTML = "";
+  files.forEach(file => { const item = criarItemLote(file); lote.push(item); batchGrid.appendChild(item.elItem); });
   finalizarMudancaDeLote(`<strong>${lote.length} imagens selecionadas</strong><br>edite o nome de cada uma abaixo`);
 }
 
-// Acrescenta novas imagens ao lote já existente, SEM apagar o que
-// já estava lá (cards já convertidos mantêm seu svg e status).
 function adicionarAoLote(files) {
-  files.forEach(file => {
-    const item = criarItemLote(file);
-    lote.push(item);
-    batchGrid.appendChild(item.elItem);
-  });
-
+  files.forEach(file => { const item = criarItemLote(file); lote.push(item); batchGrid.appendChild(item.elItem); });
   finalizarMudancaDeLote(`<strong>${lote.length} imagens no total</strong><br>edite o nome de cada uma abaixo`);
-
-  // Se já existia pelo menos uma conversão pronta anteriormente,
-  // os botões de ação do zip continuam visíveis (não escondemos
-  // batchActions aqui) — mas o texto do botão converter avisa que
-  // só as pendentes serão processadas ao clicar de novo.
-  if (lote.some(i => i.status === "pronto")) {
-    convertBtn.textContent = "Converter novas imagens";
-  }
+  if (lote.some(i => i.status === "pronto")) convertBtn.textContent = "Converter novas imagens";
 }
 
 function removerItemLote(id) {
   const idx = lote.findIndex(i => i.id === id);
   if (idx === -1) return;
-
-  const item = lote[idx];
-  item.elItem.remove();
+  lote[idx].elItem.remove();
   lote.splice(idx, 1);
-
-  if (lote.length === 0) {
-    // lote ficou vazio: volta tudo ao estado inicial
-    limparTudo();
-    return;
-  }
-
+  if (lote.length === 0) { limparTudo(); return; }
   atualizarResumoLote();
-
-  // Se não sobrou nenhum item convertido, esconde as ações de zip
-  if (!lote.some(i => i.status === "pronto")) {
-    batchActions.classList.remove("show");
-  }
-
-  // Se não sobrou nenhum pendente, o botão converter reflete isso
-  if (!lote.some(i => i.status === "pendente" || i.status === "erro")) {
-    convertBtn.textContent = "Converter";
-  }
+  if (!lote.some(i => i.status === "pronto")) batchActions.classList.remove("show");
+  if (!lote.some(i => i.status === "pendente" || i.status === "erro")) convertBtn.textContent = "Converter";
 }
 
-function finalizarMudancaDeLote(dropzoneHtml) {
-  dropzoneText.innerHTML = dropzoneHtml;
+function finalizarMudancaDeLote(html) {
+  dropzoneText.innerHTML = html;
   convertBtn.disabled = false;
   batchGrid.classList.add("show");
   batchSummary.classList.add("show");
@@ -948,8 +851,8 @@ function atualizarResumoLote() {
   batchCount.textContent = `${lote.length} imagens`;
   const prontos = lote.filter(i => i.status === "pronto");
   if (prontos.length > 0) {
-    const totalBytes = prontos.reduce((acc, i) => acc + i.tamanhoBytes, 0);
-    batchTotalSize.textContent = `${prontos.length} convertidas — ${(totalBytes / 1024).toFixed(0)} KB total`;
+    const total = prontos.reduce((acc, i) => acc + i.tamanhoBytes, 0);
+    batchTotalSize.textContent = `${prontos.length} convertidas — ${(total / 1024).toFixed(0)} KB total`;
   } else {
     batchTotalSize.textContent = "";
   }
@@ -959,12 +862,10 @@ function marcarStatusItem(item, status) {
   item.status = status;
   item.elItem.classList.remove("done", "error", "converting");
   if (status === "convertendo") item.elItem.classList.add("converting");
-  if (status === "pronto") item.elItem.classList.add("done");
-  if (status === "erro") item.elItem.classList.add("error");
+  if (status === "pronto")      item.elItem.classList.add("done");
+  if (status === "erro")        item.elItem.classList.add("error");
 }
 
-// Converte só os itens ainda não convertidos (pendente/erro) — se o
-// usuário já converteu 91 e adicionou +3, não reprocessa os 91.
 async function converterLote() {
   const pendentes = lote.filter(i => i.status === "pendente" || i.status === "erro");
   if (pendentes.length === 0) return;
@@ -980,8 +881,7 @@ async function converterLote() {
   progressCount.textContent = `0 / ${pendentes.length}`;
 
   const preset = presetAtual();
-  let concluidos = 0;
-  let comErro = 0;
+  let concluidos = 0, comErro = 0;
 
   for (const item of pendentes) {
     marcarStatusItem(item, "convertendo");
@@ -998,13 +898,10 @@ async function converterLote() {
       item.elSizeLabel.textContent = "falhou";
       comErro++;
     }
-
     concluidos++;
-    const pct = Math.round((concluidos / pendentes.length) * 100);
-    progressFill.style.width = pct + "%";
+    progressFill.style.width = Math.round((concluidos / pendentes.length) * 100) + "%";
     progressCount.textContent = `${concluidos} / ${pendentes.length}`;
     atualizarResumoLote();
-
     await new Promise(r => setTimeout(r, 0));
   }
 
@@ -1018,57 +915,38 @@ async function converterLote() {
   } else {
     statusEl.textContent = `${pendentes.length} imagens convertidas com sucesso`;
   }
-
   batchActions.classList.add("show");
 }
 
 function nomesFinaisUnicos() {
   const usados = new Map();
-  return lote
-    .filter(i => i.status === "pronto")
-    .map(item => {
-      let base = item.elNomeInput.value.trim() || `icone-${item.id + 1}`;
-      const count = usados.get(base) || 0;
-      usados.set(base, count + 1);
-      const nomeFinal = count === 0 ? base : `${base}-${count + 1}`;
-      return { item, nomeFinal: nomeFinal + ".svg" };
-    });
+  return lote.filter(i => i.status === "pronto").map(item => {
+    let base = item.elNomeInput.value.trim() || `icone-${item.id + 1}`;
+    const count = usados.get(base) || 0;
+    usados.set(base, count + 1);
+    return { item, nomeFinal: (count === 0 ? base : `${base}-${count + 1}`) + ".svg" };
+  });
 }
 
 downloadZipBtn.addEventListener("click", async () => {
   const prontos = nomesFinaisUnicos();
   if (prontos.length === 0) return;
-
   downloadZipBtn.disabled = true;
-  const textoOriginal = downloadZipBtn.textContent;
+  const orig = downloadZipBtn.textContent;
   downloadZipBtn.innerHTML = `<span class="spinner"></span>Gerando zip...`;
-
   try {
     const zip = new JSZip();
-    prontos.forEach(({ item, nomeFinal }) => {
-      zip.file(nomeFinal, item.svg);
-    });
-
+    prontos.forEach(({ item, nomeFinal }) => zip.file(nomeFinal, item.svg));
     const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url;
-    a.download = "icones-svg.zip";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    a.href = url; a.download = "icones-svg.zip";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 4000);
-
-    downloadZipBtn.textContent = "Zip baixado!";
-    downloadZipBtn.classList.add("copied");
-    setTimeout(() => {
-      downloadZipBtn.textContent = textoOriginal;
-      downloadZipBtn.classList.remove("copied");
-      downloadZipBtn.disabled = false;
-    }, 1800);
+    downloadZipBtn.textContent = "Zip baixado!"; downloadZipBtn.classList.add("copied");
+    setTimeout(() => { downloadZipBtn.textContent = orig; downloadZipBtn.classList.remove("copied"); downloadZipBtn.disabled = false; }, 1800);
   } catch (err) {
-    downloadZipBtn.textContent = textoOriginal;
-    downloadZipBtn.disabled = false;
+    downloadZipBtn.textContent = orig; downloadZipBtn.disabled = false;
     statusEl.textContent = "Zip falhou (" + err.message + ") — use 'Baixar um por um'";
     statusEl.classList.add("error");
   }
@@ -1078,55 +956,50 @@ function baixarSvgIndividual(svgTexto, nomeArquivo) {
   const blob = new Blob([svgTexto], { type: "image/svg+xml" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url;
-  a.download = nomeArquivo;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  a.href = url; a.download = nomeArquivo;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
 downloadAllOneByOneBtn.addEventListener("click", async () => {
   const prontos = nomesFinaisUnicos();
   if (prontos.length === 0) return;
-
   downloadAllOneByOneBtn.disabled = true;
-  const textoOriginal = downloadAllOneByOneBtn.textContent;
-
+  const orig = downloadAllOneByOneBtn.textContent;
   for (let i = 0; i < prontos.length; i++) {
-    const { item, nomeFinal } = prontos[i];
     downloadAllOneByOneBtn.textContent = `Baixando ${i + 1}/${prontos.length}...`;
-    baixarSvgIndividual(item.svg, nomeFinal);
+    baixarSvgIndividual(prontos[i].item.svg, prontos[i].nomeFinal);
     await new Promise(r => setTimeout(r, 350));
   }
-
-  downloadAllOneByOneBtn.textContent = textoOriginal;
+  downloadAllOneByOneBtn.textContent = orig;
   downloadAllOneByOneBtn.disabled = false;
 });
 
 batchResetBtn.addEventListener("click", limparTudo);
 
-// ── Botão "+ Adicionar mais imagens" ─────────────────────────
+// ── Adicionar mais ────────────────────────────────────────────
 addMoreBtn.addEventListener("click", () => fileInputAdd.click());
-
-fileInputAdd.addEventListener("change", (e) => {
+fileInputAdd.addEventListener("change", async (e) => {
   const files = Array.from(e.target.files);
-  if (files.length) adicionarAoLote(files);
+  if (files.length) {
+    const temZip = files.some(f => f.type === "application/zip" || f.name.toLowerCase().endsWith(".zip"));
+    if (temZip) { statusEl.classList.remove("error"); statusEl.innerHTML = `<span class="spinner"></span>Extraindo ZIP...`; }
+    const imagens = await resolverFicheiros(files);
+    statusEl.textContent = "";
+    if (imagens.length) adicionarAoLote(imagens);
+  }
   fileInputAdd.value = "";
 });
 
-// ── Botão converter: decide se é fluxo único ou lote ─────────
+// ── Converter ─────────────────────────────────────────────────
 convertBtn.addEventListener("click", () => {
   if (typeof ImageTracer === "undefined") {
     statusEl.textContent = "Erro: biblioteca de conversão não carregou";
     statusEl.classList.add("error");
     return;
   }
-  if (lote.length > 0) {
-    converterLote();
-  } else {
-    converterUnico();
-  }
+  if (lote.length > 0) converterLote();
+  else converterUnico();
 });
 </script>
 
