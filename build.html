@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Build Trigger</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   :root {
     --bg: #000000;
@@ -80,7 +81,6 @@
   .screen.active { display: block; animation: fadeIn 0.22s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* Tab bar */
   .tabbar {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -230,7 +230,6 @@
   .ios-spinner { animation: iosSpin 0.8s steps(12) infinite; }
   @keyframes iosSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-  /* App profile cards (Apps tab) */
   .app-profile-card {
     background: var(--surface);
     border-radius: var(--radius-lg);
@@ -282,7 +281,6 @@
   }
   .fab-add:active { transform: scale(0.9); }
 
-  /* Progress list */
   .progress-list { display: flex; flex-direction: column; }
   .progress-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; position: relative; }
   .progress-item:not(:last-child)::before {
@@ -323,8 +321,17 @@
     width: 46px; height: 46px; border-radius: 50%; background: var(--success-dim); color: var(--success);
     display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
   }
-  .apk-name { font-weight: 600; font-size: 15.5px; }
+  .apk-name { font-weight: 600; font-size: 15.5px; word-break: break-all; }
   .apk-meta { font-size: 12.5px; color: var(--text-secondary); margin-top: 2px; }
+  .apk-extract-status {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12.5px; color: var(--text-secondary);
+    background: var(--surface-2); border-radius: 8px; padding: 9px 11px;
+    margin-bottom: 12px;
+  }
+  .apk-extract-status.ok { color: var(--success); }
+  .apk-extract-status.fail { color: var(--danger); }
+  .apk-card-actions { display: flex; flex-direction: column; gap: 8px; }
 
   .error-card {
     background: var(--surface); border: 1px solid rgba(255,69,58,0.3); border-radius: var(--radius-lg);
@@ -379,7 +386,6 @@
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast i { color: var(--success); }
 
-  /* Modal (edit/create profile picker overlay) */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.6);
     display: none; align-items: flex-end; justify-content: center; z-index: 300;
@@ -404,13 +410,10 @@
 
 <div class="app">
 
-  <!-- ===================== TAB: APPS ===================== -->
   <div id="screen-apps" class="screen active">
     <div class="navbar">
       <div class="navbar-inner">
-        <div>
-          <div class="navbar-title"><i class="fa-solid fa-layer-group"></i>Meus Apps</div>
-        </div>
+        <div><div class="navbar-title"><i class="fa-solid fa-layer-group"></i>Meus Apps</div></div>
         <button class="nav-btn" id="btn-apps-refresh" aria-label="Atualizar"><i class="fa-solid fa-rotate"></i></button>
       </div>
     </div>
@@ -431,7 +434,6 @@
     <button class="fab-add" id="btn-fab-add" aria-label="Adicionar app"><i class="fa-solid fa-plus"></i></button>
   </div>
 
-  <!-- ===================== TAB: BUILD ===================== -->
   <div id="screen-build" class="screen">
     <div class="navbar">
       <div class="navbar-inner">
@@ -456,17 +458,11 @@
         <div class="ios-card" style="margin-bottom:16px;">
           <div class="ios-row static">
             <div class="ios-row-icon" style="background:var(--accent-dim); color:var(--accent);"><i class="fa-solid fa-folder"></i></div>
-            <div class="ios-row-content">
-              <div class="ios-row-title" id="build-summary-repo">-</div>
-              <div class="ios-row-subtitle">Repositório</div>
-            </div>
+            <div class="ios-row-content"><div class="ios-row-title" id="build-summary-repo">-</div><div class="ios-row-subtitle">Repositório</div></div>
           </div>
           <div class="ios-row static">
             <div class="ios-row-icon" style="background:var(--success-dim); color:var(--success);"><i class="fa-solid fa-code-branch"></i></div>
-            <div class="ios-row-content">
-              <div class="ios-row-title" id="build-summary-branch">-</div>
-              <div class="ios-row-subtitle">Branch</div>
-            </div>
+            <div class="ios-row-content"><div class="ios-row-title" id="build-summary-branch">-</div><div class="ios-row-subtitle">Branch</div></div>
           </div>
         </div>
 
@@ -478,31 +474,19 @@
             <div class="progress-list">
               <div class="progress-item" id="step-dispatch">
                 <div class="progress-icon-wrap"><i class="fa-regular fa-circle"></i></div>
-                <div class="progress-text">
-                  <div class="progress-title">Disparando repository_dispatch</div>
-                  <div class="progress-detail" id="detail-dispatch"></div>
-                </div>
+                <div class="progress-text"><div class="progress-title">Disparando repository_dispatch</div><div class="progress-detail" id="detail-dispatch"></div></div>
               </div>
               <div class="progress-item" id="step-locate">
                 <div class="progress-icon-wrap"><i class="fa-regular fa-circle"></i></div>
-                <div class="progress-text">
-                  <div class="progress-title">Localizando run no GitHub Actions</div>
-                  <div class="progress-detail" id="detail-locate"></div>
-                </div>
+                <div class="progress-text"><div class="progress-title">Localizando run no GitHub Actions</div><div class="progress-detail" id="detail-locate"></div></div>
               </div>
               <div class="progress-item" id="step-run">
                 <div class="progress-icon-wrap"><i class="fa-regular fa-circle"></i></div>
-                <div class="progress-text">
-                  <div class="progress-title">Executando workflow</div>
-                  <div class="progress-detail" id="detail-run"></div>
-                </div>
+                <div class="progress-text"><div class="progress-title">Executando workflow</div><div class="progress-detail" id="detail-run"></div></div>
               </div>
               <div class="progress-item" id="step-artifact">
                 <div class="progress-icon-wrap"><i class="fa-regular fa-circle"></i></div>
-                <div class="progress-text">
-                  <div class="progress-title">Buscando APK gerado</div>
-                  <div class="progress-detail" id="detail-artifact"></div>
-                </div>
+                <div class="progress-text"><div class="progress-title">Buscando APK gerado</div><div class="progress-detail" id="detail-artifact"></div></div>
               </div>
             </div>
           </div>
@@ -524,7 +508,11 @@
             <div class="apk-icon-circle"><i class="fa-brands fa-android"></i></div>
             <div><div class="apk-name" id="apk-name">-</div><div class="apk-meta" id="apk-meta">-</div></div>
           </div>
-          <button class="btn btn-primary" id="btn-download-apk"><i class="fa-solid fa-download"></i>Baixar APK</button>
+          <div class="apk-extract-status" id="apk-extract-status"><i class="fa-solid fa-circle-info"></i><span id="apk-extract-status-text">Artifact pronto. Toque em baixar para extrair o APK.</span></div>
+          <div class="apk-card-actions">
+            <button class="btn btn-primary" id="btn-download-apk-only"><i class="fa-brands fa-android"></i>Baixar somente o APK</button>
+            <button class="btn btn-secondary" id="btn-download-zip"><i class="fa-solid fa-file-zipper"></i>Baixar .zip original</button>
+          </div>
         </div>
 
         <div id="live-log-section" class="live-log-section" style="display:none;">
@@ -541,12 +529,9 @@
     </div>
   </div>
 
-  <!-- ===================== TAB: CONFIG ===================== -->
   <div id="screen-config" class="screen">
     <div class="navbar">
-      <div class="navbar-inner">
-        <div class="navbar-title"><i class="fa-solid fa-gear"></i>Configurações</div>
-      </div>
+      <div class="navbar-inner"><div class="navbar-title"><i class="fa-solid fa-gear"></i>Configurações</div></div>
     </div>
     <div class="content">
       <div class="section-label"><i class="fa-solid fa-key"></i>Autenticação</div>
@@ -587,23 +572,14 @@
     </div>
   </div>
 
-  <!-- ===================== TAB BAR ===================== -->
   <div class="tabbar">
-    <button class="tab-item active" id="tab-apps" data-screen="screen-apps">
-      <i class="fa-solid fa-layer-group"></i><span>Apps</span>
-    </button>
-    <button class="tab-item" id="tab-build" data-screen="screen-build">
-      <i class="fa-solid fa-hammer"></i><span>Build</span>
-      <div class="tab-badge" id="build-badge" style="display:none;"></div>
-    </button>
-    <button class="tab-item" id="tab-config" data-screen="screen-config">
-      <i class="fa-solid fa-gear"></i><span>Config</span>
-    </button>
+    <button class="tab-item active" id="tab-apps" data-screen="screen-apps"><i class="fa-solid fa-layer-group"></i><span>Apps</span></button>
+    <button class="tab-item" id="tab-build" data-screen="screen-build"><i class="fa-solid fa-hammer"></i><span>Build</span><div class="tab-badge" id="build-badge" style="display:none;"></div></button>
+    <button class="tab-item" id="tab-config" data-screen="screen-config"><i class="fa-solid fa-gear"></i><span>Config</span></button>
   </div>
 
 </div>
 
-<!-- ===================== MODAL: NOVO/EDITAR APP ===================== -->
 <div class="modal-overlay" id="modal-app">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -645,19 +621,15 @@
   </div>
 </div>
 
-<!-- ===================== MODAL: TROCAR APP (BUILD TAB) ===================== -->
 <div class="modal-overlay" id="modal-switch">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title"><i class="fa-solid fa-shuffle"></i>Trocar app ativo</div>
     <div id="modal-switch-list"></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" id="modal-switch-cancel">Fechar</button>
-    </div>
+    <div class="modal-actions"><button class="btn btn-secondary" id="modal-switch-cancel">Fechar</button></div>
   </div>
 </div>
 
-<!-- ===================== MODAL: AÇÕES DO APP (editar/apagar) ===================== -->
 <div class="modal-overlay" id="modal-app-actions">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -691,7 +663,10 @@
     modalSelectedRepo: null,
     modalSelectedBranch: null,
     modalEditingId: null,
-    actionsTargetId: null
+    actionsTargetId: null,
+    lastApkBlob: null,
+    lastApkFileName: null,
+    lastZipBlob: null
   };
 
   function uid() { return 'app_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); }
@@ -709,11 +684,8 @@
   function saveApps() { try { localStorage.setItem(STORAGE_APPS, JSON.stringify(state.apps)); } catch (e) { } }
   function saveActive() { try { localStorage.setItem(STORAGE_ACTIVE, state.activeAppId || ''); } catch (e) { } }
 
-  function getActiveApp() {
-    return state.apps.find(function(a) { return a.id === state.activeAppId; }) || null;
-  }
+  function getActiveApp() { return state.apps.find(function(a) { return a.id === state.activeAppId; }) || null; }
 
-  // ---------- DOM refs ----------
   var tabItems = document.querySelectorAll('.tab-item');
   var screens = document.querySelectorAll('.screen');
   var toast = document.getElementById('toast');
@@ -734,9 +706,7 @@
     if (screenId === 'screen-config') renderConfigScreen();
   }
 
-  tabItems.forEach(function(t) {
-    t.addEventListener('click', function() { switchTab(t.dataset.screen); });
-  });
+  tabItems.forEach(function(t) { t.addEventListener('click', function() { switchTab(t.dataset.screen); }); });
 
   function iosSpinnerHtml() {
     var html = '<div class="ios-spinner">';
@@ -765,12 +735,7 @@
 
   function renderAppsList() {
     bannerAppsNoToken.classList.toggle('show', !state.token);
-
-    if (state.apps.length === 0) {
-      appsEmpty.style.display = 'block';
-      appsList.innerHTML = '';
-      return;
-    }
+    if (state.apps.length === 0) { appsEmpty.style.display = 'block'; appsList.innerHTML = ''; return; }
     appsEmpty.style.display = 'none';
 
     var html = '';
@@ -778,10 +743,8 @@
       var isActive = app.id === state.activeAppId;
       html += '<div class="app-profile-card ' + (isActive ? 'active-profile' : '') + '" data-id="' + app.id + '">';
       html += '<button class="app-profile-menu-btn" data-menu-id="' + app.id + '"><i class="fa-solid fa-ellipsis"></i></button>';
-      html += '<div class="app-profile-top">';
-      html += '<div class="app-profile-icon"><i class="fa-brands fa-android"></i></div>';
-      html += '<div><div class="app-profile-name">' + escapeHtml(app.name) + '</div><div class="app-profile-repo">' + escapeHtml(app.repoFullName) + '</div></div>';
-      html += '</div>';
+      html += '<div class="app-profile-top"><div class="app-profile-icon"><i class="fa-brands fa-android"></i></div>';
+      html += '<div><div class="app-profile-name">' + escapeHtml(app.name) + '</div><div class="app-profile-repo">' + escapeHtml(app.repoFullName) + '</div></div></div>';
       html += '<div class="app-profile-meta-row">';
       html += '<div class="app-profile-chip"><i class="fa-solid fa-code-branch"></i>' + escapeHtml(app.branch) + '</div>';
       html += '<div class="app-profile-chip"><i class="fa-solid fa-bolt"></i>' + escapeHtml(app.eventType) + '</div>';
@@ -795,40 +758,24 @@
     appsList.querySelectorAll('.app-profile-card').forEach(function(card) {
       card.addEventListener('click', function(e) {
         if (e.target.closest('.app-profile-menu-btn')) return;
-        var id = card.dataset.id;
-        setActiveApp(id);
+        setActiveApp(card.dataset.id);
         switchTab('screen-build');
       });
     });
     appsList.querySelectorAll('.app-profile-menu-btn').forEach(function(btn) {
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        openAppActionsModal(btn.dataset.menuId);
-      });
+      btn.addEventListener('click', function(e) { e.stopPropagation(); openAppActionsModal(btn.dataset.menuId); });
     });
   }
 
-  function setActiveApp(id) {
-    state.activeAppId = id;
-    saveActive();
-    resetBuildProgress();
-  }
+  function setActiveApp(id) { state.activeAppId = id; saveActive(); resetBuildProgress(); }
 
-  btnAppsRefresh.addEventListener('click', function() {
-    renderAppsList();
-    showToast('Lista atualizada');
-  });
+  btnAppsRefresh.addEventListener('click', function() { renderAppsList(); showToast('Lista atualizada'); });
 
   btnFabAdd.addEventListener('click', function() {
-    if (!state.token) {
-      switchTab('screen-config');
-      showToast('Configure o token primeiro');
-      return;
-    }
+    if (!state.token) { switchTab('screen-config'); showToast('Configure o token primeiro'); return; }
     openAppModal(null);
   });
 
-  // ---------- App actions modal (edit / delete / set active) ----------
   var modalAppActionsTitle = document.getElementById('modal-app-actions-title');
   var actionSetActive = document.getElementById('action-set-active');
   var actionEditApp = document.getElementById('action-edit-app');
@@ -848,13 +795,11 @@
     closeModal('modal-app-actions');
     switchTab('screen-build');
   });
-
   actionEditApp.addEventListener('click', function() {
     var id = state.actionsTargetId;
     closeModal('modal-app-actions');
     openAppModal(id);
   });
-
   actionDeleteApp.addEventListener('click', function() {
     var id = state.actionsTargetId;
     state.apps = state.apps.filter(function(a) { return a.id !== id; });
@@ -864,7 +809,6 @@
     renderAppsList();
     showToast('App removido');
   });
-
   actionCancel.addEventListener('click', function() { closeModal('modal-app-actions'); });
 
   // =================================================================
@@ -922,7 +866,6 @@
       modalInputEventType.value = 'build-apk';
       modalInputApkPattern.value = '';
     }
-
     openModal('modal-app');
   }
 
@@ -939,30 +882,18 @@
     modalBtnLoadRepos.disabled = true;
 
     githubFetch('https://api.github.com/user/repos?per_page=100&sort=updated')
-      .then(function(data) {
-        state.modalRepos = data;
-        renderModalRepoList();
-        modalBtnLoadRepos.style.display = 'none';
-      })
-      .catch(function(err) {
-        modalErrorText.textContent = 'Erro ao carregar repositórios: ' + err.message;
-        modalError.classList.add('show');
-      })
-      .finally(function() {
-        modalBtnLoadRepos.innerHTML = '<i class="fa-solid fa-rotate"></i>Carregar repositórios';
-        modalBtnLoadRepos.disabled = false;
-      });
+      .then(function(data) { state.modalRepos = data; renderModalRepoList(); modalBtnLoadRepos.style.display = 'none'; })
+      .catch(function(err) { modalErrorText.textContent = 'Erro ao carregar repositórios: ' + err.message; modalError.classList.add('show'); })
+      .finally(function() { modalBtnLoadRepos.innerHTML = '<i class="fa-solid fa-rotate"></i>Carregar repositórios'; modalBtnLoadRepos.disabled = false; });
   });
 
   function renderModalRepoList() {
     modalRepoList.innerHTML = '';
     modalRepoList.style.display = 'block';
-
     if (state.modalRepos.length === 0) {
       modalRepoList.innerHTML = '<div class="empty-state"><i class="fa-regular fa-folder-open"></i><div class="empty-state-text">Nenhum repositório encontrado</div></div>';
       return;
     }
-
     state.modalRepos.forEach(function(repo) {
       var item = document.createElement('div');
       item.className = 'ios-row';
@@ -980,7 +911,6 @@
     el.classList.add('selected');
     state.modalSelectedRepo = repo;
     state.modalSelectedBranch = null;
-
     if (!modalInputName.value.trim()) modalInputName.value = repo.name;
 
     modalBranchSection.style.display = 'block';
@@ -988,10 +918,7 @@
     modalAdvancedSection.style.display = 'none';
 
     githubFetch('https://api.github.com/repos/' + repo.full_name + '/branches?per_page=100')
-      .then(function(data) {
-        state.modalBranches = data;
-        renderModalBranchList();
-      })
+      .then(function(data) { state.modalBranches = data; renderModalBranchList(); })
       .catch(function(err) {
         modalBranchList.innerHTML = '';
         modalErrorText.textContent = 'Erro ao carregar branches: ' + err.message;
@@ -1001,12 +928,10 @@
 
   function renderModalBranchList() {
     modalBranchList.innerHTML = '';
-
     if (state.modalBranches.length === 0) {
       modalBranchList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-code-branch"></i><div class="empty-state-text">Nenhuma branch encontrada</div></div>';
       return;
     }
-
     state.modalBranches.forEach(function(branch) {
       var item = document.createElement('div');
       item.className = 'ios-row';
@@ -1032,22 +957,9 @@
     var apkPattern = modalInputApkPattern.value.trim();
 
     modalError.classList.remove('show');
-
-    if (!name) {
-      modalErrorText.textContent = 'Dê um nome para o app.';
-      modalError.classList.add('show');
-      return;
-    }
-    if (!state.modalSelectedRepo) {
-      modalErrorText.textContent = 'Selecione um repositório.';
-      modalError.classList.add('show');
-      return;
-    }
-    if (!state.modalSelectedBranch) {
-      modalErrorText.textContent = 'Selecione uma branch.';
-      modalError.classList.add('show');
-      return;
-    }
+    if (!name) { modalErrorText.textContent = 'Dê um nome para o app.'; modalError.classList.add('show'); return; }
+    if (!state.modalSelectedRepo) { modalErrorText.textContent = 'Selecione um repositório.'; modalError.classList.add('show'); return; }
+    if (!state.modalSelectedBranch) { modalErrorText.textContent = 'Selecione uma branch.'; modalError.classList.add('show'); return; }
 
     if (state.modalEditingId) {
       var app = state.apps.find(function(a) { return a.id === state.modalEditingId; });
@@ -1059,14 +971,9 @@
       app.apkPattern = apkPattern;
     } else {
       var newApp = {
-        id: uid(),
-        name: name,
-        repoFullName: state.modalSelectedRepo.full_name,
-        repoPrivate: !!state.modalSelectedRepo.private,
-        branch: state.modalSelectedBranch.name,
-        eventType: eventType,
-        apkPattern: apkPattern,
-        createdAt: Date.now()
+        id: uid(), name: name, repoFullName: state.modalSelectedRepo.full_name,
+        repoPrivate: !!state.modalSelectedRepo.private, branch: state.modalSelectedBranch.name,
+        eventType: eventType, apkPattern: apkPattern, createdAt: Date.now()
       };
       state.apps.push(newApp);
       if (!state.activeAppId) { state.activeAppId = newApp.id; saveActive(); }
@@ -1098,7 +1005,10 @@
   var apkCard = document.getElementById('apk-card');
   var apkName = document.getElementById('apk-name');
   var apkMeta = document.getElementById('apk-meta');
-  var btnDownloadApk = document.getElementById('btn-download-apk');
+  var apkExtractStatus = document.getElementById('apk-extract-status');
+  var apkExtractStatusText = document.getElementById('apk-extract-status-text');
+  var btnDownloadApkOnly = document.getElementById('btn-download-apk-only');
+  var btnDownloadZip = document.getElementById('btn-download-zip');
   var errorCard = document.getElementById('error-card');
   var errorCardStep = document.getElementById('error-card-step');
   var errorLogText = document.getElementById('error-log-text');
@@ -1112,9 +1022,7 @@
 
   var stepIds = ['dispatch', 'locate', 'run', 'artifact'];
   var stepEls = {};
-  stepIds.forEach(function(id) {
-    stepEls[id] = { item: document.getElementById('step-' + id), detail: document.getElementById('detail-' + id) };
-  });
+  stepIds.forEach(function(id) { stepEls[id] = { item: document.getElementById('step-' + id), detail: document.getElementById('detail-' + id) }; });
 
   function renderBuildScreen() {
     var app = getActiveApp();
@@ -1154,11 +1062,7 @@
       html += '</div>';
       modalSwitchList.innerHTML = html;
       modalSwitchList.querySelectorAll('[data-switch-id]').forEach(function(row) {
-        row.addEventListener('click', function() {
-          setActiveApp(row.dataset.switchId);
-          closeModal('modal-switch');
-          renderBuildScreen();
-        });
+        row.addEventListener('click', function() { setActiveApp(row.dataset.switchId); closeModal('modal-switch'); renderBuildScreen(); });
       });
     }
     openModal('modal-switch');
@@ -1171,10 +1075,7 @@
     if (textEl) textEl.textContent = msg;
     el.classList.add('show');
   }
-  function hideBuildBanners() {
-    bannerBuildError.classList.remove('show');
-    bannerBuildSuccess.classList.remove('show');
-  }
+  function hideBuildBanners() { bannerBuildError.classList.remove('show'); bannerBuildSuccess.classList.remove('show'); }
 
   function pushLog(msg, type) {
     var time = new Date().toLocaleTimeString('pt-BR');
@@ -1193,9 +1094,7 @@
     liveLogBox.scrollTop = liveLogBox.scrollHeight;
   }
 
-  function getFullLogText() {
-    return state.liveLog.map(function(e) { return '[' + e.time + '] ' + e.msg; }).join('\n');
-  }
+  function getFullLogText() { return state.liveLog.map(function(e) { return '[' + e.time + '] ' + e.msg; }).join('\n'); }
 
   function copyText(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
@@ -1207,14 +1106,15 @@
     return Promise.resolve();
   }
 
-  function downloadText(filename, text) {
-    var blob = new Blob([text], { type: 'text/plain' });
+  function downloadBlobFile(filename, blob) {
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url; a.download = filename;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
+
+  function downloadText(filename, text) { downloadBlobFile(filename, new Blob([text], { type: 'text/plain' })); }
 
   btnCopyLog.addEventListener('click', function() { copyText(getFullLogText()).then(function() { showToast('Log copiado'); }); });
   btnDownloadLog.addEventListener('click', function() { downloadText('build-log-' + Date.now() + '.txt', getFullLogText()); showToast('Log baixado'); });
@@ -1244,6 +1144,9 @@
     if (state.pollTimer) { clearTimeout(state.pollTimer); state.pollTimer = null; }
     hideBuildBanners();
     buildBadge.style.display = 'none';
+    state.lastApkBlob = null;
+    state.lastApkFileName = null;
+    state.lastZipBlob = null;
   }
 
   function githubFetch(url, opts) {
@@ -1283,11 +1186,7 @@
 
     fetch('https://api.github.com/repos/' + app.repoFullName + '/dispatches', {
       method: 'POST',
-      headers: {
-        'Accept': 'application/vnd.github+json',
-        'Authorization': 'Bearer ' + state.token,
-        'X-GitHub-Api-Version': '2022-11-28'
-      },
+      headers: { 'Accept': 'application/vnd.github+json', 'Authorization': 'Bearer ' + state.token, 'X-GitHub-Api-Version': '2022-11-28' },
       body: JSON.stringify({ event_type: app.eventType, client_payload: { branch: app.branch } })
     }).then(function(res) {
       if (res.status !== 204) return res.text().then(function(txt) { throw new Error('HTTP ' + res.status + ': ' + txt); });
@@ -1420,6 +1319,8 @@
       });
   }
 
+  var currentArtifactUrl = null;
+
   function fetchArtifact(app, runId) {
     githubFetch('https://api.github.com/repos/' + app.repoFullName + '/actions/runs/' + runId + '/artifacts')
       .then(function(data) {
@@ -1443,7 +1344,9 @@
 
         apkName.textContent = chosen.name;
         apkMeta.textContent = formatBytes(chosen.size_in_bytes) + ' · expira em ' + new Date(chosen.expires_at).toLocaleDateString('pt-BR');
-        btnDownloadApk.href = chosen.archive_download_url;
+        currentArtifactUrl = chosen.archive_download_url;
+        apkExtractStatus.className = 'apk-extract-status';
+        apkExtractStatusText.textContent = 'Artifact pronto. Toque em baixar para extrair o APK.';
         apkCard.classList.add('show');
 
         showBuildBanner(bannerBuildSuccess, bannerBuildSuccessText, 'Build concluído! APK pronto para download.');
@@ -1463,31 +1366,77 @@
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   }
 
-  btnDownloadApk.addEventListener('click', function(e) {
-    e.preventDefault();
-    pushLog('Abrindo download autenticado do artifact...', 'default');
-    btnDownloadApk.innerHTML = iosSpinnerHtml() + 'Baixando...';
-    btnDownloadApk.disabled = true;
-
-    fetch(btnDownloadApk.href, {
+  function fetchZipBlob() {
+    if (state.lastZipBlob) return Promise.resolve(state.lastZipBlob);
+    pushLog('Baixando artifact (.zip)...', 'default');
+    return fetch(currentArtifactUrl, {
       headers: { 'Accept': 'application/vnd.github+json', 'Authorization': 'Bearer ' + state.token, 'X-GitHub-Api-Version': '2022-11-28' }
     }).then(function(res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.blob();
     }).then(function(blob) {
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url; a.download = apkName.textContent + '.zip';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      pushLog('Download iniciado.', 'success');
+      state.lastZipBlob = blob;
+      return blob;
+    });
+  }
+
+  btnDownloadApkOnly.addEventListener('click', function() {
+    if (!currentArtifactUrl) return;
+
+    btnDownloadApkOnly.innerHTML = iosSpinnerHtml() + 'Baixando...';
+    btnDownloadApkOnly.disabled = true;
+    apkExtractStatus.className = 'apk-extract-status';
+    apkExtractStatusText.textContent = 'Baixando artifact...';
+
+    fetchZipBlob().then(function(zipBlob) {
+      pushLog('Descompactando...', 'default');
+      apkExtractStatusText.textContent = 'Descompactando .zip...';
+      btnDownloadApkOnly.innerHTML = iosSpinnerHtml() + 'Descompactando...';
+      return JSZip.loadAsync(zipBlob);
+    }).then(function(zip) {
+      var apkFileName = null;
+      zip.forEach(function(relativePath, file) {
+        if (!apkFileName && relativePath.toLowerCase().endsWith('.apk')) apkFileName = relativePath;
+      });
+
+      if (!apkFileName) throw new Error('Nenhum arquivo .apk encontrado dentro do artifact.');
+
+      pushLog('APK encontrado dentro do zip: ' + apkFileName, 'success');
+      return zip.file(apkFileName).async('blob').then(function(apkBlob) { return { blob: apkBlob, name: apkFileName }; });
+    }).then(function(result) {
+      state.lastApkBlob = result.blob;
+      state.lastApkFileName = result.name.split('/').pop();
+      downloadBlobFile(state.lastApkFileName, result.blob);
+      apkExtractStatus.className = 'apk-extract-status ok';
+      apkExtractStatusText.innerHTML = '<i class="fa-solid fa-circle-check"></i> APK extraído: ' + escapeHtml(state.lastApkFileName) + ' (' + formatBytes(result.blob.size) + ')';
+      pushLog('Download do APK iniciado.', 'success');
       showToast('APK baixado');
     }).catch(function(err) {
-      pushLog('Erro no download: ' + err.message, 'error');
-      showBuildBanner(bannerBuildError, bannerBuildErrorText, 'Erro ao baixar artifact: ' + err.message);
+      pushLog('Erro ao processar artifact: ' + err.message, 'error');
+      apkExtractStatus.className = 'apk-extract-status fail';
+      apkExtractStatusText.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> ' + escapeHtml(err.message);
+      showBuildBanner(bannerBuildError, bannerBuildErrorText, 'Erro ao extrair APK: ' + err.message);
     }).finally(function() {
-      btnDownloadApk.innerHTML = '<i class="fa-solid fa-download"></i>Baixar APK';
-      btnDownloadApk.disabled = false;
+      btnDownloadApkOnly.innerHTML = '<i class="fa-brands fa-android"></i>Baixar somente o APK';
+      btnDownloadApkOnly.disabled = false;
+    });
+  });
+
+  btnDownloadZip.addEventListener('click', function() {
+    if (!currentArtifactUrl) return;
+    btnDownloadZip.innerHTML = iosSpinnerHtml() + 'Baixando...';
+    btnDownloadZip.disabled = true;
+
+    fetchZipBlob().then(function(zipBlob) {
+      downloadBlobFile(apkName.textContent + '.zip', zipBlob);
+      pushLog('Download do .zip original iniciado.', 'success');
+      showToast('ZIP baixado');
+    }).catch(function(err) {
+      pushLog('Erro no download do zip: ' + err.message, 'error');
+      showBuildBanner(bannerBuildError, bannerBuildErrorText, 'Erro ao baixar zip: ' + err.message);
+    }).finally(function() {
+      btnDownloadZip.innerHTML = '<i class="fa-solid fa-file-zipper"></i>Baixar .zip original';
+      btnDownloadZip.disabled = false;
     });
   });
 
@@ -1520,11 +1469,7 @@
   btnSaveToken.addEventListener('click', function() {
     var token = inputToken.value.trim();
     settingsSaved.classList.remove('show');
-    if (!token) {
-      settingsErrorText.textContent = 'Informe o token de acesso.';
-      settingsError.classList.add('show');
-      return;
-    }
+    if (!token) { settingsErrorText.textContent = 'Informe o token de acesso.'; settingsError.classList.add('show'); return; }
     settingsError.classList.remove('show');
     state.token = token;
     saveToken();
