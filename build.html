@@ -191,9 +191,6 @@
     border-radius: 8px;
     padding: 12px;
   }
-
-  .top-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-  .forget-btn { font-size: 12px; color: var(--text-dim); background: none; border: none; cursor: pointer; padding: 0; text-decoration: underline; font-weight: 400; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -206,45 +203,18 @@
 
 <script>
 const API = "https://api.github.com";
-const STORAGE_KEY = "build-runner-state-v1";
-
-function loadStoredState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch (e) { return null; }
-}
-
-function persist() {
-  try {
-    const toSave = {
-      token: state.token,
-      user: state.user,
-      screen: state.screen,
-      selectedRepo: state.selectedRepo,
-      selectedBranch: state.selectedBranch,
-      run: state.run,
-      artifact: state.artifact
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
-  } catch (e) { /* storage full or unavailable, ignore */ }
-}
-
-const stored = loadStoredState();
-
 let state = {
-  token: stored && stored.token ? stored.token : "",
-  user: stored && stored.user ? stored.user : null,
-  screen: stored && stored.token ? (stored.screen || "repos") : "token",
+  token: "",
+  user: null,
+  screen: "token",   // token | repos | branches | build
   repos: [],
   repoFilter: "",
-  selectedRepo: stored ? stored.selectedRepo : null,
+  selectedRepo: null,
   branches: [],
-  branchWorkflows: {},
-  selectedBranch: stored ? stored.selectedBranch : null,
-  run: stored ? stored.run : null,
-  artifact: stored ? stored.artifact : null,
+  branchWorkflows: {}, // branchName -> {hasYml, hasDispatch, path, workflowId}
+  selectedBranch: null,
+  run: null,          // {id, status, conclusion, html_url}
+  artifact: null,      // {id, name, archive_download_url}
   pollTimer: null,
   errorMsg: "",
   confirmingDelete: false
@@ -298,23 +268,10 @@ async function connectToken() {
     const me = await gh("/user");
     state.user = me;
     state.screen = "repos";
-    persist();
     await loadRepos();
   } catch (e) {
-    state.token = "";
     setError("Não consegui autenticar: " + e.message + ". Confirma que o token tem o scope 'repo' e 'workflow'.");
   }
-  render();
-}
-
-function forgetToken() {
-  if (state.pollTimer) { clearInterval(state.pollTimer); state.pollTimer = null; }
-  localStorage.removeItem(STORAGE_KEY);
-  state = {
-    token: "", user: null, screen: "token", repos: [], repoFilter: "",
-    selectedRepo: null, branches: [], branchWorkflows: {}, selectedBranch: null,
-    run: null, artifact: null, pollTimer: null, errorMsg: "", confirmingDelete: false
-  };
   render();
 }
 
@@ -342,7 +299,6 @@ async function selectRepo(repo) {
   state.branchWorkflows = {};
   state.run = null;
   state.artifact = null;
-  persist();
   render();
   setError("");
   try {
@@ -356,6 +312,7 @@ async function selectRepo(repo) {
     }
     state.branches = all;
     render();
+    // check workflows per branch, in parallel but capped
     for (const b of all) {
       checkBranchWorkflow(repo, b.name);
     }
@@ -373,6 +330,7 @@ async function checkBranchWorkflow(repo, branchName) {
       render();
       return;
     }
+    // inspect each yml for workflow_dispatch
     let found = null;
     for (const f of ymls) {
       try {
@@ -405,9 +363,9 @@ async function startBuild(branchName) {
   state.screen = "build";
   state.run = { status: "queued", conclusion: null };
   state.artifact = null;
-  persist();
   render();
   try {
+    // resolve workflow id from path
     const workflows = await gh(`/repos/${repo.full_name}/actions/workflows`);
     const match = workflows.workflows.find(w => w.path === wf.path);
     if (!match) throw new Error("Workflow não encontrado via API de Actions.");
@@ -418,6 +376,7 @@ async function startBuild(branchName) {
       body: JSON.stringify({ ref: branchName })
     });
 
+    // poll for the new run
     await new Promise(r => setTimeout(r, 2500));
     let run = null;
     for (let i = 0; i < 10 && !run; i++) {
@@ -428,13 +387,11 @@ async function startBuild(branchName) {
     if (!run) throw new Error("Build disparado mas não consegui localizar o run. Confere no GitHub.");
 
     state.run = run;
-    persist();
     render();
     pollRun(repo.full_name, run.id);
   } catch (e) {
     setError("Falha ao disparar build: " + e.message);
     state.run = null;
-    persist();
     render();
   }
 }
@@ -445,7 +402,6 @@ function pollRun(fullName, runId) {
     try {
       const run = await gh(`/repos/${fullName}/actions/runs/${runId}`);
       state.run = run;
-      persist();
       if (run.status === "completed") {
         clearInterval(state.pollTimer);
         state.pollTimer = null;
@@ -455,7 +411,7 @@ function pollRun(fullName, runId) {
       }
       render();
     } catch (e) {
-      // transient network errors shouldn't kill the poll
+      // keep trying silently; transient network errors shouldn't kill the poll
     }
   }, 6000);
 }
@@ -465,7 +421,6 @@ async function loadArtifact(fullName, runId) {
     const data = await gh(`/repos/${fullName}/actions/runs/${runId}/artifacts`);
     if (data.artifacts && data.artifacts.length > 0) {
       state.artifact = data.artifacts[0];
-      persist();
     }
   } catch (e) {
     setError("Build terminou mas não consegui buscar o artefacto: " + e.message);
@@ -475,6 +430,7 @@ async function loadArtifact(fullName, runId) {
 
 function apkDownloadUrl() {
   if (!state.artifact) return null;
+  // GitHub requires auth for artifact download; we proxy via a direct authenticated fetch+blob
   return state.artifact.archive_download_url;
 }
 
@@ -523,7 +479,6 @@ async function confirmDeleteBuild() {
     state.artifact = null;
     state.confirmingDelete = false;
     state.screen = "branches";
-    persist();
   } catch (e) {
     setError("Falha ao apagar: " + e.message);
   }
@@ -541,7 +496,6 @@ function goBack() {
     state.artifact = null;
     state.confirmingDelete = false;
   }
-  persist();
   render();
 }
 
@@ -564,7 +518,7 @@ function render() {
     app.appendChild(h("div", { class: "card" }, [
       h("label", { for: "token-input", text: "Token de acesso pessoal do GitHub" }),
       h("input", { type: "password", id: "token-input", placeholder: "ghp_••••••••••••••••", onkeydown: e => { if (e.key === "Enter") connectToken(); } }),
-      h("p", { class: "hint", text: "Precisa dos scopes 'repo' e 'workflow'. Fica guardado só neste navegador." }),
+      h("p", { class: "hint", text: "Precisa dos scopes 'repo' e 'workflow'. O token fica só nesta página, não é guardado." }),
       h("div", { class: "btn-row" }, [
         h("button", { class: "btn-primary", id: "connect-btn", text: "Ligar", onclick: connectToken })
       ]),
@@ -574,13 +528,9 @@ function render() {
   }
 
   if (state.screen === "repos") {
-    if (state.repos.length === 0) loadRepos().then(render);
     const filtered = state.repos.filter(r => r.full_name.toLowerCase().includes(state.repoFilter.toLowerCase()));
     app.appendChild(h("div", { class: "card" }, [
-      h("div", { class: "top-row" }, [
-        h("label", { text: state.user ? ("Ligado como " + state.user.login) : "Repositórios" }),
-        h("button", { class: "forget-btn", text: "Esquecer token", onclick: forgetToken })
-      ]),
+      h("label", { text: state.user ? ("Ligado como " + state.user.login) : "Repositórios" }),
       h("input", { type: "text", placeholder: "Filtrar repositórios…", value: state.repoFilter, oninput: e => { state.repoFilter = e.target.value; render(); } }),
       state.repos.length === 0 && !state.errorMsg
         ? h("p", { class: "muted", text: "A carregar repositórios…" })
@@ -596,10 +546,6 @@ function render() {
   }
 
   if (state.screen === "branches") {
-    if (state.branches.length === 0 && state.selectedRepo) {
-      selectRepo(state.selectedRepo);
-      return;
-    }
     app.appendChild(h("button", { class: "back-link", text: "← repositórios", onclick: goBack }));
     app.appendChild(h("div", { class: "card" }, [
       h("label", { text: state.selectedRepo.full_name }),
@@ -679,11 +625,6 @@ function render() {
 }
 
 render();
-
-// Resume polling if we reloaded mid-build
-if (state.screen === "build" && state.run && state.run.status !== "completed" && state.selectedRepo) {
-  pollRun(state.selectedRepo.full_name, state.run.id);
-}
 </script>
 </body>
 </html>
