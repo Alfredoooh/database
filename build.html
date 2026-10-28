@@ -1,2650 +1,689 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Build Console</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Runner</title>
 <style>
   :root {
-    --font: "Segoe UI", "Segoe UI Variable", system-ui, -apple-system, Roboto, sans-serif;
-    --font-mono: "Cascadia Code", "SF Mono", Consolas, monospace;
-
-    /* Fluent light theme */
-    --bg: #FAF9F8;
-    --bg-canvas: #F3F2F1;
-    --surface: #FFFFFF;
-    --surface-alt: #F3F2F1;
-    --surface-hover: #F3F2F1;
-    --surface-pressed: #EDEBE9;
-    --stroke: #E1DFDD;
-    --stroke-strong: #C8C6C4;
-    --text-primary: #201F1E;
-    --text-secondary: #605E5C;
-    --text-tertiary: #8A8886;
-    --text-on-accent: #FFFFFF;
-
-    --accent: #0078D4;
-    --accent-hover: #106EBE;
-    --accent-pressed: #005A9E;
-    --accent-light: #EFF6FC;
-    --accent-border: #C7E0F4;
-
-    --success: #107C10;
-    --success-bg: #DFF6DD;
-    --success-border: #9FD89F;
-    --danger: #D83B01;
-    --danger-bg: #FDE7E9;
-    --danger-border: #F3A9A0;
-    --warning: #797673;
-    --warning-bg: #FFF4CE;
-    --warning-border: #F9E29C;
-    --info: #0078D4;
-
-    --radius-sm: 2px;
-    --radius-md: 4px;
-    --radius-lg: 6px;
-    --shadow-2: 0 1.6px 3.6px rgba(0,0,0,0.13), 0 0.3px 0.9px rgba(0,0,0,0.11);
-    --shadow-4: 0 3.2px 7.2px rgba(0,0,0,0.13), 0 0.6px 1.8px rgba(0,0,0,0.11);
-    --shadow-8: 0 6.4px 14.4px rgba(0,0,0,0.13), 0 1.2px 3.6px rgba(0,0,0,0.11);
-
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-    --navbar-h: 48px;
-    --tabbar-h: 54px;
+    --bg: #ffffff;
+    --surface: #f3f2f0;
+    --border: #dddad4;
+    --text: #1a1a18;
+    --text-dim: #6b6862;
+    --accent: #2b5fd9;
+    --accent-text: #ffffff;
+    --ok: #1e7f4f;
+    --fail: #b3261e;
+    --warn: #9a6a00;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15140f;
+      --surface: #201f19;
+      --border: #38362c;
+      --text: #ece8de;
+      --text-dim: #9b968a;
+      --accent: #6d93ff;
+      --accent-text: #0e1320;
+      --ok: #5fcf96;
+      --fail: #ff8a80;
+      --warn: #e0b24a;
+      color-scheme: dark;
+    }
   }
 
-  [data-theme="dark"] {
-    --bg: #1B1A19;
-    --bg-canvas: #201F1E;
-    --surface: #252423;
-    --surface-alt: #2D2C2B;
-    --surface-hover: #323130;
-    --surface-pressed: #3B3A39;
-    --stroke: #3B3A39;
-    --stroke-strong: #484645;
-    --text-primary: #F3F2F1;
-    --text-secondary: #C8C6C4;
-    --text-tertiary: #979593;
-    --text-on-accent: #FFFFFF;
-
-    --accent: #2899F5;
-    --accent-hover: #4DB2FF;
-    --accent-pressed: #1A7FD1;
-    --accent-light: #112733;
-    --accent-border: #1E425B;
-
-    --success: #6CCB5F;
-    --success-bg: #0E2E0E;
-    --success-border: #1F4A1F;
-    --danger: #FF8C66;
-    --danger-bg: #3B1309;
-    --danger-border: #5C2415;
-    --warning: #C8C6C4;
-    --warning-bg: #352F10;
-    --warning-border: #524A1B;
-    --info: #2899F5;
-
-    --shadow-2: 0 1.6px 3.6px rgba(0,0,0,0.4), 0 0.3px 0.9px rgba(0,0,0,0.3);
-    --shadow-4: 0 3.2px 7.2px rgba(0,0,0,0.4), 0 0.6px 1.8px rgba(0,0,0,0.3);
-    --shadow-8: 0 6.4px 14.4px rgba(0,0,0,0.4), 0 1.2px 3.6px rgba(0,0,0,0.3);
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { background: var(--bg-canvas); color: var(--text-primary); height: 100%; }
+  * { box-sizing: border-box; }
   body {
-    font-family: var(--font);
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 24px 16px 64px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .sub {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin: 0 0 28px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  input[type="password"], input[type="text"], select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+  }
+  input:focus, select:focus, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  button {
+    appearance: none;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
     font-size: 14px;
-    line-height: 1.45;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
-    transition: background 0.2s ease, color 0.2s ease;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
   }
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-thumb { background: var(--stroke-strong); border-radius: 10px; border: 2px solid var(--bg-canvas); }
-  ::-webkit-scrollbar-track { background: transparent; }
+  .btn-primary { background: var(--accent); color: var(--accent-text); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-danger { background: var(--fail); color: #fff; }
+  .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 
-  .app { max-width: 520px; margin: 0 auto; min-height: 100vh; position: relative; background: var(--bg); }
-
-  /* ---------- Top command bar ---------- */
-  .navbar {
-    position: sticky; top: 0; z-index: 50;
-    padding-top: var(--safe-top);
-    background: var(--surface);
-    border-bottom: 1px solid var(--stroke);
-  }
-  .navbar-inner { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 11px 16px; min-height: var(--navbar-h); gap: 10px; }
-  .navbar-title { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 9px; color: var(--text-primary); }
-  .navbar-title-icon {
-    width: 28px; height: 28px; border-radius: var(--radius-md);
-    background: var(--accent-light); color: var(--accent);
-    display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0;
-  }
-  .navbar-sub { font-size: 11.5px; color: var(--text-tertiary); margin-top: 1px; font-weight: 400; }
-  .navbar-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-  .nav-btn {
-    width: 30px; height: 30px; border-radius: var(--radius-md);
-    background: transparent; border: 1px solid transparent; color: var(--text-secondary);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; cursor: pointer;
-    transition: background 0.1s ease, border-color 0.1s ease;
-  }
-  .nav-btn:hover { background: var(--surface-hover); }
-  .nav-btn:active { background: var(--surface-pressed); }
-  .nav-btn.accent { background: var(--accent); color: #fff; }
-  .nav-btn.accent:hover { background: var(--accent-hover); }
-
-  .theme-switch {
-    display: flex; align-items: center; background: var(--surface-alt); border: 1px solid var(--stroke);
-    border-radius: 100px; padding: 2px; gap: 1px;
-  }
-  .theme-switch button {
-    width: 26px; height: 24px; border: none; background: transparent; border-radius: 100px;
-    color: var(--text-tertiary); font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s ease, color 0.15s ease;
-  }
-  .theme-switch button.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow-2); }
-
-  .content { padding: 14px; padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 20px); min-height: calc(100vh - 60px); }
-
-  .screen { display: none; }
-  .screen.active { display: block; }
-
-  /* ---------- Bottom nav (Fluent pivot style, not iOS pill tabs) ---------- */
-  .tabbar {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    max-width: 520px; margin: 0 auto;
-    height: calc(var(--tabbar-h) + var(--safe-bottom));
-    padding-bottom: var(--safe-bottom);
-    background: var(--surface);
-    border-top: 1px solid var(--stroke);
-    display: flex; z-index: 100;
-  }
-  .tab-item {
-    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 3px; background: none; border: none; color: var(--text-tertiary);
-    cursor: pointer; font-family: inherit; position: relative;
-  }
-  .tab-item::before {
-    content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-    width: 0; height: 2px; background: var(--accent); transition: width 0.15s ease;
-  }
-  .tab-item i { font-size: 17px; }
-  .tab-item span { font-size: 10px; font-weight: 600; }
-  .tab-item.active { color: var(--accent); }
-  .tab-item.active::before { width: 28px; }
-  .tab-badge {
-    position: absolute; top: 6px; right: calc(50% - 18px);
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--danger); border: 1.5px solid var(--surface);
+  .hint { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
+  .error-box {
+    border: 1px solid var(--fail);
+    color: var(--fail);
+    background: color-mix(in srgb, var(--fail) 10%, transparent);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-top: 12px;
   }
 
-  .section-label {
-    font-size: 11.5px; font-weight: 600; color: var(--text-tertiary);
-    padding: 0 2px 7px; display: flex; align-items: center; justify-content: space-between; gap: 6px;
-    margin-top: 18px;
+  .repo-list, .branch-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
+  .repo-item, .branch-item {
+    text-align: left;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
   }
-  .section-label:first-child { margin-top: 0; }
-  .section-label-left { display: flex; align-items: center; gap: 6px; }
-  .section-label .count-pill {
-    background: var(--surface-alt); color: var(--text-secondary);
-    font-size: 10.5px; padding: 1px 7px; border-radius: 100px; font-weight: 700; border: 1px solid var(--stroke);
+  .repo-item:hover, .branch-item:hover:not(.disabled) { border-color: var(--accent); }
+  .branch-item.disabled { opacity: 0.45; cursor: default; }
+  .branch-item.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--bg)); }
+  .tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+    white-space: nowrap;
   }
-  .section-label-action { color: var(--accent); font-weight: 600; cursor: pointer; font-size: 11.5px; }
+  .tag-ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
+  .tag-warn { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
 
-  /* ---------- Fluent card/list primitives ---------- */
-  .card { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--stroke); overflow: hidden; }
-  .card.elevated { box-shadow: var(--shadow-4); }
+  .back-link {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 13px;
+    padding: 0;
+    cursor: pointer;
+    margin-bottom: 12px;
+  }
 
-  .list-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 11px 14px; border-bottom: 1px solid var(--stroke);
-    gap: 10px; cursor: pointer; transition: background 0.1s ease; position: relative;
-  }
-  .list-row:last-child { border-bottom: none; }
-  .list-row:hover { background: var(--surface-hover); }
-  .list-row:active { background: var(--surface-pressed); }
-  .list-row.static { cursor: default; }
-  .list-row.static:hover { background: var(--surface); }
-  .list-row-icon {
-    width: 30px; height: 30px; border-radius: var(--radius-md);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; flex-shrink: 0; border: 1px solid var(--stroke);
-  }
-  .list-row-content { flex: 1; min-width: 0; }
-  .list-row-title { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); }
-  .list-row-subtitle { font-size: 11.5px; color: var(--text-secondary); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .list-row-trail { font-size: 12px; color: var(--text-tertiary); display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-  .list-row-chevron { color: var(--text-tertiary); font-size: 11px; }
-  .list-row.selected { background: var(--accent-light); }
-  .list-row.selected .list-row-title { color: var(--accent); }
-  .list-row.selected .list-row-icon { border-color: var(--accent-border); color: var(--accent); background: var(--surface); }
+  .status-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .dot-queued { background: var(--text-dim); }
+  .dot-running { background: var(--warn); animation: pulse 1.2s infinite ease-in-out; }
+  .dot-ok { background: var(--ok); }
+  .dot-fail { background: var(--fail); }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
 
-  .field-group { margin-bottom: 14px; }
-  .field-label { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; padding: 0 1px; display: flex; align-items: center; gap: 6px; }
-  .field-label i { font-size: 11px; color: var(--text-tertiary); width: 13px; }
-  .field-wrap { position: relative; }
-  .field-input, .field-select {
-    width: 100%; background: var(--surface); border: 1px solid var(--stroke-strong);
-    border-radius: var(--radius-md); color: var(--text-primary); padding: 9px 11px;
-    font-size: 13.5px; font-family: inherit; transition: border-color 0.12s ease, box-shadow 0.12s ease;
-  }
-  .field-input:focus, .field-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-  .field-input::placeholder { color: var(--text-tertiary); }
-  .field-toggle-visibility {
-    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-    background: none; border: none; color: var(--text-tertiary); font-size: 13px; cursor: pointer; padding: 6px;
-  }
-  .field-hint { font-size: 11.5px; color: var(--text-tertiary); margin-top: 6px; padding: 0 1px; line-height: 1.5; }
-  .field-hint code { background: var(--surface-alt); padding: 1px 5px; border-radius: 4px; font-family: var(--font-mono); font-size: 10.5px; color: var(--danger); border: 1px solid var(--stroke); }
-  .field-hint a { color: var(--accent); text-decoration: none; }
-  .field-hint a:hover { text-decoration: underline; }
-  .checkbox-row { display: flex; align-items: center; gap: 9px; padding: 9px 0; cursor: pointer; }
-  .checkbox-box {
-    width: 18px; height: 18px; border-radius: var(--radius-sm); border: 1px solid var(--stroke-strong);
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--surface); font-size: 10px; color: #fff;
-    transition: all 0.1s ease;
-  }
-  .checkbox-row.checked .checkbox-box { background: var(--accent); border-color: var(--accent); }
-  .checkbox-label { font-size: 13px; color: var(--text-primary); }
-
-  /* ---------- Buttons (Fluent: square-ish, border-based secondary) ---------- */
-  .btn {
-    width: 100%; border: 1px solid transparent; border-radius: var(--radius-md);
-    font-size: 13.5px; font-weight: 600; font-family: inherit; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 7px;
-    transition: background 0.1s ease, border-color 0.1s ease; padding: 9px 14px;
-  }
-  .btn:active { transform: translateY(0.5px); }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: var(--accent-hover); }
-  .btn-primary:disabled { background: var(--surface-alt); color: var(--text-tertiary); cursor: not-allowed; }
-  .btn-secondary { background: var(--surface); color: var(--text-primary); border-color: var(--stroke-strong); }
-  .btn-secondary:hover { background: var(--surface-hover); }
-  .btn-secondary:disabled { color: var(--text-tertiary); cursor: not-allowed; }
-  .btn-danger-text { background: transparent; color: var(--danger); border-color: var(--danger-border); }
-  .btn-danger-text:hover { background: var(--danger-bg); }
-  .btn-sm { padding: 6px 12px; font-size: 12px; font-weight: 600; width: auto; border-radius: var(--radius-sm); }
-  .btn-row { display: flex; gap: 8px; }
-  .btn-row .btn { flex: 1; }
-
-  .banner {
-    border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 14px;
-    font-size: 12.5px; display: none; align-items: flex-start; gap: 9px; line-height: 1.5;
-    border: 1px solid;
-  }
-  .banner.show { display: flex; }
-  .banner i { font-size: 13px; margin-top: 1px; flex-shrink: 0; }
-  .banner.warning { background: var(--warning-bg); color: var(--text-primary); border-color: var(--warning-border); }
-  .banner.warning i { color: #9B7B00; }
-  [data-theme="dark"] .banner.warning i { color: #E8C84A; }
-  .banner.error { background: var(--danger-bg); color: var(--danger); border-color: var(--danger-border); }
-  .banner.success { background: var(--success-bg); color: var(--success); border-color: var(--success-border); }
-  .banner.info { background: var(--accent-light); color: var(--accent); border-color: var(--accent-border); }
-
-  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-tertiary); }
-  .empty-state i { font-size: 28px; margin-bottom: 12px; display: block; opacity: 0.5; }
-  .empty-state-title { font-size: 13.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
-  .empty-state-text { font-size: 12px; line-height: 1.55; max-width: 320px; margin: 0 auto; }
-
-  .fluent-spinner {
-    width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
-    border: 2px solid var(--stroke); border-top-color: var(--accent);
+  .muted { color: var(--text-dim); font-size: 13px; }
+  .spin {
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
     animation: spin 0.7s linear infinite;
+    display: inline-block;
   }
-  .fluent-spinner.on-accent { border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ---------- App profile card ---------- */
-  .app-profile-card {
-    background: var(--surface); border-radius: var(--radius-lg); padding: 14px;
-    margin-bottom: 10px; border: 1px solid var(--stroke); cursor: pointer;
-    transition: border-color 0.12s ease; position: relative;
+  a.apk-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
   }
-  .app-profile-card:hover { border-color: var(--stroke-strong); }
-  .app-profile-card.active-profile { border-color: var(--accent); border-width: 1px; box-shadow: 0 0 0 1px var(--accent); }
-  .app-profile-top { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
-  .app-profile-icon {
-    width: 38px; height: 38px; border-radius: var(--radius-md);
-    background: var(--accent-light); color: var(--accent);
-    display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
-  }
-  .app-profile-name { font-size: 14.5px; font-weight: 700; }
-  .app-profile-repo { font-size: 11.5px; color: var(--text-secondary); margin-top: 1px; }
-  .app-profile-menu-btn {
-    position: absolute; top: 11px; right: 11px;
-    width: 26px; height: 26px; border-radius: var(--radius-sm);
-    background: transparent; border: none; color: var(--text-tertiary);
-    display: flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer;
-  }
-  .app-profile-menu-btn:hover { background: var(--surface-hover); }
-  .app-profile-meta-row { display: flex; gap: 6px; flex-wrap: wrap; }
-  .app-profile-chip {
-    display: flex; align-items: center; gap: 5px;
-    background: var(--surface-alt); padding: 4px 9px; border-radius: 100px;
-    font-size: 10.5px; color: var(--text-secondary); border: 1px solid var(--stroke); font-weight: 500;
-  }
-  .app-profile-chip i { font-size: 9.5px; }
-  .app-profile-chip.accent { background: var(--accent-light); color: var(--accent); border-color: var(--accent-border); }
-  .app-profile-active-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    background: var(--accent); color: #fff; font-size: 10px; font-weight: 700;
-    padding: 3px 9px; border-radius: var(--radius-sm); margin-top: 9px;
-  }
-  .fab-add {
-    position: fixed;
-    bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 16px);
-    right: 18px;
-    width: 46px; height: 46px; border-radius: var(--radius-lg);
-    background: var(--accent); color: #fff; border: none;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 17px; cursor: pointer; z-index: 60;
-    box-shadow: var(--shadow-8);
-  }
-  .fab-add:hover { background: var(--accent-hover); }
-  .fab-add:active { transform: translateY(1px); }
+  a.apk-link:hover { text-decoration: underline; }
 
-  /* ---------- Progress / step timeline ---------- */
-  .progress-list { display: flex; flex-direction: column; }
-  .progress-item { display: flex; align-items: flex-start; gap: 11px; padding: 10px 0; position: relative; }
-  .progress-item:not(:last-child)::before {
-    content: ""; position: absolute; left: 11px; top: 30px; bottom: -4px; width: 1.5px; background: var(--stroke);
+  .confirm-box {
+    margin-top: 12px;
+    border: 1px solid var(--warn);
+    background: color-mix(in srgb, var(--warn) 10%, transparent);
+    border-radius: 8px;
+    padding: 12px;
   }
-  .progress-item.done:not(:last-child)::before { background: var(--success); opacity: 0.5; }
-  .progress-icon-wrap {
-    width: 24px; height: 24px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    background: var(--surface-alt); color: var(--text-tertiary); font-size: 11px; z-index: 1;
-    border: 1px solid var(--stroke);
-  }
-  .progress-item.active .progress-icon-wrap { background: var(--accent-light); color: var(--accent); border-color: var(--accent-border); }
-  .progress-item.done .progress-icon-wrap { background: var(--success-bg); color: var(--success); border-color: var(--success-border); }
-  .progress-item.error .progress-icon-wrap { background: var(--danger-bg); color: var(--danger); border-color: var(--danger-border); }
-  .progress-text { flex: 1; padding-top: 2px; min-width: 0; }
-  .progress-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
-  .progress-item.active .progress-title, .progress-item.done .progress-title { color: var(--text-primary); }
-  .progress-item.error .progress-title { color: var(--danger); }
-  .progress-detail { font-size: 11.5px; color: var(--text-tertiary); margin-top: 2px; word-break: break-word; }
-  .progress-timer { font-size: 10.5px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; margin-top: 2px; }
 
-  .link-row {
-    display: flex; align-items: center; justify-content: center; gap: 7px; padding: 10px;
-    color: var(--accent); text-decoration: none; font-size: 13px; font-weight: 600;
-    background: var(--surface); border-radius: var(--radius-md); border: 1px solid var(--stroke); margin-top: 12px;
-  }
-  .link-row:hover { background: var(--surface-hover); }
-
-  .apk-card {
-    background: var(--surface);
-    border: 1px solid var(--success-border); border-radius: var(--radius-lg); padding: 15px;
-    margin-top: 14px; display: none;
-  }
-  .apk-card.show { display: block; }
-  .apk-card-top { display: flex; align-items: center; gap: 11px; margin-bottom: 12px; }
-  .apk-icon-circle {
-    width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--success-bg); color: var(--success);
-    display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0;
-  }
-  .apk-name { font-weight: 700; font-size: 13.5px; word-break: break-all; }
-  .apk-meta { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
-  .apk-extract-status {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 11.5px; color: var(--text-secondary);
-    background: var(--surface-alt); border-radius: var(--radius-sm); padding: 8px 10px;
-    margin-bottom: 11px; border: 1px solid var(--stroke);
-  }
-  .apk-extract-status.ok { color: var(--success); }
-  .apk-extract-status.fail { color: var(--danger); }
-  .apk-card-actions { display: flex; flex-direction: column; gap: 7px; }
-
-  .error-card {
-    background: var(--surface); border: 1px solid var(--danger-border); border-radius: var(--radius-lg);
-    padding: 14px; margin-top: 14px; display: none;
-  }
-  .error-card.show { display: block; }
-  .error-card-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--danger); margin-bottom: 9px; }
-  .error-card-step { font-size: 11.5px; color: var(--text-secondary); margin-bottom: 9px; padding: 7px 9px; background: var(--surface-alt); border-radius: var(--radius-sm); border: 1px solid var(--stroke); }
-  .error-card-step .step-job { color: var(--text-tertiary); }
-  .error-log-text {
-    background: var(--bg-canvas); border-radius: var(--radius-sm); padding: 11px; font-size: 11px;
-    font-family: var(--font-mono); white-space: pre-wrap; word-break: break-word;
-    max-height: 320px; overflow-y: auto; color: var(--danger); line-height: 1.65; border: 1px solid var(--stroke);
-  }
-  .error-card-actions { display: flex; gap: 7px; margin-top: 9px; }
-
-  .live-log-section { margin-top: 18px; }
-  .live-log-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; padding: 0 1px; }
-  .live-log-actions { display: flex; gap: 6px; align-items: center; }
-  .live-log-status {
-    display: flex; align-items: center; gap: 5px; font-size: 10.5px; color: var(--text-tertiary); font-weight: 600;
-  }
-  .live-log-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-tertiary); }
-  .live-log-status.live .dot { background: var(--success); animation: pulse 1.4s ease infinite; }
-  .live-log-status.live { color: var(--success); }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-  .icon-chip {
-    width: 27px; height: 27px; border-radius: var(--radius-sm); background: var(--surface);
-    border: 1px solid var(--stroke); color: var(--text-secondary);
-    display: flex; align-items: center; justify-content: center; font-size: 11.5px; cursor: pointer;
-  }
-  .icon-chip:hover { background: var(--surface-hover); }
-  .live-log-box {
-    background: var(--bg-canvas); border: 1px solid var(--stroke); border-radius: var(--radius-md);
-    padding: 11px 12px; font-size: 11px; font-family: var(--font-mono);
-    white-space: pre-wrap; word-break: break-word; max-height: 280px; overflow-y: auto;
-    color: var(--text-secondary); line-height: 1.75;
-  }
-  .live-log-line { display: flex; gap: 8px; padding: 1px 0; }
-  .live-log-time { color: var(--text-tertiary); flex-shrink: 0; }
-  .live-log-msg { flex: 1; }
-  .live-log-line.err .live-log-msg { color: var(--danger); }
-  .live-log-line.ok .live-log-msg { color: var(--success); }
-  .live-log-line.info .live-log-msg { color: var(--accent); }
-
-  .job-detail-box {
-    background: var(--bg-canvas); border: 1px solid var(--stroke); border-radius: var(--radius-md);
-    margin-top: 8px; overflow: hidden;
-  }
-  .job-detail-head {
-    display: flex; align-items: center; justify-content: space-between; padding: 8px 10px;
-    cursor: pointer; font-size: 12px; font-weight: 600;
-  }
-  .job-detail-head:hover { background: var(--surface-hover); }
-  .job-detail-head .jd-status { display: flex; align-items: center; gap: 7px; }
-  .job-step-row { display: flex; align-items: center; gap: 8px; padding: 5px 10px 5px 30px; font-size: 11px; color: var(--text-secondary); }
-  .job-step-row i { font-size: 9px; width: 11px; flex-shrink: 0; }
-  .job-step-row.ok i { color: var(--success); }
-  .job-step-row.fail i { color: var(--danger); }
-  .job-step-row.running i { color: var(--accent); }
-  .job-step-row.pending i { color: var(--text-tertiary); }
-  .job-steps-wrap { display: none; padding-bottom: 6px; }
-  .job-steps-wrap.open { display: block; }
-
-  .settings-footer { margin-top: 20px; text-align: center; font-size: 11px; color: var(--text-tertiary); padding: 0 16px; line-height: 1.6; }
-  .settings-footer i { color: var(--text-tertiary); }
-
-  .toast {
-    position: fixed; bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 18px); left: 50%;
-    transform: translateX(-50%) translateY(90px);
-    background: var(--text-primary); color: var(--bg);
-    padding: 10px 16px; border-radius: var(--radius-md); font-size: 12.5px; font-weight: 600;
-    display: flex; align-items: center; gap: 8px; z-index: 200;
-    transition: transform 0.25s ease;
-    box-shadow: var(--shadow-8); max-width: 88%;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast i { color: var(--success); }
-
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
-    display: none; align-items: flex-end; justify-content: center; z-index: 300;
-  }
-  .modal-overlay.show { display: flex; }
-  .modal-sheet {
-    background: var(--surface); width: 100%; max-width: 520px;
-    border-radius: 10px 10px 0 0; padding: 8px 16px calc(20px + var(--safe-bottom));
-    max-height: 86vh; overflow-y: auto; border-top: 1px solid var(--stroke);
-  }
-  .modal-handle { width: 32px; height: 3px; background: var(--stroke-strong); border-radius: 10px; margin: 8px auto 14px; }
-  .modal-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-  .modal-actions { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; }
-
-  .inline-step-label { font-size: 11.5px; font-weight: 700; color: var(--text-tertiary); margin: 14px 0 7px; padding: 0 1px; }
-  .inline-step-label:first-child { margin-top: 0; }
-
-  .yaml-card {
-    border: 1px solid var(--stroke); border-radius: var(--radius-md); padding: 11px; margin-bottom: 8px; cursor: pointer;
-    transition: border-color 0.12s ease;
-  }
-  .yaml-card:hover { border-color: var(--stroke-strong); }
-  .yaml-card.selected { border-color: var(--accent); background: var(--accent-light); }
-  .yaml-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .yaml-card-name { font-size: 13px; font-weight: 700; font-family: var(--font-mono); }
-  .yaml-card-path { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; font-family: var(--font-mono); }
-  .yaml-card.selected .yaml-card-name { color: var(--accent); }
-
-  .history-item {
-    background: var(--surface); border-radius: var(--radius-lg); padding: 12px 14px;
-    margin-bottom: 9px; border: 1px solid var(--stroke); cursor: pointer;
-  }
-  .history-item:hover { border-color: var(--stroke-strong); }
-  .history-item-top { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
-  .history-item-icon {
-    width: 32px; height: 32px; border-radius: var(--radius-md); display: flex; align-items: center;
-    justify-content: center; font-size: 13px; flex-shrink: 0;
-  }
-  .history-item-icon.success { background: var(--success-bg); color: var(--success); }
-  .history-item-icon.failure { background: var(--danger-bg); color: var(--danger); }
-  .history-item-content { flex: 1; min-width: 0; }
-  .history-item-name { font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .history-item-repo { font-size: 11px; color: var(--text-secondary); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--font-mono); }
-  .history-item-date { font-size: 10.5px; color: var(--text-tertiary); flex-shrink: 0; text-align: right; }
-  .history-item-meta-row { display: flex; gap: 6px; flex-wrap: wrap; }
-  .history-resuming-banner {
-    background: var(--accent-light); color: var(--accent); border-radius: var(--radius-md);
-    padding: 10px 12px; font-size: 12.5px; display: flex; align-items: center; gap: 9px;
-    margin-bottom: 14px; border: 1px solid var(--accent-border);
-  }
-  .history-detail-card { background: var(--surface); border-radius: var(--radius-lg); padding: 14px; border: 1px solid var(--stroke); }
-  .history-filter-row { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; }
-  .filter-chip {
-    flex-shrink: 0; padding: 6px 12px; border-radius: 100px; font-size: 11.5px; font-weight: 600;
-    border: 1px solid var(--stroke); background: var(--surface); color: var(--text-secondary); cursor: pointer;
-  }
-  .filter-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-
-  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
-  .stat-box { background: var(--surface); border: 1px solid var(--stroke); border-radius: var(--radius-lg); padding: 12px; }
-  .stat-value { font-size: 20px; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
-  .stat-label { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; font-weight: 600; }
-
-  .search-wrap { position: relative; margin-bottom: 12px; }
-  .search-wrap i { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); font-size: 12px; }
-  .search-wrap input { padding-left: 32px; }
+  .top-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .forget-btn { font-size: 12px; color: var(--text-dim); background: none; border: none; cursor: pointer; padding: 0; text-decoration: underline; font-weight: 400; white-space: nowrap; }
 </style>
 </head>
 <body>
+<div class="wrap">
+  <h1>Build Runner</h1>
+  <p class="sub">Dispara builds do GitHub Actions direto do branch que já tem o workflow.</p>
 
-<div class="app">
-
-  <div id="screen-apps" class="screen active">
-    <div class="navbar">
-      <div class="navbar-inner">
-        <div class="navbar-title"><div class="navbar-title-icon"><i class="fa-solid fa-layer-group"></i></div>Meus apps</div>
-        <div class="navbar-actions">
-          <div class="theme-switch" id="theme-switch">
-            <button data-theme-choice="light" aria-label="Tema claro"><i class="fa-solid fa-sun"></i></button>
-            <button data-theme-choice="dark" aria-label="Tema escuro"><i class="fa-solid fa-moon"></i></button>
-          </div>
-          <button class="nav-btn" id="btn-apps-refresh" aria-label="Atualizar"><i class="fa-solid fa-rotate"></i></button>
-        </div>
-      </div>
-    </div>
-    <div class="content">
-      <div id="banner-apps-no-token" class="banner warning">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span>Configure seu token do GitHub na aba Config antes de criar um app.</span>
-      </div>
-
-      <div id="apps-empty" class="empty-state" style="display:none;">
-        <i class="fa-regular fa-folder-open"></i>
-        <div class="empty-state-title">Nenhum app configurado</div>
-        <div class="empty-state-text">Toque no botão + para adicionar seu primeiro app, escolher o repositório, a branch e qual workflow YAML ele deve usar.</div>
-      </div>
-
-      <div id="apps-list"></div>
-    </div>
-    <button class="fab-add" id="btn-fab-add" aria-label="Adicionar app"><i class="fa-solid fa-plus"></i></button>
-  </div>
-
-  <div id="screen-build" class="screen">
-    <div class="navbar">
-      <div class="navbar-inner">
-        <div>
-          <div class="navbar-title" id="build-title"><div class="navbar-title-icon"><i class="fa-solid fa-hammer"></i></div>Build</div>
-          <div class="navbar-sub" id="build-subtitle">Nenhum app selecionado</div>
-        </div>
-        <div class="navbar-actions">
-          <button class="nav-btn" id="btn-build-switch" aria-label="Trocar app"><i class="fa-solid fa-shuffle"></i></button>
-        </div>
-      </div>
-    </div>
-    <div class="content">
-      <div id="build-no-app" class="empty-state">
-        <i class="fa-solid fa-mobile-screen"></i>
-        <div class="empty-state-title">Nenhum app selecionado</div>
-        <div class="empty-state-text">Vá até a aba Apps e toque em um app salvo, ou crie um novo, para começar a buildar.</div>
-      </div>
-
-      <div id="build-active-wrap" style="display:none;">
-        <div id="banner-build-resuming" class="history-resuming-banner" style="display:none;">
-          <div class="fluent-spinner" id="resuming-spinner-slot"></div>
-          <span id="banner-build-resuming-text">Retomando build em andamento...</span>
-        </div>
-        <div id="banner-build-error" class="banner error"><i class="fa-solid fa-circle-exclamation"></i><span id="banner-build-error-text"></span></div>
-        <div id="banner-build-success" class="banner success"><i class="fa-solid fa-circle-check"></i><span id="banner-build-success-text"></span></div>
-        <div id="banner-build-cancelled" class="banner info"><i class="fa-solid fa-circle-info"></i><span>Build cancelado.</span></div>
-
-        <div class="card" style="margin-bottom:14px;">
-          <div class="list-row static">
-            <div class="list-row-icon" style="color:var(--accent);"><i class="fa-solid fa-folder"></i></div>
-            <div class="list-row-content"><div class="list-row-title" id="build-summary-repo">-</div><div class="list-row-subtitle">Repositório</div></div>
-          </div>
-          <div class="list-row static">
-            <div class="list-row-icon" style="color:var(--success);"><i class="fa-solid fa-code-branch"></i></div>
-            <div class="list-row-content"><div class="list-row-title" id="build-summary-branch">-</div><div class="list-row-subtitle">Branch</div></div>
-          </div>
-          <div class="list-row static">
-            <div class="list-row-icon" style="color:var(--text-secondary);"><i class="fa-solid fa-file-code"></i></div>
-            <div class="list-row-content"><div class="list-row-title" id="build-summary-yaml">-</div><div class="list-row-subtitle">Workflow YAML</div></div>
-            <div class="list-row-trail"><button class="icon-chip" id="btn-build-change-yaml" aria-label="Trocar workflow"><i class="fa-solid fa-pen"></i></button></div>
-          </div>
-        </div>
-
-        <div class="btn-row">
-          <button class="btn btn-primary" id="btn-trigger" style="flex:2;"><i class="fa-solid fa-play"></i>Disparar build</button>
-          <button class="btn btn-secondary" id="btn-cancel-build" style="flex:1; display:none;"><i class="fa-solid fa-stop"></i>Parar</button>
-        </div>
-
-        <div id="progress-area" style="display:none; margin-top:18px;">
-          <div class="section-label">
-            <div class="section-label-left"><i class="fa-solid fa-list-check"></i>Progresso do build</div>
-            <div class="live-log-status" id="live-status-pill"><span class="dot"></span><span id="live-status-text">Parado</span></div>
-          </div>
-          <div class="card" style="padding:12px 14px;">
-            <div class="progress-list">
-              <div class="progress-item" id="step-dispatch">
-                <div class="progress-icon-wrap"><i class="fa-regular fa-circle"></i></div>
-                <div class="progress-text"><div class="progress-title">Disparando repository_dispatch</div><div class="progress-detail" id="detail-dispatch"></div></div>
-              </div>
-              <div class="progress-item" id="step-locate">
-                <div class="progress-icon-wrap"><i class="fa-regular fa-circle"></i></div>
-                <div class="progress-text"><div class="progress-title">Localizando run no GitHub Actions</div><div class="progress-detail" id="detail-locate"></div></div>
-              </div>
-              <div class="progress-item" id="step-run">
-                <div class="progress-icon-wrap"><i class="fa-regular fa-circle"></i></div>
-                <div class="progress-text">
-                  <div class="progress-title">Executando workflow</div>
-                  <div class="progress-detail" id="detail-run"></div>
-                  <div id="jobs-detail-wrap"></div>
-                </div>
-              </div>
-              <div class="progress-item" id="step-artifact">
-                <div class="progress-icon-wrap"><i class="fa-regular fa-circle"></i></div>
-                <div class="progress-text"><div class="progress-title">Buscando APK gerado</div><div class="progress-detail" id="detail-artifact"></div></div>
-              </div>
-            </div>
-          </div>
-          <a href="#" id="link-view-actions" class="link-row" target="_blank" rel="noopener" style="display:none;"><i class="fa-solid fa-arrow-up-right-from-square"></i>Ver execução no GitHub Actions</a>
-        </div>
-
-        <div id="error-card" class="error-card">
-          <div class="error-card-title"><i class="fa-solid fa-bug"></i>Log do erro</div>
-          <div class="error-card-step" id="error-card-step"><span class="step-job">Identificando...</span></div>
-          <div class="error-log-text" id="error-log-text">Carregando log...</div>
-          <div class="error-card-actions">
-            <button class="btn btn-secondary btn-sm" id="btn-copy-error" style="flex:1;"><i class="fa-regular fa-copy"></i>Copiar</button>
-            <button class="btn btn-secondary btn-sm" id="btn-download-error" style="flex:1;"><i class="fa-solid fa-download"></i>Baixar .txt</button>
-            <button class="btn btn-secondary btn-sm" id="btn-retry-build" style="flex:1;"><i class="fa-solid fa-rotate-right"></i>Repetir build</button>
-          </div>
-        </div>
-
-        <div id="apk-card" class="apk-card">
-          <div class="apk-card-top">
-            <div class="apk-icon-circle"><i class="fa-brands fa-android"></i></div>
-            <div><div class="apk-name" id="apk-name">-</div><div class="apk-meta" id="apk-meta">-</div></div>
-          </div>
-          <div class="apk-extract-status" id="apk-extract-status"><i class="fa-solid fa-circle-info"></i><span id="apk-extract-status-text">Artifact pronto. Toque em baixar para extrair o APK.</span></div>
-          <div class="apk-card-actions">
-            <button class="btn btn-primary" id="btn-download-apk-only"><i class="fa-brands fa-android"></i>Baixar somente o APK</button>
-            <button class="btn btn-secondary" id="btn-download-zip"><i class="fa-solid fa-file-zipper"></i>Baixar .zip original</button>
-            <button class="btn btn-secondary" id="btn-qr-apk"><i class="fa-solid fa-qrcode"></i>Mostrar QR para instalar noutro aparelho</button>
-          </div>
-        </div>
-
-        <div id="qr-box" style="display:none; text-align:center; margin-top:10px; padding:16px; background:var(--surface); border:1px solid var(--stroke); border-radius: var(--radius-lg);">
-          <div id="qr-canvas-wrap"></div>
-          <div class="field-hint" style="margin-top:8px;">O link do artifact expira e exige o token do GitHub — funciona melhor no mesmo navegador/sessão.</div>
-        </div>
-
-        <div id="live-log-section" class="live-log-section" style="display:none;">
-          <div class="live-log-header">
-            <div class="section-label" style="margin:0; padding:0;"><div class="section-label-left"><i class="fa-solid fa-terminal"></i>Log da execução</div></div>
-            <div class="live-log-actions">
-              <button class="icon-chip" id="btn-copy-log" aria-label="Copiar log"><i class="fa-regular fa-copy"></i></button>
-              <button class="icon-chip" id="btn-download-log" aria-label="Baixar log"><i class="fa-solid fa-download"></i></button>
-            </div>
-          </div>
-          <div class="live-log-box" id="live-log-box"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="screen-history" class="screen">
-    <div class="navbar">
-      <div class="navbar-inner">
-        <div class="navbar-title"><div class="navbar-title-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>Histórico</div>
-        <div class="navbar-actions">
-          <button class="nav-btn" id="btn-history-clear" aria-label="Limpar histórico"><i class="fa-solid fa-trash"></i></button>
-        </div>
-      </div>
-    </div>
-    <div class="content">
-      <div class="stat-grid" id="history-stats"></div>
-
-      <div class="history-filter-row" id="history-filter-row">
-        <button class="filter-chip active" data-filter="all">Todos</button>
-        <button class="filter-chip" data-filter="success">Sucesso</button>
-        <button class="filter-chip" data-filter="failure">Falha</button>
-      </div>
-
-      <div id="history-empty" class="empty-state" style="display:none;">
-        <i class="fa-solid fa-clock-rotate-left"></i>
-        <div class="empty-state-title">Nenhum build no histórico</div>
-        <div class="empty-state-text">Builds concluídos (com sucesso ou falha) aparecem aqui automaticamente.</div>
-      </div>
-      <div id="history-list"></div>
-    </div>
-  </div>
-
-  <div id="screen-config" class="screen">
-    <div class="navbar">
-      <div class="navbar-inner"><div class="navbar-title"><div class="navbar-title-icon"><i class="fa-solid fa-gear"></i></div>Configurações</div></div>
-    </div>
-    <div class="content">
-      <div class="section-label"><div class="section-label-left"><i class="fa-solid fa-key"></i>Autenticação</div></div>
-      <div class="field-group">
-        <div class="field-label"><i class="fa-brands fa-github"></i>Personal access token</div>
-        <div class="field-wrap">
-          <input type="password" class="field-input" id="input-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" style="padding-right:40px;">
-          <button class="field-toggle-visibility" id="btn-toggle-token" type="button"><i class="fa-regular fa-eye"></i></button>
-        </div>
-        <div class="field-hint">
-          Precisa dos escopos <code>repo</code> e <code>workflow</code>. Gere em
-          <a href="https://github.com/settings/tokens" target="_blank" rel="noopener">github.com/settings/tokens</a>.
-          Compartilhado entre todos os apps salvos.
-        </div>
-      </div>
-
-      <div id="settings-error" class="banner error"><i class="fa-solid fa-circle-exclamation"></i><span id="settings-error-text"></span></div>
-      <div id="settings-saved" class="banner success"><i class="fa-solid fa-circle-check"></i><span>Token salvo neste dispositivo.</span></div>
-      <div id="settings-token-info" class="banner info"><i class="fa-solid fa-circle-user"></i><span id="settings-token-info-text"></span></div>
-
-      <button class="btn btn-primary" id="btn-save-token"><i class="fa-solid fa-floppy-disk"></i>Salvar e validar token</button>
-
-      <div class="section-label"><div class="section-label-left"><i class="fa-solid fa-bell"></i>Notificações</div></div>
-      <div class="card">
-        <div class="list-row static">
-          <div class="list-row-content"><div class="list-row-title">Notificar ao concluir build</div><div class="list-row-subtitle">Usa a API de notificações do navegador</div></div>
-          <div class="list-row-trail"><label class="checkbox-row" id="toggle-notify" style="padding:0;"><div class="checkbox-box"><i class="fa-solid fa-check"></i></div></label></div>
-        </div>
-        <div class="list-row static">
-          <div class="list-row-content"><div class="list-row-title">Som ao concluir</div></div>
-          <div class="list-row-trail"><label class="checkbox-row" id="toggle-sound" style="padding:0;"><div class="checkbox-box"><i class="fa-solid fa-check"></i></div></label></div>
-        </div>
-      </div>
-
-      <div class="section-label"><div class="section-label-left"><i class="fa-solid fa-layer-group"></i>Apps salvos</div></div>
-      <div class="card" style="margin-bottom:8px;">
-        <div class="list-row static">
-          <div class="list-row-icon" style="color:var(--text-secondary);"><i class="fa-solid fa-boxes-stacked"></i></div>
-          <div class="list-row-content"><div class="list-row-title">Total de apps</div></div>
-          <div class="list-row-trail" id="config-apps-count">0</div>
-        </div>
-      </div>
-
-      <div class="btn-row" style="margin-bottom:8px;">
-        <button class="btn btn-secondary" id="btn-export-apps"><i class="fa-solid fa-file-export"></i>Exportar</button>
-        <button class="btn btn-secondary" id="btn-import-apps"><i class="fa-solid fa-file-import"></i>Importar</button>
-      </div>
-      <input type="file" id="file-import-apps" accept="application/json" style="display:none;">
-
-      <button class="btn btn-danger-text" id="btn-clear-apps" style="margin-bottom:8px;"><i class="fa-solid fa-trash"></i>Apagar todos os apps salvos</button>
-      <button class="btn btn-danger-text" id="btn-clear-token"><i class="fa-solid fa-key"></i>Remover token salvo</button>
-
-      <div class="settings-footer">
-        <i class="fa-solid fa-shield-halved"></i>
-        O token fica salvo em texto no armazenamento local deste navegador. Não use este dispositivo se outras pessoas tiverem acesso a ele.
-      </div>
-    </div>
-  </div>
-
-  <div class="tabbar">
-    <button class="tab-item active" id="tab-apps" data-screen="screen-apps"><i class="fa-solid fa-layer-group"></i><span>Apps</span></button>
-    <button class="tab-item" id="tab-build" data-screen="screen-build"><i class="fa-solid fa-hammer"></i><span>Build</span><div class="tab-badge" id="build-badge" style="display:none;"></div></button>
-    <button class="tab-item" id="tab-history" data-screen="screen-history"><i class="fa-solid fa-clock-rotate-left"></i><span>Histórico</span></button>
-    <button class="tab-item" id="tab-config" data-screen="screen-config"><i class="fa-solid fa-gear"></i><span>Config</span></button>
-  </div>
-
+  <div id="app"></div>
 </div>
-
-<div class="modal-overlay" id="modal-app">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title"><i class="fa-solid fa-mobile-screen" id="modal-app-icon"></i><span id="modal-app-title">Novo app</span></div>
-
-    <div class="field-group">
-      <div class="field-label"><i class="fa-solid fa-tag"></i>Nome do app</div>
-      <input type="text" class="field-input" id="modal-input-name" placeholder="appao">
-    </div>
-
-    <div class="inline-step-label">Repositório</div>
-    <button class="btn btn-secondary" id="modal-btn-load-repos"><i class="fa-solid fa-rotate"></i>Carregar repositórios</button>
-    <div class="search-wrap" id="modal-repo-search-wrap" style="display:none; margin-top:8px;">
-      <i class="fa-solid fa-magnifying-glass"></i>
-      <input type="text" class="field-input" id="modal-repo-search" placeholder="Filtrar repositórios...">
-    </div>
-    <div id="modal-repo-list" class="card" style="display:none; margin-top:8px; max-height:220px; overflow-y:auto;"></div>
-    <div class="field-hint" id="modal-selected-repo-hint" style="display:none;"></div>
-
-    <div id="modal-branch-section" style="display:none;">
-      <div class="inline-step-label">Branch</div>
-      <div id="modal-branch-list" class="card" style="max-height:220px; overflow-y:auto;"></div>
-    </div>
-
-    <div id="modal-yaml-section" style="display:none;">
-      <div class="inline-step-label">
-        Workflow YAML <span style="font-weight:400; color:var(--text-tertiary);">— qual workflow dispara o build deste app</span>
-      </div>
-      <div id="modal-yaml-list"></div>
-      <div class="field-hint" id="modal-yaml-hint" style="display:none;"></div>
-    </div>
-
-    <div id="modal-project-path-section" style="display:none;">
-      <div class="field-group">
-        <div class="field-label"><i class="fa-solid fa-folder-tree"></i>Pasta do projeto dentro da branch (opcional)</div>
-        <input type="text" class="field-input" id="modal-input-project-path" placeholder="ex: apps/orbit">
-        <div class="field-hint">Útil quando a branch tem vários projetos em pastas diferentes, cada um com o seu próprio workflow. Fica apenas como anotação/organização — quem decide o que builda é o YAML selecionado acima.</div>
-      </div>
-    </div>
-
-    <div id="modal-advanced-section" style="display:none;">
-      <div class="inline-step-label">Avançado</div>
-      <div class="field-group">
-        <div class="field-label"><i class="fa-solid fa-bolt"></i>Event type (repository_dispatch)</div>
-        <input type="text" class="field-input" id="modal-input-event-type" placeholder="build-apk" value="build-apk">
-        <div class="field-hint">Deve corresponder ao <code>types</code> do gatilho <code>repository_dispatch</code> dentro do YAML selecionado.</div>
-      </div>
-      <div class="field-group" style="margin-bottom:8px;">
-        <div class="field-label"><i class="fa-solid fa-box-archive"></i>Nome do artifact (opcional)</div>
-        <input type="text" class="field-input" id="modal-input-apk-pattern" placeholder="appao-debug-apk">
-      </div>
-      <div class="checkbox-row" id="modal-toggle-watch">
-        <div class="checkbox-box"><i class="fa-solid fa-check"></i></div>
-        <div class="checkbox-label">Marcar este app com favorito (aparece primeiro na lista)</div>
-      </div>
-    </div>
-
-    <div id="modal-error" class="banner error" style="margin-top:14px;"><i class="fa-solid fa-circle-exclamation"></i><span id="modal-error-text"></span></div>
-
-    <div class="modal-actions">
-      <button class="btn btn-primary" id="modal-btn-save"><i class="fa-solid fa-check"></i>Salvar app</button>
-      <button class="btn btn-secondary" id="modal-btn-cancel">Cancelar</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-switch">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title"><i class="fa-solid fa-shuffle"></i>Trocar app ativo</div>
-    <div id="modal-switch-list"></div>
-    <div class="modal-actions"><button class="btn btn-secondary" id="modal-switch-cancel">Fechar</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-change-yaml">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title"><i class="fa-solid fa-file-code"></i>Trocar workflow deste build</div>
-    <div class="field-hint" style="margin-bottom:10px;">Isto troca apenas o workflow usado no próximo disparo — não altera o app salvo.</div>
-    <div id="modal-change-yaml-list"></div>
-    <div class="modal-actions"><button class="btn btn-secondary" id="modal-change-yaml-cancel">Fechar</button></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-app-actions">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="modal-app-actions-title"><i class="fa-solid fa-ellipsis"></i>App</div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" id="action-set-active"><i class="fa-solid fa-play"></i>Definir como ativo e ir para Build</button>
-      <button class="btn btn-secondary" id="action-edit-app"><i class="fa-solid fa-pen"></i>Editar</button>
-      <button class="btn btn-secondary" id="action-duplicate-app"><i class="fa-solid fa-copy"></i>Duplicar (outro projeto/pasta)</button>
-      <button class="btn btn-secondary" id="action-delete-app" style="color:var(--danger);"><i class="fa-solid fa-trash"></i>Apagar app</button>
-      <button class="btn btn-secondary" id="action-cancel">Cancelar</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-history-detail">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="modal-history-title"><i class="fa-solid fa-clock-rotate-left"></i>Detalhes do build</div>
-    <div id="modal-history-body"></div>
-    <div class="modal-actions"><button class="btn btn-secondary" id="modal-history-close">Fechar</button></div>
-  </div>
-</div>
-
-<div id="toast" class="toast"><i class="fa-solid fa-check"></i><span id="toast-text"></span></div>
 
 <script>
-(function() {
-  var STORAGE_TOKEN = 'gh_build_token_v3';
-  var STORAGE_APPS = 'gh_build_apps_v3';
-  var STORAGE_ACTIVE = 'gh_build_active_app_v3';
-  var STORAGE_LIVE_BUILD = 'gh_build_live_build_v2';
-  var STORAGE_HISTORY = 'gh_build_history_v2';
-  var STORAGE_THEME = 'gh_build_theme_v1';
-  var STORAGE_PREFS = 'gh_build_prefs_v1';
-  var HISTORY_MAX_ITEMS = 80;
+const API = "https://api.github.com";
+const STORAGE_KEY = "build-runner-state-v1";
 
-  var state = {
-    token: '',
-    tokenLogin: '',
-    apps: [],
-    activeAppId: null,
-    pollTimer: null,
-    liveLog: [],
-    lastErrorLog: '',
-    modalRepos: [],
-    modalBranches: [],
-    modalYamls: [],
-    modalSelectedRepo: null,
-    modalSelectedBranch: null,
-    modalSelectedYaml: null,
-    modalFavorite: false,
-    modalEditingId: null,
-    actionsTargetId: null,
-    lastApkBlob: null,
-    lastApkFileName: null,
-    lastZipBlob: null,
-    history: [],
-    historyFilter: 'all',
-    liveBuild: null,
-    isResuming: false,
-    historyDetailTarget: null,
-    cancelRequested: false,
-    buildOverrideYaml: null,
-    jobsCache: {},
-    prefs: { notify: true, sound: true },
-    theme: 'light'
+function loadStoredState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) { return null; }
+}
+
+function persist() {
+  try {
+    const toSave = {
+      token: state.token,
+      user: state.user,
+      screen: state.screen,
+      selectedRepo: state.selectedRepo,
+      selectedBranch: state.selectedBranch,
+      run: state.run,
+      artifact: state.artifact
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  } catch (e) { /* storage full or unavailable, ignore */ }
+}
+
+const stored = loadStoredState();
+
+let state = {
+  token: stored && stored.token ? stored.token : "",
+  user: stored && stored.user ? stored.user : null,
+  screen: stored && stored.token ? (stored.screen || "repos") : "token",
+  repos: [],
+  repoFilter: "",
+  selectedRepo: stored ? stored.selectedRepo : null,
+  branches: [],
+  branchWorkflows: {},
+  selectedBranch: stored ? stored.selectedBranch : null,
+  run: stored ? stored.run : null,
+  artifact: stored ? stored.artifact : null,
+  pollTimer: null,
+  errorMsg: "",
+  confirmingDelete: false
+};
+
+function h(tag, attrs, children) {
+  const el = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    if (k === "text") el.textContent = attrs[k];
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), attrs[k]);
+    else el.setAttribute(k, attrs[k]);
+  }
+  if (children) children.forEach(c => c && el.appendChild(c));
+  return el;
+}
+
+async function gh(path, opts = {}) {
+  const res = await fetch(API + path, {
+    ...opts,
+    headers: {
+      "Authorization": "Bearer " + state.token,
+      "Accept": "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      ...(opts.headers || {})
+    }
+  });
+  if (!res.ok) {
+    let msg = res.status + " " + res.statusText;
+    try { const j = await res.json(); if (j.message) msg = j.message; } catch(e) {}
+    throw new Error(msg);
+  }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+function setError(msg) {
+  state.errorMsg = msg || "";
+  render();
+}
+
+async function connectToken() {
+  const input = document.getElementById("token-input");
+  const token = input.value.trim();
+  if (!token) return;
+  state.token = token;
+  setError("");
+  const btn = document.getElementById("connect-btn");
+  btn.disabled = true;
+  btn.textContent = "A ligar…";
+  try {
+    const me = await gh("/user");
+    state.user = me;
+    state.screen = "repos";
+    persist();
+    await loadRepos();
+  } catch (e) {
+    state.token = "";
+    setError("Não consegui autenticar: " + e.message + ". Confirma que o token tem o scope 'repo' e 'workflow'.");
+  }
+  render();
+}
+
+function forgetToken() {
+  if (state.pollTimer) { clearInterval(state.pollTimer); state.pollTimer = null; }
+  localStorage.removeItem(STORAGE_KEY);
+  state = {
+    token: "", user: null, screen: "token", repos: [], repoFilter: "",
+    selectedRepo: null, branches: [], branchWorkflows: {}, selectedBranch: null,
+    run: null, artifact: null, pollTimer: null, errorMsg: "", confirmingDelete: false
   };
+  render();
+}
 
-  function uid() { return 'app_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); }
-
-  // =================================================================
-  // PERSISTENCE
-  // =================================================================
-  function loadAll() {
-    try { state.token = localStorage.getItem(STORAGE_TOKEN) || ''; } catch (e) { }
-    try {
-      var raw = localStorage.getItem(STORAGE_APPS);
-      state.apps = raw ? JSON.parse(raw) : [];
-    } catch (e) { state.apps = []; }
-    try { state.activeAppId = localStorage.getItem(STORAGE_ACTIVE) || null; } catch (e) { }
-    try {
-      var rawHist = localStorage.getItem(STORAGE_HISTORY);
-      state.history = rawHist ? JSON.parse(rawHist) : [];
-    } catch (e) { state.history = []; }
-    try {
-      var rawLive = localStorage.getItem(STORAGE_LIVE_BUILD);
-      state.liveBuild = rawLive ? JSON.parse(rawLive) : null;
-    } catch (e) { state.liveBuild = null; }
-    try {
-      var rawTheme = localStorage.getItem(STORAGE_THEME);
-      state.theme = rawTheme || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    } catch (e) { state.theme = 'light'; }
-    try {
-      var rawPrefs = localStorage.getItem(STORAGE_PREFS);
-      state.prefs = rawPrefs ? JSON.parse(rawPrefs) : { notify: true, sound: true };
-    } catch (e) { state.prefs = { notify: true, sound: true }; }
-
-    // Migração leve de apps antigos sem lista de yamls
-    state.apps.forEach(function(app) {
-      if (!app.yamls || !app.yamls.length) {
-        app.yamls = app.workflowFile ? [{ name: app.workflowFile, path: '.github/workflows/' + app.workflowFile }] : [];
-      }
-      if (!app.selectedYamlPath && app.yamls.length) app.selectedYamlPath = app.yamls[0].path;
-      if (app.favorite === undefined) app.favorite = false;
-      if (app.projectPath === undefined) app.projectPath = '';
-    });
-  }
-
-  function saveToken() { try { localStorage.setItem(STORAGE_TOKEN, state.token); } catch (e) { } }
-  function saveApps() { try { localStorage.setItem(STORAGE_APPS, JSON.stringify(state.apps)); } catch (e) { } }
-  function saveActive() { try { localStorage.setItem(STORAGE_ACTIVE, state.activeAppId || ''); } catch (e) { } }
-  function saveHistory() { try { localStorage.setItem(STORAGE_HISTORY, JSON.stringify(state.history)); } catch (e) { } }
-  function saveTheme() { try { localStorage.setItem(STORAGE_THEME, state.theme); } catch (e) { } }
-  function savePrefs() { try { localStorage.setItem(STORAGE_PREFS, JSON.stringify(state.prefs)); } catch (e) { } }
-
-  function saveLiveBuild() {
-    try {
-      if (state.liveBuild) localStorage.setItem(STORAGE_LIVE_BUILD, JSON.stringify(state.liveBuild));
-      else localStorage.removeItem(STORAGE_LIVE_BUILD);
-    } catch (e) { }
-  }
-  function clearLiveBuild() { state.liveBuild = null; saveLiveBuild(); }
-
-  function addHistoryEntry(entry) {
-    entry.id = 'hist_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-    entry.finishedAt = Date.now();
-    state.history.unshift(entry);
-    if (state.history.length > HISTORY_MAX_ITEMS) state.history = state.history.slice(0, HISTORY_MAX_ITEMS);
-    saveHistory();
-  }
-
-  function getActiveApp() { return state.apps.find(function(a) { return a.id === state.activeAppId; }) || null; }
-  function findAppById(id) { return state.apps.find(function(a) { return a.id === id; }) || null; }
-  function getAppYaml(app, overridePath) {
-    var path = overridePath || app.selectedYamlPath;
-    var found = (app.yamls || []).find(function(y) { return y.path === path; });
-    return found || (app.yamls && app.yamls[0]) || null;
-  }
-
-  // =================================================================
-  // THEME
-  // =================================================================
-  function applyTheme() {
-    document.documentElement.setAttribute('data-theme', state.theme);
-    document.querySelectorAll('#theme-switch button').forEach(function(b) {
-      b.classList.toggle('active', b.dataset.themeChoice === state.theme);
-    });
-  }
-  document.getElementById('theme-switch').addEventListener('click', function(e) {
-    var btn = e.target.closest('button[data-theme-choice]');
-    if (!btn) return;
-    state.theme = btn.dataset.themeChoice;
-    saveTheme();
-    applyTheme();
-  });
-
-  // =================================================================
-  // GENERIC UI HELPERS
-  // =================================================================
-  var tabItems = document.querySelectorAll('.tab-item');
-  var screens = document.querySelectorAll('.screen');
-  var toast = document.getElementById('toast');
-  var toastText = document.getElementById('toast-text');
-
-  function showToast(msg) {
-    toastText.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(function() { toast.classList.remove('show'); }, 2400);
-  }
-
-  function switchTab(screenId) {
-    tabItems.forEach(function(t) { t.classList.toggle('active', t.dataset.screen === screenId); });
-    screens.forEach(function(s) { s.classList.toggle('active', s.id === screenId); });
-    window.scrollTo(0, 0);
-    if (screenId === 'screen-apps') renderAppsList();
-    if (screenId === 'screen-build') renderBuildScreen();
-    if (screenId === 'screen-history') renderHistoryScreen();
-    if (screenId === 'screen-config') renderConfigScreen();
-  }
-  tabItems.forEach(function(t) { t.addEventListener('click', function() { switchTab(t.dataset.screen); }); });
-
-  function escapeHtml(s) {
-    var div = document.createElement('div');
-    div.textContent = s == null ? '' : s;
-    return div.innerHTML;
-  }
-
-  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-  function openModal(id) { document.getElementById(id).classList.add('show'); }
-
-  function formatBytes(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  }
-
-  function formatDuration(ms) {
-    var s = Math.floor(ms / 1000);
-    var m = Math.floor(s / 60);
-    s = s % 60;
-    if (m === 0) return s + 's';
-    return m + 'm ' + (s < 10 ? '0' : '') + s + 's';
-  }
-
-  function notifyUser(title, body, isError) {
-    if (!state.prefs.notify) return;
-    try {
-      if ('Notification' in window) {
-        if (Notification.permission === 'granted') {
-          new Notification(title, { body: body, icon: undefined });
-        } else if (Notification.permission !== 'denied') {
-          Notification.requestPermission().then(function(perm) {
-            if (perm === 'granted') new Notification(title, { body: body });
-          });
-        }
-      }
-    } catch (e) { }
-    if (state.prefs.sound) playBeep(isError);
-  }
-
-  var audioCtx = null;
-  function playBeep(isError) {
-    try {
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      var o = audioCtx.createOscillator();
-      var g = audioCtx.createGain();
-      o.connect(g); g.connect(audioCtx.destination);
-      o.frequency.value = isError ? 220 : 660;
-      g.gain.setValueAtTime(0.08, audioCtx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
-      o.start();
-      o.stop(audioCtx.currentTime + 0.35);
-    } catch (e) { }
-  }
-
-  // =================================================================
-  // APPS TAB
-  // =================================================================
-  var bannerAppsNoToken = document.getElementById('banner-apps-no-token');
-  var appsEmpty = document.getElementById('apps-empty');
-  var appsList = document.getElementById('apps-list');
-  var btnFabAdd = document.getElementById('btn-fab-add');
-  var btnAppsRefresh = document.getElementById('btn-apps-refresh');
-
-  function renderAppsList() {
-    bannerAppsNoToken.classList.toggle('show', !state.token);
-    if (state.apps.length === 0) { appsEmpty.style.display = 'block'; appsList.innerHTML = ''; return; }
-    appsEmpty.style.display = 'none';
-
-    var sorted = state.apps.slice().sort(function(a, b) {
-      if (!!a.favorite !== !!b.favorite) return a.favorite ? -1 : 1;
-      return (b.createdAt || 0) - (a.createdAt || 0);
-    });
-
-    var html = '';
-    sorted.forEach(function(app) {
-      var isActive = app.id === state.activeAppId;
-      var yaml = getAppYaml(app);
-      html += '<div class="app-profile-card ' + (isActive ? 'active-profile' : '') + '" data-id="' + app.id + '">';
-      html += '<button class="app-profile-menu-btn" data-menu-id="' + app.id + '"><i class="fa-solid fa-ellipsis"></i></button>';
-      html += '<div class="app-profile-top"><div class="app-profile-icon"><i class="fa-brands fa-android"></i></div>';
-      html += '<div><div class="app-profile-name">' + (app.favorite ? '<i class="fa-solid fa-star" style="color:#C19C00; font-size:11px; margin-right:4px;"></i>' : '') + escapeHtml(app.name) + '</div><div class="app-profile-repo">' + escapeHtml(app.repoFullName) + '</div></div></div>';
-      html += '<div class="app-profile-meta-row">';
-      html += '<div class="app-profile-chip"><i class="fa-solid fa-code-branch"></i>' + escapeHtml(app.branch) + '</div>';
-      if (app.projectPath) html += '<div class="app-profile-chip"><i class="fa-solid fa-folder-tree"></i>' + escapeHtml(app.projectPath) + '</div>';
-      html += '<div class="app-profile-chip accent"><i class="fa-solid fa-file-code"></i>' + escapeHtml(yaml ? yaml.name : '—') + '</div>';
-      html += '</div>';
-      if (isActive) html += '<div class="app-profile-active-badge"><i class="fa-solid fa-circle-check"></i>Ativo no Build</div>';
-      html += '</div>';
-    });
-    appsList.innerHTML = html;
-
-    appsList.querySelectorAll('.app-profile-card').forEach(function(card) {
-      card.addEventListener('click', function(e) {
-        if (e.target.closest('.app-profile-menu-btn')) return;
-        setActiveApp(card.dataset.id);
-        switchTab('screen-build');
-      });
-    });
-    appsList.querySelectorAll('.app-profile-menu-btn').forEach(function(btn) {
-      btn.addEventListener('click', function(e) { e.stopPropagation(); openAppActionsModal(btn.dataset.menuId); });
-    });
-  }
-
-  function setActiveApp(id) {
-    if (state.liveBuild && state.liveBuild.appId !== id) {
-      if (state.pollTimer) { clearTimeout(state.pollTimer); state.pollTimer = null; }
+async function loadRepos() {
+  setError("");
+  try {
+    let page = 1, all = [];
+    while (true) {
+      const batch = await gh(`/user/repos?per_page=100&page=${page}&sort=pushed`);
+      all = all.concat(batch);
+      if (batch.length < 100) break;
+      page++;
+      if (page > 10) break;
     }
-    state.activeAppId = id;
-    saveActive();
-    resetBuildProgress();
-    state.buildOverrideYaml = null;
-    maybeResumeLiveBuild();
+    state.repos = all;
+  } catch (e) {
+    setError("Não consegui carregar repositórios: " + e.message);
   }
+}
 
-  btnAppsRefresh.addEventListener('click', function() { renderAppsList(); showToast('Lista atualizada'); });
-
-  btnFabAdd.addEventListener('click', function() {
-    if (!state.token) { switchTab('screen-config'); showToast('Configure o token primeiro'); return; }
-    openAppModal(null, null);
-  });
-
-  var modalAppActionsTitle = document.getElementById('modal-app-actions-title');
-  var actionSetActive = document.getElementById('action-set-active');
-  var actionEditApp = document.getElementById('action-edit-app');
-  var actionDuplicateApp = document.getElementById('action-duplicate-app');
-  var actionDeleteApp = document.getElementById('action-delete-app');
-  var actionCancel = document.getElementById('action-cancel');
-
-  function openAppActionsModal(id) {
-    state.actionsTargetId = id;
-    var app = state.apps.find(function(a) { return a.id === id; });
-    if (!app) return;
-    modalAppActionsTitle.innerHTML = '<i class="fa-brands fa-android"></i>' + escapeHtml(app.name);
-    openModal('modal-app-actions');
-  }
-
-  actionSetActive.addEventListener('click', function() {
-    setActiveApp(state.actionsTargetId);
-    closeModal('modal-app-actions');
-    switchTab('screen-build');
-  });
-  actionEditApp.addEventListener('click', function() {
-    var id = state.actionsTargetId;
-    closeModal('modal-app-actions');
-    openAppModal(id, null);
-  });
-  actionDuplicateApp.addEventListener('click', function() {
-    var id = state.actionsTargetId;
-    closeModal('modal-app-actions');
-    openAppModal(null, id);
-  });
-  actionDeleteApp.addEventListener('click', function() {
-    var id = state.actionsTargetId;
-    state.apps = state.apps.filter(function(a) { return a.id !== id; });
-    if (state.activeAppId === id) { state.activeAppId = null; saveActive(); }
-    if (state.liveBuild && state.liveBuild.appId === id) {
-      if (state.pollTimer) { clearTimeout(state.pollTimer); state.pollTimer = null; }
-      clearLiveBuild();
+async function selectRepo(repo) {
+  state.selectedRepo = repo;
+  state.screen = "branches";
+  state.branches = [];
+  state.branchWorkflows = {};
+  state.run = null;
+  state.artifact = null;
+  persist();
+  render();
+  setError("");
+  try {
+    let page = 1, all = [];
+    while (true) {
+      const batch = await gh(`/repos/${repo.full_name}/branches?per_page=100&page=${page}`);
+      all = all.concat(batch);
+      if (batch.length < 100) break;
+      page++;
+      if (page > 10) break;
     }
-    saveApps();
-    closeModal('modal-app-actions');
-    renderAppsList();
-    showToast('App removido');
-  });
-  actionCancel.addEventListener('click', function() { closeModal('modal-app-actions'); });
-
-  // =================================================================
-  // ADD/EDIT/DUPLICATE APP MODAL
-  // =================================================================
-  var modalApp = document.getElementById('modal-app');
-  var modalAppTitle = document.getElementById('modal-app-title');
-  var modalInputName = document.getElementById('modal-input-name');
-  var modalBtnLoadRepos = document.getElementById('modal-btn-load-repos');
-  var modalRepoSearchWrap = document.getElementById('modal-repo-search-wrap');
-  var modalRepoSearch = document.getElementById('modal-repo-search');
-  var modalRepoList = document.getElementById('modal-repo-list');
-  var modalSelectedRepoHint = document.getElementById('modal-selected-repo-hint');
-  var modalBranchSection = document.getElementById('modal-branch-section');
-  var modalBranchList = document.getElementById('modal-branch-list');
-  var modalYamlSection = document.getElementById('modal-yaml-section');
-  var modalYamlList = document.getElementById('modal-yaml-list');
-  var modalYamlHint = document.getElementById('modal-yaml-hint');
-  var modalProjectPathSection = document.getElementById('modal-project-path-section');
-  var modalInputProjectPath = document.getElementById('modal-input-project-path');
-  var modalAdvancedSection = document.getElementById('modal-advanced-section');
-  var modalInputEventType = document.getElementById('modal-input-event-type');
-  var modalInputApkPattern = document.getElementById('modal-input-apk-pattern');
-  var modalToggleWatch = document.getElementById('modal-toggle-watch');
-  var modalError = document.getElementById('modal-error');
-  var modalErrorText = document.getElementById('modal-error-text');
-  var modalBtnSave = document.getElementById('modal-btn-save');
-  var modalBtnCancel = document.getElementById('modal-btn-cancel');
-
-  modalToggleWatch.addEventListener('click', function() {
-    state.modalFavorite = !state.modalFavorite;
-    modalToggleWatch.classList.toggle('checked', state.modalFavorite);
-  });
-
-  function openAppModal(editId, duplicateFromId) {
-    state.modalEditingId = editId;
-    state.modalRepos = [];
-    state.modalBranches = [];
-    state.modalYamls = [];
-    state.modalSelectedRepo = null;
-    state.modalSelectedBranch = null;
-    state.modalSelectedYaml = null;
-    state.modalFavorite = false;
-    modalError.classList.remove('show');
-    modalRepoSearchWrap.style.display = 'none';
-    modalRepoList.style.display = 'none';
-    modalRepoList.innerHTML = '';
-    modalBranchSection.style.display = 'none';
-    modalBranchList.innerHTML = '';
-    modalYamlSection.style.display = 'none';
-    modalYamlList.innerHTML = '';
-    modalYamlHint.style.display = 'none';
-    modalProjectPathSection.style.display = 'none';
-    modalInputProjectPath.value = '';
-    modalAdvancedSection.style.display = 'none';
-    modalSelectedRepoHint.style.display = 'none';
-    modalBtnLoadRepos.style.display = 'flex';
-    modalBtnLoadRepos.innerHTML = '<i class="fa-solid fa-rotate"></i>Carregar repositórios';
-    modalBtnLoadRepos.disabled = false;
-    modalToggleWatch.classList.remove('checked');
-
-    var seed = null;
-    if (editId) seed = state.apps.find(function(a) { return a.id === editId; });
-    else if (duplicateFromId) seed = state.apps.find(function(a) { return a.id === duplicateFromId; });
-
-    if (seed) {
-      modalAppTitle.textContent = editId ? 'Editar app' : 'Duplicar app';
-      modalInputName.value = editId ? seed.name : (seed.name + ' (cópia)');
-      modalInputEventType.value = seed.eventType;
-      modalInputApkPattern.value = seed.apkPattern || '';
-      modalInputProjectPath.value = seed.projectPath || '';
-      state.modalSelectedRepo = { full_name: seed.repoFullName, name: seed.repoFullName.split('/')[1], private: seed.repoPrivate };
-      state.modalSelectedBranch = { name: seed.branch };
-      state.modalYamls = (seed.yamls || []).slice();
-      state.modalSelectedYaml = getAppYaml(seed);
-      state.modalFavorite = editId ? !!seed.favorite : false;
-      modalToggleWatch.classList.toggle('checked', state.modalFavorite);
-
-      modalSelectedRepoHint.style.display = 'block';
-      modalSelectedRepoHint.innerHTML = '<i class="fa-solid fa-folder"></i> Repositório atual: <strong>' + escapeHtml(seed.repoFullName) + '</strong> — carregue novamente para trocar.';
-      modalBranchSection.style.display = 'block';
-      modalBranchList.innerHTML = '<div class="list-row selected"><div class="list-row-icon"><i class="fa-solid fa-code-branch"></i></div><div class="list-row-content"><div class="list-row-title">' + escapeHtml(seed.branch) + '</div></div><i class="fa-solid fa-check" style="color:var(--accent);"></i></div>';
-
-      modalYamlSection.style.display = 'block';
-      renderModalYamlList();
-      modalProjectPathSection.style.display = 'block';
-      modalAdvancedSection.style.display = 'block';
-    } else {
-      modalAppTitle.textContent = 'Novo app';
-      modalInputName.value = '';
-      modalInputEventType.value = 'build-apk';
-      modalInputApkPattern.value = '';
+    state.branches = all;
+    render();
+    for (const b of all) {
+      checkBranchWorkflow(repo, b.name);
     }
-    openModal('modal-app');
+  } catch (e) {
+    setError("Não consegui carregar branches: " + e.message);
   }
+}
 
-  modalBtnCancel.addEventListener('click', function() { closeModal('modal-app'); });
-
-  modalBtnLoadRepos.addEventListener('click', function() {
-    if (!state.token) {
-      modalErrorText.textContent = 'Token não configurado. Vá em Config primeiro.';
-      modalError.classList.add('show');
+async function checkBranchWorkflow(repo, branchName) {
+  try {
+    const listing = await gh(`/repos/${repo.full_name}/contents/.github/workflows?ref=${encodeURIComponent(branchName)}`);
+    const ymls = Array.isArray(listing) ? listing.filter(f => /\.ya?ml$/i.test(f.name)) : [];
+    if (ymls.length === 0) {
+      state.branchWorkflows[branchName] = { hasYml: false };
+      render();
       return;
     }
-    modalError.classList.remove('show');
-    modalBtnLoadRepos.innerHTML = '<div class="fluent-spinner"></div>Carregando...';
-    modalBtnLoadRepos.disabled = true;
-
-    githubFetch('https://api.github.com/user/repos?per_page=100&sort=updated')
-      .then(function(data) {
-        state.modalRepos = data;
-        renderModalRepoList(data);
-        modalBtnLoadRepos.style.display = 'none';
-        modalRepoSearchWrap.style.display = 'block';
-      })
-      .catch(function(err) { modalErrorText.textContent = 'Erro ao carregar repositórios: ' + err.message; modalError.classList.add('show'); })
-      .finally(function() { modalBtnLoadRepos.innerHTML = '<i class="fa-solid fa-rotate"></i>Carregar repositórios'; modalBtnLoadRepos.disabled = false; });
-  });
-
-  modalRepoSearch.addEventListener('input', function() {
-    var q = modalRepoSearch.value.trim().toLowerCase();
-    var filtered = !q ? state.modalRepos : state.modalRepos.filter(function(r) { return r.full_name.toLowerCase().indexOf(q) !== -1; });
-    renderModalRepoList(filtered);
-  });
-
-  function renderModalRepoList(repos) {
-    modalRepoList.innerHTML = '';
-    modalRepoList.style.display = 'block';
-    if (repos.length === 0) {
-      modalRepoList.innerHTML = '<div class="empty-state"><i class="fa-regular fa-folder-open"></i><div class="empty-state-text">Nenhum repositório encontrado</div></div>';
-      return;
-    }
-    repos.forEach(function(repo) {
-      var item = document.createElement('div');
-      item.className = 'list-row';
-      item.innerHTML =
-        '<div class="list-row-icon"><i class="fa-solid fa-folder"></i></div>' +
-        '<div class="list-row-content"><div class="list-row-title">' + escapeHtml(repo.name) + '</div><div class="list-row-subtitle">' + escapeHtml(repo.full_name) + '</div></div>' +
-        '<div class="list-row-trail">' + (repo.private ? '<i class="fa-solid fa-lock"></i>' : '<i class="fa-solid fa-globe"></i>') + '<i class="fa-solid fa-chevron-right list-row-chevron"></i></div>';
-      item.addEventListener('click', function() { selectModalRepo(repo, item); });
-      modalRepoList.appendChild(item);
-    });
-  }
-
-  function selectModalRepo(repo, el) {
-    modalRepoList.querySelectorAll('.list-row').forEach(function(s) { s.classList.remove('selected'); });
-    el.classList.add('selected');
-    state.modalSelectedRepo = repo;
-    state.modalSelectedBranch = null;
-    state.modalSelectedYaml = null;
-    state.modalYamls = [];
-    if (!modalInputName.value.trim()) modalInputName.value = repo.name;
-
-    modalBranchSection.style.display = 'block';
-    modalBranchList.innerHTML = '<div class="empty-state"><div style="margin:0 auto 10px; display:inline-block;"><div class="fluent-spinner"></div></div><div class="empty-state-text">Carregando branches...</div></div>';
-    modalYamlSection.style.display = 'none';
-    modalProjectPathSection.style.display = 'none';
-    modalAdvancedSection.style.display = 'none';
-
-    githubFetch('https://api.github.com/repos/' + repo.full_name + '/branches?per_page=100')
-      .then(function(data) { state.modalBranches = data; renderModalBranchList(); })
-      .catch(function(err) {
-        modalBranchList.innerHTML = '';
-        modalErrorText.textContent = 'Erro ao carregar branches: ' + err.message;
-        modalError.classList.add('show');
-      });
-  }
-
-  function renderModalBranchList() {
-    modalBranchList.innerHTML = '';
-    if (state.modalBranches.length === 0) {
-      modalBranchList.innerHTML = '<div class="empty-state"><i class="fa-solid fa-code-branch"></i><div class="empty-state-text">Nenhuma branch encontrada</div></div>';
-      return;
-    }
-    state.modalBranches.forEach(function(branch) {
-      var item = document.createElement('div');
-      item.className = 'list-row';
-      item.innerHTML =
-        '<div class="list-row-icon"><i class="fa-solid fa-code-branch"></i></div>' +
-        '<div class="list-row-content"><div class="list-row-title">' + escapeHtml(branch.name) + '</div></div>' +
-        '<i class="fa-solid fa-chevron-right list-row-chevron"></i>';
-      item.addEventListener('click', function() { selectModalBranch(branch, item); });
-      modalBranchList.appendChild(item);
-    });
-  }
-
-  function selectModalBranch(branch, el) {
-    modalBranchList.querySelectorAll('.list-row').forEach(function(s) { s.classList.remove('selected'); });
-    el.classList.add('selected');
-    state.modalSelectedBranch = branch;
-    state.modalSelectedYaml = null;
-
-    modalYamlSection.style.display = 'block';
-    modalYamlList.innerHTML = '<div class="empty-state"><div style="margin:0 auto 10px; display:inline-block;"><div class="fluent-spinner"></div></div><div class="empty-state-text">Procurando workflows em .github/workflows...</div></div>';
-    modalProjectPathSection.style.display = 'none';
-    modalAdvancedSection.style.display = 'none';
-
-    loadWorkflowsForBranch(state.modalSelectedRepo.full_name, branch.name)
-      .then(function(yamls) {
-        state.modalYamls = yamls;
-        renderModalYamlList();
-        modalProjectPathSection.style.display = 'block';
-        modalAdvancedSection.style.display = 'block';
-      })
-      .catch(function(err) {
-        modalYamlList.innerHTML = '';
-        modalErrorText.textContent = 'Erro ao listar workflows: ' + err.message;
-        modalError.classList.add('show');
-        modalProjectPathSection.style.display = 'block';
-        modalAdvancedSection.style.display = 'block';
-      });
-  }
-
-  // Lista todos os .yml/.yaml dentro de .github/workflows na branch escolhida,
-  // para permitir múltiplos workflows (ex: um por pasta/projeto) na mesma branch.
-  function loadWorkflowsForBranch(repoFullName, branchName) {
-    return githubFetch('https://api.github.com/repos/' + repoFullName + '/contents/.github/workflows?ref=' + encodeURIComponent(branchName))
-      .then(function(files) {
-        if (!Array.isArray(files)) return [];
-        return files
-          .filter(function(f) { return f.type === 'file' && /\.ya?ml$/i.test(f.name); })
-          .map(function(f) { return { name: f.name, path: f.path }; });
-      })
-      .catch(function(err) {
-        if (('' + err.message).indexOf('404') !== -1) return [];
-        throw err;
-      });
-  }
-
-  function renderModalYamlList() {
-    modalYamlList.innerHTML = '';
-    if (!state.modalYamls || state.modalYamls.length === 0) {
-      modalYamlList.innerHTML = '<div class="empty-state" style="padding:20px;"><i class="fa-solid fa-file-circle-question"></i><div class="empty-state-text">Nenhum .yml encontrado em .github/workflows nesta branch. Você ainda pode digitar o nome manualmente abaixo.</div></div>';
-      modalYamlHint.style.display = 'block';
-      modalYamlHint.innerHTML = '<div class="field-group" style="margin-top:8px; margin-bottom:0;"><input type="text" class="field-input" id="modal-input-manual-yaml" placeholder=".github/workflows/build.yml"></div>';
-      var manualInput = document.getElementById('modal-input-manual-yaml');
-      manualInput.addEventListener('input', function() {
-        var v = manualInput.value.trim();
-        state.modalSelectedYaml = v ? { name: v.split('/').pop(), path: v } : null;
-      });
-      return;
-    }
-    modalYamlHint.style.display = 'none';
-    state.modalYamls.forEach(function(yaml) {
-      var card = document.createElement('div');
-      card.className = 'yaml-card' + (state.modalSelectedYaml && state.modalSelectedYaml.path === yaml.path ? ' selected' : '');
-      card.innerHTML =
-        '<div class="yaml-card-top">' +
-        '<div><div class="yaml-card-name"><i class="fa-solid fa-file-code" style="margin-right:6px;"></i>' + escapeHtml(yaml.name) + '</div><div class="yaml-card-path">' + escapeHtml(yaml.path) + '</div></div>' +
-        (state.modalSelectedYaml && state.modalSelectedYaml.path === yaml.path ? '<i class="fa-solid fa-circle-check" style="color:var(--accent);"></i>' : '') +
-        '</div>';
-      card.addEventListener('click', function() {
-        state.modalSelectedYaml = yaml;
-        renderModalYamlList();
-      });
-      modalYamlList.appendChild(card);
-    });
-  }
-
-  modalBtnSave.addEventListener('click', function() {
-    var name = modalInputName.value.trim();
-    var eventType = modalInputEventType.value.trim() || 'build-apk';
-    var apkPattern = modalInputApkPattern.value.trim();
-    var projectPath = modalInputProjectPath.value.trim();
-
-    modalError.classList.remove('show');
-    if (!name) { modalErrorText.textContent = 'Dê um nome para o app.'; modalError.classList.add('show'); return; }
-    if (!state.modalSelectedRepo) { modalErrorText.textContent = 'Selecione um repositório.'; modalError.classList.add('show'); return; }
-    if (!state.modalSelectedBranch) { modalErrorText.textContent = 'Selecione uma branch.'; modalError.classList.add('show'); return; }
-    if (!state.modalSelectedYaml) { modalErrorText.textContent = 'Selecione (ou digite) o workflow YAML responsável pelo build.'; modalError.classList.add('show'); return; }
-
-    var allYamls = state.modalYamls && state.modalYamls.length ? state.modalYamls : [state.modalSelectedYaml];
-
-    if (state.modalEditingId) {
-      var app = state.apps.find(function(a) { return a.id === state.modalEditingId; });
-      app.name = name;
-      app.repoFullName = state.modalSelectedRepo.full_name;
-      app.repoPrivate = !!state.modalSelectedRepo.private;
-      app.branch = state.modalSelectedBranch.name;
-      app.eventType = eventType;
-      app.apkPattern = apkPattern;
-      app.projectPath = projectPath;
-      app.yamls = allYamls;
-      app.selectedYamlPath = state.modalSelectedYaml.path;
-      app.favorite = state.modalFavorite;
-    } else {
-      var newApp = {
-        id: uid(), name: name, repoFullName: state.modalSelectedRepo.full_name,
-        repoPrivate: !!state.modalSelectedRepo.private, branch: state.modalSelectedBranch.name,
-        eventType: eventType, apkPattern: apkPattern, projectPath: projectPath,
-        yamls: allYamls, selectedYamlPath: state.modalSelectedYaml.path,
-        favorite: state.modalFavorite, createdAt: Date.now()
-      };
-      state.apps.push(newApp);
-      if (!state.activeAppId) { state.activeAppId = newApp.id; saveActive(); }
-    }
-
-    saveApps();
-    closeModal('modal-app');
-    renderAppsList();
-    showToast(state.modalEditingId ? 'App atualizado' : 'App criado');
-  });
-
-  // =================================================================
-  // BUILD TAB
-  // =================================================================
-  var buildTitle = document.getElementById('build-title');
-  var buildSubtitle = document.getElementById('build-subtitle');
-  var buildNoApp = document.getElementById('build-no-app');
-  var buildActiveWrap = document.getElementById('build-active-wrap');
-  var buildSummaryRepo = document.getElementById('build-summary-repo');
-  var buildSummaryBranch = document.getElementById('build-summary-branch');
-  var buildSummaryYaml = document.getElementById('build-summary-yaml');
-  var btnBuildChangeYaml = document.getElementById('btn-build-change-yaml');
-  var btnBuildSwitch = document.getElementById('btn-build-switch');
-  var btnTrigger = document.getElementById('btn-trigger');
-  var btnCancelBuild = document.getElementById('btn-cancel-build');
-  var bannerBuildResuming = document.getElementById('banner-build-resuming');
-  var bannerBuildResumingText = document.getElementById('banner-build-resuming-text');
-  var resumingSpinnerSlot = document.getElementById('resuming-spinner-slot');
-  var bannerBuildError = document.getElementById('banner-build-error');
-  var bannerBuildErrorText = document.getElementById('banner-build-error-text');
-  var bannerBuildSuccess = document.getElementById('banner-build-success');
-  var bannerBuildSuccessText = document.getElementById('banner-build-success-text');
-  var bannerBuildCancelled = document.getElementById('banner-build-cancelled');
-  var progressArea = document.getElementById('progress-area');
-  var linkViewActions = document.getElementById('link-view-actions');
-  var apkCard = document.getElementById('apk-card');
-  var apkName = document.getElementById('apk-name');
-  var apkMeta = document.getElementById('apk-meta');
-  var apkExtractStatus = document.getElementById('apk-extract-status');
-  var apkExtractStatusText = document.getElementById('apk-extract-status-text');
-  var btnDownloadApkOnly = document.getElementById('btn-download-apk-only');
-  var btnDownloadZip = document.getElementById('btn-download-zip');
-  var btnQrApk = document.getElementById('btn-qr-apk');
-  var qrBox = document.getElementById('qr-box');
-  var qrCanvasWrap = document.getElementById('qr-canvas-wrap');
-  var errorCard = document.getElementById('error-card');
-  var errorCardStep = document.getElementById('error-card-step');
-  var errorLogText = document.getElementById('error-log-text');
-  var btnCopyError = document.getElementById('btn-copy-error');
-  var btnDownloadError = document.getElementById('btn-download-error');
-  var btnRetryBuild = document.getElementById('btn-retry-build');
-  var liveLogSection = document.getElementById('live-log-section');
-  var liveLogBox = document.getElementById('live-log-box');
-  var btnCopyLog = document.getElementById('btn-copy-log');
-  var btnDownloadLog = document.getElementById('btn-download-log');
-  var buildBadge = document.getElementById('build-badge');
-  var liveStatusPill = document.getElementById('live-status-pill');
-  var liveStatusText = document.getElementById('live-status-text');
-  var jobsDetailWrap = document.getElementById('jobs-detail-wrap');
-
-  var stepIds = ['dispatch', 'locate', 'run', 'artifact'];
-  var stepEls = {};
-  stepIds.forEach(function(id) { stepEls[id] = { item: document.getElementById('step-' + id), detail: document.getElementById('detail-' + id) }; });
-
-  function renderBuildScreen() {
-    var app = getActiveApp();
-    if (!app) {
-      buildTitle.innerHTML = '<div class="navbar-title-icon"><i class="fa-solid fa-hammer"></i></div>Build';
-      buildSubtitle.textContent = 'Nenhum app selecionado';
-      buildNoApp.style.display = 'block';
-      buildActiveWrap.style.display = 'none';
-      return;
-    }
-    buildTitle.innerHTML = '<div class="navbar-title-icon"><i class="fa-brands fa-android"></i></div>' + escapeHtml(app.name);
-    buildSubtitle.textContent = app.repoFullName + ' · ' + app.branch + (app.projectPath ? ' · ' + app.projectPath : '');
-    buildNoApp.style.display = 'none';
-    buildActiveWrap.style.display = 'block';
-    buildSummaryRepo.textContent = app.repoFullName;
-    buildSummaryBranch.textContent = app.branch;
-    var yaml = getAppYaml(app, state.buildOverrideYaml);
-    buildSummaryYaml.textContent = yaml ? yaml.name : '—';
-  }
-
-  btnBuildSwitch.addEventListener('click', function() { openSwitchModal(); });
-
-  btnBuildChangeYaml.addEventListener('click', function() {
-    var app = getActiveApp();
-    if (!app) return;
-    var list = document.getElementById('modal-change-yaml-list');
-    list.innerHTML = '';
-    var yamls = app.yamls && app.yamls.length ? app.yamls : [];
-    if (yamls.length === 0) {
-      list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-file-circle-question"></i><div class="empty-state-text">Este app não tem workflows listados. Edite o app para adicionar um.</div></div>';
-    } else {
-      yamls.forEach(function(yaml) {
-        var activePath = state.buildOverrideYaml || app.selectedYamlPath;
-        var card = document.createElement('div');
-        card.className = 'yaml-card' + (activePath === yaml.path ? ' selected' : '');
-        card.innerHTML =
-          '<div class="yaml-card-top">' +
-          '<div><div class="yaml-card-name"><i class="fa-solid fa-file-code" style="margin-right:6px;"></i>' + escapeHtml(yaml.name) + '</div><div class="yaml-card-path">' + escapeHtml(yaml.path) + '</div></div>' +
-          (activePath === yaml.path ? '<i class="fa-solid fa-circle-check" style="color:var(--accent);"></i>' : '') +
-          '</div>';
-        card.addEventListener('click', function() {
-          state.buildOverrideYaml = yaml.path;
-          closeModal('modal-change-yaml');
-          renderBuildScreen();
-          showToast('Workflow definido para este build: ' + yaml.name);
-        });
-        list.appendChild(card);
-      });
-    }
-    openModal('modal-change-yaml');
-  });
-  document.getElementById('modal-change-yaml-cancel').addEventListener('click', function() { closeModal('modal-change-yaml'); });
-
-  var modalSwitchList = document.getElementById('modal-switch-list');
-  var modalSwitchCancel = document.getElementById('modal-switch-cancel');
-
-  function openSwitchModal() {
-    if (state.apps.length === 0) {
-      modalSwitchList.innerHTML = '<div class="empty-state"><i class="fa-regular fa-folder-open"></i><div class="empty-state-text">Nenhum app salvo. Crie um na aba Apps.</div></div>';
-    } else {
-      var html = '<div class="card">';
-      state.apps.forEach(function(app) {
-        var isActive = app.id === state.activeAppId;
-        html += '<div class="list-row ' + (isActive ? 'selected' : '') + '" data-switch-id="' + app.id + '">';
-        html += '<div class="list-row-icon"><i class="fa-brands fa-android"></i></div>';
-        html += '<div class="list-row-content"><div class="list-row-title">' + escapeHtml(app.name) + '</div><div class="list-row-subtitle">' + escapeHtml(app.repoFullName) + ' · ' + escapeHtml(app.branch) + '</div></div>';
-        if (isActive) html += '<i class="fa-solid fa-check" style="color:var(--accent);"></i>';
-        html += '</div>';
-      });
-      html += '</div>';
-      modalSwitchList.innerHTML = html;
-      modalSwitchList.querySelectorAll('[data-switch-id]').forEach(function(row) {
-        row.addEventListener('click', function() { setActiveApp(row.dataset.switchId); closeModal('modal-switch'); renderBuildScreen(); });
-      });
-    }
-    openModal('modal-switch');
-  }
-  modalSwitchCancel.addEventListener('click', function() { closeModal('modal-switch'); });
-
-  function showBuildBanner(el, textEl, msg) {
-    bannerBuildError.classList.remove('show');
-    bannerBuildSuccess.classList.remove('show');
-    bannerBuildCancelled.classList.remove('show');
-    if (textEl) textEl.textContent = msg;
-    el.classList.add('show');
-  }
-  function hideBuildBanners() {
-    bannerBuildError.classList.remove('show');
-    bannerBuildSuccess.classList.remove('show');
-    bannerBuildCancelled.classList.remove('show');
-  }
-
-  function setLiveStatus(mode, label) {
-    liveStatusPill.classList.toggle('live', mode === 'live');
-    liveStatusText.textContent = label;
-  }
-
-  function pushLog(msg, type) {
-    var time = new Date().toLocaleTimeString('pt-BR');
-    state.liveLog.push({ time: time, msg: msg, type: type || 'default' });
-    renderLiveLog();
-    persistLiveBuildSnapshot();
-  }
-
-  function renderLiveLog() {
-    liveLogSection.style.display = 'block';
-    var html = '';
-    state.liveLog.forEach(function(entry) {
-      var cls = entry.type === 'error' ? 'err' : (entry.type === 'success' ? 'ok' : (entry.type === 'info' ? 'info' : ''));
-      html += '<div class="live-log-line ' + cls + '"><span class="live-log-time">' + entry.time + '</span><span class="live-log-msg">' + escapeHtml(entry.msg) + '</span></div>';
-    });
-    liveLogBox.innerHTML = html;
-    liveLogBox.scrollTop = liveLogBox.scrollHeight;
-  }
-
-  function getFullLogText() { return state.liveLog.map(function(e) { return '[' + e.time + '] ' + e.msg; }).join('\n'); }
-
-  function copyText(text) {
-    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
-    var ta = document.createElement('textarea');
-    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-    document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); } catch (e) { }
-    document.body.removeChild(ta);
-    return Promise.resolve();
-  }
-
-  function downloadBlobFile(filename, blob) {
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
-  function downloadText(filename, text) { downloadBlobFile(filename, new Blob([text], { type: 'text/plain' })); }
-
-  btnCopyLog.addEventListener('click', function() { copyText(getFullLogText()).then(function() { showToast('Log copiado'); }); });
-  btnDownloadLog.addEventListener('click', function() { downloadText('build-log-' + Date.now() + '.txt', getFullLogText()); showToast('Log baixado'); });
-  btnCopyError.addEventListener('click', function() { copyText(state.lastErrorLog).then(function() { showToast('Erro copiado'); }); });
-  btnDownloadError.addEventListener('click', function() { downloadText('error-log-' + Date.now() + '.txt', state.lastErrorLog); showToast('Erro baixado'); });
-  btnRetryBuild.addEventListener('click', function() { btnTrigger.click(); });
-
-  function setStepState(id, s, detailText) {
-    var el = stepEls[id];
-    el.item.classList.remove('active', 'done', 'error');
-    var iconWrap = el.item.querySelector('.progress-icon-wrap');
-    if (s === 'active') { el.item.classList.add('active'); iconWrap.innerHTML = '<div class="fluent-spinner" style="width:12px;height:12px;border-width:1.5px;"></div>'; }
-    else if (s === 'done') { el.item.classList.add('done'); iconWrap.innerHTML = '<i class="fa-solid fa-check"></i>'; }
-    else if (s === 'error') { el.item.classList.add('error'); iconWrap.innerHTML = '<i class="fa-solid fa-xmark"></i>'; }
-    else { iconWrap.innerHTML = '<i class="fa-regular fa-circle"></i>'; }
-    if (detailText !== undefined) el.detail.textContent = detailText;
-
-    if (state.liveBuild) {
-      state.liveBuild.steps = state.liveBuild.steps || {};
-      state.liveBuild.steps[id] = { state: s, detail: detailText !== undefined ? detailText : (state.liveBuild.steps[id] ? state.liveBuild.steps[id].detail : '') };
-      saveLiveBuild();
-    }
-  }
-
-  function persistLiveBuildSnapshot() {
-    if (!state.liveBuild) return;
-    state.liveBuild.liveLog = state.liveLog;
-    saveLiveBuild();
-  }
-
-  function resetBuildProgress() {
-    stepIds.forEach(function(id) { setStepState(id, 'idle', ''); });
-    progressArea.style.display = 'none';
-    linkViewActions.style.display = 'none';
-    apkCard.classList.remove('show');
-    errorCard.classList.remove('show');
-    qrBox.style.display = 'none';
-    jobsDetailWrap.innerHTML = '';
-    state.jobsCache = {};
-    state.liveLog = [];
-    liveLogBox.innerHTML = '';
-    liveLogSection.style.display = 'none';
-    if (state.pollTimer) { clearTimeout(state.pollTimer); state.pollTimer = null; }
-    hideBuildBanners();
-    bannerBuildResuming.style.display = 'none';
-    buildBadge.style.display = 'none';
-    btnCancelBuild.style.display = 'none';
-    btnTrigger.style.flex = '2';
-    state.lastApkBlob = null;
-    state.lastApkFileName = null;
-    state.lastZipBlob = null;
-    state.cancelRequested = false;
-    setLiveStatus('idle', 'Parado');
-  }
-
-  function githubFetch(url, opts) {
-    opts = opts || {};
-    opts.headers = Object.assign({
-      'Accept': 'application/vnd.github+json',
-      'Authorization': 'Bearer ' + state.token,
-      'X-GitHub-Api-Version': '2022-11-28'
-    }, opts.headers || {});
-    return fetch(url, opts).then(function(res) {
-      if (!res.ok) return res.text().then(function(txt) { throw new Error('HTTP ' + res.status + ': ' + txt); });
-      if (res.status === 204) return null;
-      return res.json();
-    });
-  }
-
-  function githubFetchText(url) {
-    return fetch(url, { headers: { 'Authorization': 'Bearer ' + state.token, 'X-GitHub-Api-Version': '2022-11-28' } })
-      .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.text(); });
-  }
-
-  btnCancelBuild.addEventListener('click', function() {
-    state.cancelRequested = true;
-    if (state.pollTimer) { clearTimeout(state.pollTimer); state.pollTimer = null; }
-
-    var runId = state.liveBuild ? state.liveBuild.runId : null;
-    var app = getActiveApp();
-
-    pushLog('Cancelamento solicitado pelo usuário.', 'info');
-    setLiveStatus('idle', 'Cancelando...');
-
-    if (runId && app) {
-      githubFetch('https://api.github.com/repos/' + app.repoFullName + '/actions/runs/' + runId + '/cancel', { method: 'POST' })
-        .then(function() { pushLog('Pedido de cancelamento enviado ao GitHub Actions.', 'success'); })
-        .catch(function(err) { pushLog('Não foi possível pedir cancelamento ao GitHub: ' + err.message, 'error'); });
-    }
-
-    showBuildBanner(bannerBuildCancelled, null, '');
-    btnTrigger.disabled = false;
-    btnTrigger.innerHTML = '<i class="fa-solid fa-play"></i>Disparar build';
-    btnCancelBuild.style.display = 'none';
-    btnTrigger.style.flex = '2';
-    buildBadge.style.display = 'none';
-    setLiveStatus('idle', 'Cancelado');
-    clearLiveBuild();
-  });
-
-  btnTrigger.addEventListener('click', function() {
-    var app = getActiveApp();
-    if (!app) { showBuildBanner(bannerBuildError, bannerBuildErrorText, 'Nenhum app selecionado.'); return; }
-    if (!state.token) { switchTab('screen-config'); showToast('Configure o token primeiro'); return; }
-
-    var yaml = getAppYaml(app, state.buildOverrideYaml);
-    if (!yaml) { showBuildBanner(bannerBuildError, bannerBuildErrorText, 'Nenhum workflow YAML definido para este app. Edite o app para escolher um.'); return; }
-
-    hideBuildBanners();
-    resetBuildProgress();
-    progressArea.style.display = 'block';
-    btnTrigger.disabled = true;
-    btnTrigger.innerHTML = '<div class="fluent-spinner on-accent"></div>Disparando...';
-    btnCancelBuild.style.display = 'flex';
-    btnTrigger.style.flex = '2';
-    setLiveStatus('live', 'Em execução');
-
-    setStepState('dispatch', 'active', 'Enviando requisição...');
-    pushLog('Enviando repository_dispatch para ' + app.repoFullName + ' (branch: ' + app.branch + ', workflow: ' + yaml.name + ')...', 'info');
-
-    var dispatchTime = new Date();
-
-    state.liveBuild = {
-      appId: app.id,
-      appName: app.name,
-      repoFullName: app.repoFullName,
-      branch: app.branch,
-      apkPattern: app.apkPattern || '',
-      yamlPath: yaml.path,
-      yamlName: yaml.name,
-      phase: 'dispatch',
-      dispatchTimeIso: dispatchTime.toISOString(),
-      locateAttempt: 0,
-      locateStartedAt: Date.now(),
-      runId: null,
-      runNumber: null,
-      runHtmlUrl: null,
-      steps: {},
-      liveLog: [],
-      startedAt: Date.now()
-    };
-    saveLiveBuild();
-
-    fetch('https://api.github.com/repos/' + app.repoFullName + '/dispatches', {
-      method: 'POST',
-      headers: { 'Accept': 'application/vnd.github+json', 'Authorization': 'Bearer ' + state.token, 'X-GitHub-Api-Version': '2022-11-28' },
-      body: JSON.stringify({ event_type: app.eventType, client_payload: { branch: app.branch, project_path: app.projectPath || undefined, workflow: yaml.path } })
-    }).then(function(res) {
-      if (res.status !== 204) return res.text().then(function(txt) { throw new Error('HTTP ' + res.status + ': ' + txt); });
-      setStepState('dispatch', 'done', 'Enviado com sucesso');
-      pushLog('Build disparado! Aguardando o GitHub Actions registrar a execução...', 'success');
-      buildBadge.style.display = 'block';
-
-      setStepState('locate', 'active', 'Aguardando registro...');
-      if (state.liveBuild) { state.liveBuild.phase = 'locate'; saveLiveBuild(); }
-      setTimeout(function() { locateRun(app, yaml, dispatchTime, 0); }, 3000);
-    }).catch(function(err) {
-      setStepState('dispatch', 'error', 'Falhou');
-      pushLog('Erro ao disparar: ' + err.message, 'error');
-      showBuildBanner(bannerBuildError, bannerBuildErrorText, 'Falha ao disparar build: ' + err.message);
-      btnTrigger.innerHTML = '<i class="fa-solid fa-play"></i>Disparar build';
-      btnTrigger.disabled = false;
-      btnCancelBuild.style.display = 'none';
-      btnTrigger.style.flex = '2';
-      setLiveStatus('idle', 'Erro');
-      clearLiveBuild();
-    });
-  });
-
-  // locateRun agora usa polling contínuo por tempo (até 3 minutos), em vez de um
-  // número fixo de tentativas com mensagens confusas — e identifica o run por branch
-  // + janela de tempo, de forma mais confiável que apenas "o mais recente".
-  var LOCATE_TIMEOUT_MS = 3 * 60 * 1000;
-  var LOCATE_POLL_MS = 3500;
-
-  function locateRun(app, yaml, dispatchTime, attempt) {
-    if (!state.liveBuild || state.liveBuild.appId !== app.id || state.cancelRequested) return;
-
-    var startedAt = state.liveBuild.locateStartedAt || Date.now();
-    var elapsed = Date.now() - startedAt;
-
-    if (elapsed > LOCATE_TIMEOUT_MS) {
-      setStepState('locate', 'error', 'Não localizado em 3min');
-      pushLog('Não foi possível localizar o run automaticamente após 3 minutos de tentativas.', 'error');
-      showBuildBanner(bannerBuildError, bannerBuildErrorText, 'Não encontrei o run automaticamente. Confira se o repository_dispatch e o event_type batem com o gatilho do YAML, e veja a aba Actions do repositório.');
-      btnTrigger.disabled = false;
-      btnTrigger.innerHTML = '<i class="fa-solid fa-play"></i>Disparar build';
-      btnCancelBuild.style.display = 'none';
-      btnTrigger.style.flex = '2';
-      setLiveStatus('idle', 'Falhou');
-      addHistoryEntry({
-        appId: app.id, appName: app.name, repoFullName: app.repoFullName, branch: app.branch, yamlName: yaml.name,
-        conclusion: 'locate_failed', runNumber: null, runHtmlUrl: null,
-        artifact: null, errorSummary: 'Run não localizado automaticamente após 3 minutos de polling.'
-      });
-      clearLiveBuild();
-      return;
-    }
-
-    githubFetch('https://api.github.com/repos/' + app.repoFullName + '/actions/runs?branch=' + encodeURIComponent(app.branch) + '&event=repository_dispatch&per_page=15')
-      .then(function(data) {
-        if (!state.liveBuild || state.liveBuild.appId !== app.id || state.cancelRequested) return;
-        var runs = data.workflow_runs || [];
-        var cutoff = new Date(dispatchTime.getTime() - 8000);
-        var match = runs.find(function(r) {
-          return new Date(r.created_at) >= cutoff && (r.path === yaml.path || r.name === yaml.name || !yaml.path);
-        });
-        if (!match) match = runs.find(function(r) { return new Date(r.created_at) >= cutoff; });
-
-        if (!match) {
-          var secondsLeft = Math.max(0, Math.round((LOCATE_TIMEOUT_MS - elapsed) / 1000));
-          pushLog('Ainda não apareceu nas execuções recentes. Tentando de novo (expira em ' + secondsLeft + 's)...', 'default');
-          setStepState('locate', 'active', 'Procurando... (' + formatDuration(elapsed) + ')');
-          state.liveBuild.locateAttempt = attempt + 1;
-          saveLiveBuild();
-          state.pollTimer = setTimeout(function() { locateRun(app, yaml, dispatchTime, attempt + 1); }, LOCATE_POLL_MS);
-          return;
-        }
-
-        setStepState('locate', 'done', 'Run #' + match.run_number + ' · ' + escapeHtml(match.name || yaml.name));
-        pushLog('Run localizado: #' + match.run_number + ' (id ' + match.id + ', workflow: ' + (match.name || yaml.name) + ').', 'success');
-        linkViewActions.href = match.html_url;
-        linkViewActions.style.display = 'flex';
-        setStepState('run', 'active', 'Iniciando...');
-
-        state.liveBuild.runId = match.id;
-        state.liveBuild.runNumber = match.run_number;
-        state.liveBuild.runHtmlUrl = match.html_url;
-        state.liveBuild.phase = 'run';
-        saveLiveBuild();
-
-        pollRunStatus(app, match.id);
-      })
-      .catch(function(err) {
-        pushLog('Erro ao localizar run: ' + err.message + '. Tentando novamente...', 'error');
-        state.pollTimer = setTimeout(function() { locateRun(app, yaml, dispatchTime, attempt + 1); }, LOCATE_POLL_MS);
-      });
-  }
-
-  function pollRunStatus(app, runId) {
-    if (!state.liveBuild || state.liveBuild.runId !== runId || state.cancelRequested) return;
-
-    githubFetch('https://api.github.com/repos/' + app.repoFullName + '/actions/runs/' + runId)
-      .then(function(run) {
-        if (!state.liveBuild || state.liveBuild.runId !== runId || state.cancelRequested) return;
-        var statusLabel = translateStatus(run.status, run.conclusion);
-        setStepState('run', run.status === 'completed' ? (run.conclusion === 'success' ? 'done' : 'error') : 'active', statusLabel);
-
-        refreshJobsDetail(app, runId);
-
-        if (run.status !== 'completed') {
-          state.pollTimer = setTimeout(function() { pollRunStatus(app, runId); }, 5000);
-          return;
-        }
-
-        if (run.conclusion === 'success') {
-          pushLog('Workflow concluído com sucesso.', 'success');
-          setStepState('artifact', 'active', 'Buscando...');
-          state.liveBuild.phase = 'artifact';
-          saveLiveBuild();
-          fetchArtifact(app, runId);
-        } else if (run.conclusion === 'cancelled') {
-          pushLog('Workflow foi cancelado.', 'error');
-          showBuildBanner(bannerBuildCancelled, null, '');
-          finishTriggerUi();
-          addHistoryEntry({
-            appId: app.id, appName: app.name, repoFullName: app.repoFullName, branch: app.branch, yamlName: state.liveBuild.yamlName,
-            conclusion: 'cancelled', runNumber: state.liveBuild.runNumber, runHtmlUrl: state.liveBuild.runHtmlUrl,
-            artifact: null, errorSummary: null
-          });
-          clearLiveBuild();
-        } else {
-          pushLog('Workflow terminou com conclusão: ' + run.conclusion + '.', 'error');
-          showBuildBanner(bannerBuildError, bannerBuildErrorText, 'O build falhou (' + run.conclusion + '). Veja o log abaixo.');
-          buildBadge.style.display = 'none';
-          notifyUser('Build falhou', app.name + ' · ' + run.conclusion, true);
-          fetchFailureLog(app, runId, run.conclusion);
-        }
-      })
-      .catch(function(err) {
-        pushLog('Erro ao consultar status: ' + err.message + '. Tentando novamente...', 'error');
-        state.pollTimer = setTimeout(function() { pollRunStatus(app, runId); }, 6000);
-      });
-  }
-
-  function translateStatus(status, conclusion) {
-    var map = { queued: 'Na fila', in_progress: 'Em execução', completed: 'Concluído', waiting: 'Aguardando', requested: 'Solicitado' };
-    var base = map[status] || status;
-    if (conclusion) base += ' · ' + (({ success: 'sucesso', failure: 'falha', cancelled: 'cancelado', timed_out: 'tempo esgotado', skipped: 'ignorado' })[conclusion] || conclusion);
-    return base;
-  }
-
-  function finishTriggerUi() {
-    btnTrigger.disabled = false;
-    btnTrigger.innerHTML = '<i class="fa-solid fa-play"></i>Disparar build';
-    btnCancelBuild.style.display = 'none';
-    btnTrigger.style.flex = '2';
-    setLiveStatus('idle', 'Parado');
-  }
-
-  // Mostra, em tempo real, os jobs e steps da execução — não apenas o status geral do run.
-  function refreshJobsDetail(app, runId) {
-    githubFetch('https://api.github.com/repos/' + app.repoFullName + '/actions/runs/' + runId + '/jobs')
-      .then(function(data) {
-        var jobs = data.jobs || [];
-        state.jobsCache[runId] = jobs;
-        renderJobsDetail(jobs);
-      })
-      .catch(function() { /* não bloqueia o fluxo principal se isto falhar */ });
-  }
-
-  function renderJobsDetail(jobs) {
-    if (!jobs || !jobs.length) { jobsDetailWrap.innerHTML = ''; return; }
-    var html = '';
-    jobs.forEach(function(job, idx) {
-      var statusIcon = job.status !== 'completed'
-        ? '<div class="fluent-spinner" style="width:10px;height:10px;border-width:1.5px;"></div>'
-        : (job.conclusion === 'success' ? '<i class="fa-solid fa-circle-check" style="color:var(--success);"></i>' : '<i class="fa-solid fa-circle-xmark" style="color:var(--danger);"></i>');
-      html += '<div class="job-detail-box">';
-      html += '<div class="job-detail-head" data-job-toggle="' + idx + '"><div class="jd-status">' + statusIcon + '<span>' + escapeHtml(job.name) + '</span></div><i class="fa-solid fa-chevron-down" style="font-size:10px; color:var(--text-tertiary);"></i></div>';
-      html += '<div class="job-steps-wrap" id="job-steps-' + idx + '">';
-      (job.steps || []).forEach(function(step) {
-        var cls = step.status !== 'completed' ? (step.status === 'in_progress' ? 'running' : 'pending') : (step.conclusion === 'success' ? 'ok' : (step.conclusion === 'skipped' ? 'pending' : 'fail'));
-        var icon = cls === 'running' ? '<i class="fa-solid fa-circle-notch fa-spin"></i>' : (cls === 'ok' ? '<i class="fa-solid fa-check"></i>' : (cls === 'fail' ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-regular fa-circle"></i>'));
-        html += '<div class="job-step-row ' + cls + '">' + icon + '<span>' + escapeHtml(step.name) + '</span></div>';
-      });
-      html += '</div></div>';
-    });
-    jobsDetailWrap.innerHTML = html;
-    jobsDetailWrap.querySelectorAll('[data-job-toggle]').forEach(function(head) {
-      head.addEventListener('click', function() {
-        var idx = head.getAttribute('data-job-toggle');
-        document.getElementById('job-steps-' + idx).classList.toggle('open');
-      });
-    });
-  }
-
-  function fetchFailureLog(app, runId, conclusion) {
-    errorCard.classList.add('show');
-    errorCardStep.innerHTML = '<span class="step-job">Identificando step com falha...</span>';
-    errorLogText.textContent = 'Carregando log...';
-    pushLog('Buscando detalhes do erro...', 'default');
-    finishTriggerUi();
-
-    githubFetch('https://api.github.com/repos/' + app.repoFullName + '/actions/runs/' + runId + '/jobs')
-      .then(function(data) {
-        var jobs = data.jobs || [];
-        var failedJob = jobs.find(function(j) { return j.conclusion === 'failure'; });
-
-        if (!failedJob) {
-          errorCardStep.textContent = 'Nenhum job com falha identificado.';
-          errorLogText.textContent = 'Não foi possível localizar o job que falhou. Veja a aba Actions diretamente.';
-          state.lastErrorLog = 'App: ' + app.name + '\nRepo: ' + app.repoFullName + '\nBranch: ' + app.branch + '\nWorkflow: ' + state.liveBuild.yamlName + '\n\nNenhum job com falha identificado.';
-          addHistoryEntry({
-            appId: app.id, appName: app.name, repoFullName: app.repoFullName, branch: app.branch, yamlName: state.liveBuild.yamlName,
-            conclusion: conclusion, runNumber: state.liveBuild ? state.liveBuild.runNumber : null,
-            runHtmlUrl: state.liveBuild ? state.liveBuild.runHtmlUrl : null,
-            artifact: null, errorSummary: state.lastErrorLog
-          });
-          clearLiveBuild();
-          return;
-        }
-
-        var failedStep = (failedJob.steps || []).find(function(s) { return s.conclusion === 'failure'; });
-        var stepName = failedStep ? failedStep.name : 'desconhecido';
-        errorCardStep.innerHTML = '<span class="step-job">Job:</span> ' + escapeHtml(failedJob.name) + ' &nbsp;·&nbsp; <span class="step-job">Step:</span> ' + escapeHtml(stepName);
-        pushLog('Step com falha: ' + stepName + '. Buscando log completo...', 'error');
-
-        return githubFetchText('https://api.github.com/repos/' + app.repoFullName + '/actions/jobs/' + failedJob.id + '/logs')
-          .then(function(rawLog) {
-            var lines = rawLog.split('\n');
-            var relevantStart = -1;
-            for (var i = 0; i < lines.length; i++) {
-              if (lines[i].indexOf('FAILURE:') !== -1 || lines[i].indexOf('error:') !== -1 ||
-                  lines[i].indexOf('e: ') !== -1 || lines[i].indexOf('Execution failed for task') !== -1) {
-                relevantStart = i; break;
-              }
-            }
-            var snippet = relevantStart !== -1
-              ? lines.slice(relevantStart, Math.min(lines.length, relevantStart + 80)).join('\n')
-              : lines.slice(Math.max(0, lines.length - 80)).join('\n');
-            errorLogText.textContent = snippet || 'Log vazio.';
-            state.lastErrorLog = 'App: ' + app.name + '\nRepo: ' + app.repoFullName + '\nBranch: ' + app.branch + '\nWorkflow: ' + state.liveBuild.yamlName + '\nJob: ' + failedJob.name + '\nStep: ' + stepName + '\n\n' + snippet;
-            pushLog('Log do erro carregado.', 'success');
-
-            addHistoryEntry({
-              appId: app.id, appName: app.name, repoFullName: app.repoFullName, branch: app.branch, yamlName: state.liveBuild.yamlName,
-              conclusion: conclusion, runNumber: state.liveBuild ? state.liveBuild.runNumber : null,
-              runHtmlUrl: state.liveBuild ? state.liveBuild.runHtmlUrl : null,
-              artifact: null, errorSummary: state.lastErrorLog, failedJob: failedJob.name, failedStep: stepName
-            });
-            clearLiveBuild();
-          });
-      })
-      .catch(function(err) {
-        errorCardStep.textContent = 'Erro ao buscar log.';
-        errorLogText.textContent = 'Falha ao carregar log: ' + err.message;
-        pushLog('Erro ao buscar log: ' + err.message, 'error');
-        state.lastErrorLog = 'App: ' + app.name + '\nRepo: ' + app.repoFullName + '\nBranch: ' + app.branch + '\n\nFalha ao carregar log: ' + err.message;
-        addHistoryEntry({
-          appId: app.id, appName: app.name, repoFullName: app.repoFullName, branch: app.branch, yamlName: state.liveBuild ? state.liveBuild.yamlName : '',
-          conclusion: conclusion, runNumber: state.liveBuild ? state.liveBuild.runNumber : null,
-          runHtmlUrl: state.liveBuild ? state.liveBuild.runHtmlUrl : null,
-          artifact: null, errorSummary: state.lastErrorLog
-        });
-        clearLiveBuild();
-      });
-  }
-
-  var currentArtifactUrl = null;
-
-  function fetchArtifact(app, runId) {
-    githubFetch('https://api.github.com/repos/' + app.repoFullName + '/actions/runs/' + runId + '/artifacts')
-      .then(function(data) {
-        var artifacts = data.artifacts || [];
-        if (artifacts.length === 0) {
-          setStepState('artifact', 'error', 'Nenhum artifact');
-          pushLog('Nenhum artifact encontrado neste run.', 'error');
-          showBuildBanner(bannerBuildError, bannerBuildErrorText, 'Build concluído, mas nenhum artifact foi publicado.');
-          buildBadge.style.display = 'none';
-          finishTriggerUi();
-          addHistoryEntry({
-            appId: app.id, appName: app.name, repoFullName: app.repoFullName, branch: app.branch, yamlName: state.liveBuild.yamlName,
-            conclusion: 'success', runNumber: state.liveBuild ? state.liveBuild.runNumber : null,
-            runHtmlUrl: state.liveBuild ? state.liveBuild.runHtmlUrl : null,
-            artifact: null, errorSummary: 'Build concluído com sucesso, mas sem artifacts publicados.'
-          });
-          clearLiveBuild();
-          return;
-        }
-
-        var chosen = artifacts[0];
-        if (app.apkPattern) {
-          var found = artifacts.find(function(a) { return a.name === app.apkPattern; });
-          if (found) chosen = found;
-        }
-
-        setStepState('artifact', 'done', chosen.name);
-        pushLog('Artifact encontrado: ' + chosen.name + ' (' + formatBytes(chosen.size_in_bytes) + ').', 'success');
-
-        apkName.textContent = chosen.name;
-        apkMeta.textContent = formatBytes(chosen.size_in_bytes) + ' · expira em ' + new Date(chosen.expires_at).toLocaleDateString('pt-BR');
-        currentArtifactUrl = chosen.archive_download_url;
-        apkExtractStatus.className = 'apk-extract-status';
-        apkExtractStatusText.textContent = 'Artifact pronto. Toque em baixar para extrair o APK.';
-        apkCard.classList.add('show');
-
-        var totalTime = state.liveBuild ? formatDuration(Date.now() - state.liveBuild.startedAt) : '';
-        showBuildBanner(bannerBuildSuccess, bannerBuildSuccessText, 'Build concluído em ' + totalTime + '! APK pronto para download.');
-        buildBadge.style.display = 'none';
-        finishTriggerUi();
-        notifyUser('Build concluído', app.name + ' · ' + chosen.name, false);
-
-        addHistoryEntry({
-          appId: app.id, appName: app.name, repoFullName: app.repoFullName, branch: app.branch, yamlName: state.liveBuild.yamlName,
-          conclusion: 'success', runNumber: state.liveBuild ? state.liveBuild.runNumber : null,
-          runHtmlUrl: state.liveBuild ? state.liveBuild.runHtmlUrl : null,
-          artifact: { name: chosen.name, sizeBytes: chosen.size_in_bytes, expiresAt: chosen.expires_at, downloadUrl: chosen.archive_download_url },
-          errorSummary: null
-        });
-        clearLiveBuild();
-      })
-      .catch(function(err) {
-        setStepState('artifact', 'error', 'Erro');
-        pushLog('Erro ao buscar artifact: ' + err.message, 'error');
-        showBuildBanner(bannerBuildError, bannerBuildErrorText, 'Falha ao buscar o artifact: ' + err.message);
-        buildBadge.style.display = 'none';
-        finishTriggerUi();
-        addHistoryEntry({
-          appId: app.id, appName: app.name, repoFullName: app.repoFullName, branch: app.branch, yamlName: state.liveBuild ? state.liveBuild.yamlName : '',
-          conclusion: 'success', runNumber: state.liveBuild ? state.liveBuild.runNumber : null,
-          runHtmlUrl: state.liveBuild ? state.liveBuild.runHtmlUrl : null,
-          artifact: null, errorSummary: 'Build teve sucesso, mas falhou ao buscar o artifact: ' + err.message
-        });
-        clearLiveBuild();
-      });
-  }
-
-  function fetchZipBlob() {
-    if (state.lastZipBlob) return Promise.resolve(state.lastZipBlob);
-    pushLog('Baixando artifact (.zip)...', 'default');
-    return fetch(currentArtifactUrl, {
-      headers: { 'Accept': 'application/vnd.github+json', 'Authorization': 'Bearer ' + state.token, 'X-GitHub-Api-Version': '2022-11-28' }
-    }).then(function(res) {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.blob();
-    }).then(function(blob) {
-      state.lastZipBlob = blob;
-      return blob;
-    });
-  }
-
-  btnDownloadApkOnly.addEventListener('click', function() {
-    if (!currentArtifactUrl) return;
-
-    btnDownloadApkOnly.innerHTML = '<div class="fluent-spinner on-accent"></div>Baixando...';
-    btnDownloadApkOnly.disabled = true;
-    apkExtractStatus.className = 'apk-extract-status';
-    apkExtractStatusText.textContent = 'Baixando artifact...';
-
-    fetchZipBlob().then(function(zipBlob) {
-      pushLog('Descompactando...', 'default');
-      apkExtractStatusText.textContent = 'Descompactando .zip...';
-      btnDownloadApkOnly.innerHTML = '<div class="fluent-spinner on-accent"></div>Descompactando...';
-      return JSZip.loadAsync(zipBlob);
-    }).then(function(zip) {
-      var apkFileName = null;
-      zip.forEach(function(relativePath, file) {
-        if (!apkFileName && relativePath.toLowerCase().endsWith('.apk')) apkFileName = relativePath;
-      });
-
-      if (!apkFileName) throw new Error('Nenhum arquivo .apk encontrado dentro do artifact.');
-
-      pushLog('APK encontrado dentro do zip: ' + apkFileName, 'success');
-      return zip.file(apkFileName).async('blob').then(function(apkBlob) { return { blob: apkBlob, name: apkFileName }; });
-    }).then(function(result) {
-      state.lastApkBlob = result.blob;
-      state.lastApkFileName = result.name.split('/').pop();
-      downloadBlobFile(state.lastApkFileName, result.blob);
-      apkExtractStatus.className = 'apk-extract-status ok';
-      apkExtractStatusText.innerHTML = '<i class="fa-solid fa-circle-check"></i> APK extraído: ' + escapeHtml(state.lastApkFileName) + ' (' + formatBytes(result.blob.size) + ')';
-      pushLog('Download do APK iniciado.', 'success');
-      showToast('APK baixado');
-    }).catch(function(err) {
-      pushLog('Erro ao processar artifact: ' + err.message, 'error');
-      apkExtractStatus.className = 'apk-extract-status fail';
-      apkExtractStatusText.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> ' + escapeHtml(err.message);
-      showBuildBanner(bannerBuildError, bannerBuildErrorText, 'Erro ao extrair APK: ' + err.message);
-    }).finally(function() {
-      btnDownloadApkOnly.innerHTML = '<i class="fa-brands fa-android"></i>Baixar somente o APK';
-      btnDownloadApkOnly.disabled = false;
-    });
-  });
-
-  btnDownloadZip.addEventListener('click', function() {
-    if (!currentArtifactUrl) return;
-    btnDownloadZip.innerHTML = '<div class="fluent-spinner"></div>Baixando...';
-    btnDownloadZip.disabled = true;
-
-    fetchZipBlob().then(function(zipBlob) {
-      downloadBlobFile(apkName.textContent + '.zip', zipBlob);
-      pushLog('Download do .zip original iniciado.', 'success');
-      showToast('ZIP baixado');
-    }).catch(function(err) {
-      pushLog('Erro no download do zip: ' + err.message, 'error');
-      showBuildBanner(bannerBuildError, bannerBuildErrorText, 'Erro ao baixar zip: ' + err.message);
-    }).finally(function() {
-      btnDownloadZip.innerHTML = '<i class="fa-solid fa-file-zipper"></i>Baixar .zip original';
-      btnDownloadZip.disabled = false;
-    });
-  });
-
-  // QR code simples (sem dependência externa) usando a API pública gratuita de imagem QR
-  // apenas como representação visual — o link ainda exige o token para ser baixado.
-  btnQrApk.addEventListener('click', function() {
-    if (qrBox.style.display === 'block') { qrBox.style.display = 'none'; return; }
-    var text = encodeURIComponent(window.location.href);
-    qrCanvasWrap.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + text + '" width="180" height="180" alt="QR" style="border-radius:8px;">';
-    qrBox.style.display = 'block';
-  });
-
-  // =================================================================
-  // RESUMING A LIVE BUILD AFTER RELOAD
-  // =================================================================
-  function maybeResumeLiveBuild() {
-    var lb = state.liveBuild;
-    if (!lb) return;
-    if (lb.appId !== state.activeAppId) return;
-
-    var app = findAppById(lb.appId);
-    if (!app) { clearLiveBuild(); return; }
-
-    state.isResuming = true;
-    progressArea.style.display = 'block';
-    bannerBuildResuming.style.display = 'flex';
-    bannerBuildResumingText.textContent = 'Retomando build de ' + app.name + ' (continuava rodando quando você saiu)...';
-    setLiveStatus('live', 'Retomando...');
-
-    state.liveLog = lb.liveLog || [];
-    renderLiveLog();
-
-    stepIds.forEach(function(id) {
-      var saved = lb.steps && lb.steps[id];
-      if (saved) setStepState(id, saved.state, saved.detail);
-    });
-
-    if (lb.runHtmlUrl) { linkViewActions.href = lb.runHtmlUrl; linkViewActions.style.display = 'flex'; }
-
-    btnTrigger.disabled = true;
-    btnTrigger.innerHTML = '<div class="fluent-spinner on-accent"></div>Build em andamento...';
-    btnCancelBuild.style.display = 'flex';
-
-    var dispatchTime = new Date(lb.dispatchTimeIso);
-    var yaml = { name: lb.yamlName, path: lb.yamlPath };
-
-    if (lb.phase === 'dispatch' || lb.phase === 'locate') {
-      pushLog('Retomando: verificando se o run já apareceu no GitHub Actions...', 'info');
-      locateRun(app, yaml, dispatchTime, lb.locateAttempt || 0);
-    } else if (lb.phase === 'run' && lb.runId) {
-      pushLog('Retomando: consultando status do run #' + lb.runNumber + '...', 'info');
-      pollRunStatus(app, lb.runId);
-    } else if (lb.phase === 'artifact' && lb.runId) {
-      pushLog('Retomando: buscando artifact do run #' + lb.runNumber + '...', 'info');
-      fetchArtifact(app, lb.runId);
-    } else {
-      clearLiveBuild();
-    }
-
-    setTimeout(function() {
-      bannerBuildResuming.style.display = 'none';
-      state.isResuming = false;
-    }, 2200);
-  }
-
-  // =================================================================
-  // HISTORY TAB
-  // =================================================================
-  var historyEmpty = document.getElementById('history-empty');
-  var historyList = document.getElementById('history-list');
-  var historyStats = document.getElementById('history-stats');
-  var historyFilterRow = document.getElementById('history-filter-row');
-  var btnHistoryClear = document.getElementById('btn-history-clear');
-  var modalHistoryTitle = document.getElementById('modal-history-title');
-  var modalHistoryBody = document.getElementById('modal-history-body');
-  var modalHistoryClose = document.getElementById('modal-history-close');
-
-  historyFilterRow.addEventListener('click', function(e) {
-    var chip = e.target.closest('.filter-chip');
-    if (!chip) return;
-    historyFilterRow.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
-    chip.classList.add('active');
-    state.historyFilter = chip.dataset.filter;
-    renderHistoryScreen();
-  });
-
-  function conclusionLabel(c) {
-    if (c === 'success') return 'Sucesso';
-    if (c === 'failure') return 'Falha';
-    if (c === 'cancelled') return 'Cancelado';
-    if (c === 'timed_out') return 'Tempo esgotado';
-    if (c === 'locate_failed') return 'Run não localizado';
-    return c || 'Desconhecido';
-  }
-
-  function renderHistoryScreen() {
-    var successCount = state.history.filter(function(h) { return h.conclusion === 'success' && h.artifact; }).length;
-    var failCount = state.history.filter(function(h) { return h.conclusion !== 'success' || !h.artifact; }).length;
-    historyStats.innerHTML =
-      '<div class="stat-box"><div class="stat-value" style="color:var(--success);">' + successCount + '</div><div class="stat-label">Builds com sucesso</div></div>' +
-      '<div class="stat-box"><div class="stat-value" style="color:var(--danger);">' + failCount + '</div><div class="stat-label">Falhas / incompletos</div></div>';
-
-    var filtered = state.history.filter(function(h) {
-      if (state.historyFilter === 'all') return true;
-      if (state.historyFilter === 'success') return h.conclusion === 'success' && h.artifact;
-      if (state.historyFilter === 'failure') return !(h.conclusion === 'success' && h.artifact);
-      return true;
-    });
-
-    if (filtered.length === 0) { historyEmpty.style.display = 'block'; historyList.innerHTML = ''; return; }
-    historyEmpty.style.display = 'none';
-
-    var html = '';
-    filtered.forEach(function(entry) {
-      var isSuccess = entry.conclusion === 'success' && entry.artifact;
-      var iconClass = isSuccess ? 'success' : 'failure';
-      var iconGlyph = isSuccess ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-xmark';
-      var dateStr = new Date(entry.finishedAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-
-      html += '<div class="history-item" data-hist-id="' + entry.id + '">';
-      html += '<div class="history-item-top">';
-      html += '<div class="history-item-icon ' + iconClass + '"><i class="' + iconGlyph + '"></i></div>';
-      html += '<div class="history-item-content"><div class="history-item-name">' + escapeHtml(entry.appName) + '</div>';
-      html += '<div class="history-item-repo">' + escapeHtml(entry.repoFullName) + ' · ' + escapeHtml(entry.branch) + '</div></div>';
-      html += '<div class="history-item-date">' + dateStr + (entry.runNumber ? '<br>#' + entry.runNumber : '') + '</div>';
-      html += '</div>';
-      html += '<div class="history-item-meta-row">';
-      html += '<div class="app-profile-chip">' + conclusionLabel(entry.conclusion) + '</div>';
-      if (entry.yamlName) html += '<div class="app-profile-chip accent"><i class="fa-solid fa-file-code"></i>' + escapeHtml(entry.yamlName) + '</div>';
-      if (entry.artifact) html += '<div class="app-profile-chip"><i class="fa-solid fa-box-archive"></i>' + escapeHtml(entry.artifact.name) + '</div>';
-      html += '</div></div>';
-    });
-    historyList.innerHTML = html;
-
-    historyList.querySelectorAll('.history-item').forEach(function(item) {
-      item.addEventListener('click', function() { openHistoryDetail(item.dataset.histId); });
-    });
-  }
-
-  function openHistoryDetail(id) {
-    var entry = state.history.find(function(h) { return h.id === id; });
-    if (!entry) return;
-    state.historyDetailTarget = entry;
-
-    modalHistoryTitle.innerHTML = '<i class="fa-brands fa-android"></i>' + escapeHtml(entry.appName);
-
-    var html = '<div class="history-detail-card">';
-    html += '<div class="list-row static" style="padding:0 0 10px;"><div class="list-row-content"><div class="list-row-title">' + escapeHtml(entry.repoFullName) + '</div><div class="list-row-subtitle">Branch: ' + escapeHtml(entry.branch) + (entry.yamlName ? ' · Workflow: ' + escapeHtml(entry.yamlName) : '') + '</div></div></div>';
-    html += '<div class="list-row static" style="padding:0 0 10px;"><div class="list-row-content"><div class="list-row-title">' + conclusionLabel(entry.conclusion) + '</div><div class="list-row-subtitle">' + new Date(entry.finishedAt).toLocaleString('pt-BR') + (entry.runNumber ? ' · Run #' + entry.runNumber : '') + '</div></div></div>';
-
-    if (entry.runHtmlUrl) {
-      html += '<a href="' + entry.runHtmlUrl + '" target="_blank" rel="noopener" class="link-row" style="margin-top:0;"><i class="fa-solid fa-arrow-up-right-from-square"></i>Ver no GitHub Actions</a>';
-    }
-
-    if (entry.artifact) {
-      var expired = new Date(entry.artifact.expiresAt).getTime() < Date.now();
-      html += '<div class="section-label" style="margin-top:14px;"><div class="section-label-left">Artifact</div></div>';
-      html += '<div class="card"><div class="list-row static"><div class="list-row-icon" style="color:var(--success);"><i class="fa-brands fa-android"></i></div><div class="list-row-content"><div class="list-row-title">' + escapeHtml(entry.artifact.name) + '</div><div class="list-row-subtitle">' + formatBytes(entry.artifact.sizeBytes) + (expired ? ' · expirado' : ' · expira em ' + new Date(entry.artifact.expiresAt).toLocaleDateString('pt-BR')) + '</div></div></div></div>';
-      if (!expired) {
-        html += '<button class="btn btn-primary" id="hist-btn-download-apk" style="margin-top:10px;"><i class="fa-brands fa-android"></i>Baixar APK deste build</button>';
-      } else {
-        html += '<div class="field-hint" style="margin-top:10px;"><i class="fa-solid fa-circle-info"></i> O artifact deste build expirou no GitHub e não pode mais ser baixado.</div>';
-      }
-    }
-
-    if (entry.errorSummary) {
-      html += '<div class="section-label" style="margin-top:14px;"><div class="section-label-left">Resumo do erro</div></div>';
-      html += '<div class="error-log-text" style="max-height:220px;">' + escapeHtml(entry.errorSummary) + '</div>';
-      html += '<button class="btn btn-secondary btn-sm" id="hist-btn-copy-error" style="margin-top:10px;"><i class="fa-regular fa-copy"></i>Copiar erro</button>';
-    }
-
-    html += '<button class="btn btn-secondary btn-sm" id="hist-btn-rerun" style="margin-top:10px;"><i class="fa-solid fa-rotate-right"></i>Disparar este app de novo</button>';
-
-    html += '</div>';
-    modalHistoryBody.innerHTML = html;
-
-    var apkBtn = document.getElementById('hist-btn-download-apk');
-    if (apkBtn) apkBtn.addEventListener('click', function() { downloadHistoryArtifact(entry, apkBtn); });
-    var copyErrBtn = document.getElementById('hist-btn-copy-error');
-    if (copyErrBtn) copyErrBtn.addEventListener('click', function() { copyText(entry.errorSummary).then(function() { showToast('Erro copiado'); }); });
-    var rerunBtn = document.getElementById('hist-btn-rerun');
-    if (rerunBtn) rerunBtn.addEventListener('click', function() {
-      var app = findAppById(entry.appId);
-      closeModal('modal-history-detail');
-      if (!app) { showToast('Este app já não existe mais na lista'); return; }
-      setActiveApp(app.id);
-      switchTab('screen-build');
-      showToast('Pronto para disparar ' + app.name + ' novamente');
-    });
-
-    openModal('modal-history-detail');
-  }
-
-  function downloadHistoryArtifact(entry, btnEl) {
-    if (!state.token) { showToast('Configure o token na aba Config primeiro'); return; }
-    btnEl.innerHTML = '<div class="fluent-spinner on-accent"></div>Baixando...';
-    btnEl.disabled = true;
-
-    fetch(entry.artifact.downloadUrl, {
-      headers: { 'Accept': 'application/vnd.github+json', 'Authorization': 'Bearer ' + state.token, 'X-GitHub-Api-Version': '2022-11-28' }
-    }).then(function(res) {
-      if (!res.ok) throw new Error('HTTP ' + res.status + ' — o artifact pode ter expirado no GitHub.');
-      return res.blob();
-    }).then(function(zipBlob) {
-      btnEl.innerHTML = '<div class="fluent-spinner on-accent"></div>Descompactando...';
-      return JSZip.loadAsync(zipBlob);
-    }).then(function(zip) {
-      var apkFileName = null;
-      zip.forEach(function(relativePath) { if (!apkFileName && relativePath.toLowerCase().endsWith('.apk')) apkFileName = relativePath; });
-      if (!apkFileName) throw new Error('Nenhum arquivo .apk encontrado dentro do artifact.');
-      return zip.file(apkFileName).async('blob').then(function(apkBlob) { return { blob: apkBlob, name: apkFileName.split('/').pop() }; });
-    }).then(function(result) {
-      downloadBlobFile(result.name, result.blob);
-      showToast('APK baixado');
-    }).catch(function(err) {
-      showToast('Erro: ' + err.message);
-    }).finally(function() {
-      btnEl.innerHTML = '<i class="fa-brands fa-android"></i>Baixar APK deste build';
-      btnEl.disabled = false;
-    });
-  }
-
-  modalHistoryClose.addEventListener('click', function() { closeModal('modal-history-detail'); });
-
-  btnHistoryClear.addEventListener('click', function() {
-    if (state.history.length === 0) { showToast('Histórico já está vazio'); return; }
-    state.history = [];
-    saveHistory();
-    renderHistoryScreen();
-    showToast('Histórico limpo');
-  });
-
-  // =================================================================
-  // CONFIG TAB
-  // =================================================================
-  var inputToken = document.getElementById('input-token');
-  var btnToggleToken = document.getElementById('btn-toggle-token');
-  var settingsError = document.getElementById('settings-error');
-  var settingsErrorText = document.getElementById('settings-error-text');
-  var settingsSaved = document.getElementById('settings-saved');
-  var settingsTokenInfo = document.getElementById('settings-token-info');
-  var settingsTokenInfoText = document.getElementById('settings-token-info-text');
-  var btnSaveToken = document.getElementById('btn-save-token');
-  var btnClearToken = document.getElementById('btn-clear-token');
-  var btnClearApps = document.getElementById('btn-clear-apps');
-  var configAppsCount = document.getElementById('config-apps-count');
-  var toggleNotify = document.getElementById('toggle-notify');
-  var toggleSound = document.getElementById('toggle-sound');
-  var btnExportApps = document.getElementById('btn-export-apps');
-  var btnImportApps = document.getElementById('btn-import-apps');
-  var fileImportApps = document.getElementById('file-import-apps');
-
-  function renderConfigScreen() {
-    inputToken.value = state.token;
-    configAppsCount.textContent = state.apps.length;
-    settingsError.classList.remove('show');
-    settingsSaved.classList.remove('show');
-    settingsTokenInfo.classList.toggle('show', !!state.tokenLogin);
-    if (state.tokenLogin) settingsTokenInfoText.textContent = 'Autenticado como ' + state.tokenLogin;
-    toggleNotify.classList.toggle('checked', !!state.prefs.notify);
-    toggleSound.classList.toggle('checked', !!state.prefs.sound);
-  }
-
-  toggleNotify.addEventListener('click', function() {
-    state.prefs.notify = !state.prefs.notify;
-    toggleNotify.classList.toggle('checked', state.prefs.notify);
-    savePrefs();
-    if (state.prefs.notify && 'Notification' in window && Notification.permission === 'default') Notification.requestPermission();
-  });
-  toggleSound.addEventListener('click', function() {
-    state.prefs.sound = !state.prefs.sound;
-    toggleSound.classList.toggle('checked', state.prefs.sound);
-    savePrefs();
-  });
-
-  btnToggleToken.addEventListener('click', function() {
-    var isPass = inputToken.type === 'password';
-    inputToken.type = isPass ? 'text' : 'password';
-    btnToggleToken.innerHTML = isPass ? '<i class="fa-regular fa-eye-slash"></i>' : '<i class="fa-regular fa-eye"></i>';
-  });
-
-  btnSaveToken.addEventListener('click', function() {
-    var token = inputToken.value.trim();
-    settingsSaved.classList.remove('show');
-    settingsTokenInfo.classList.remove('show');
-    if (!token) { settingsErrorText.textContent = 'Informe o token de acesso.'; settingsError.classList.add('show'); return; }
-    settingsError.classList.remove('show');
-
-    btnSaveToken.innerHTML = '<div class="fluent-spinner on-accent"></div>Validando...';
-    btnSaveToken.disabled = true;
-
-    fetch('https://api.github.com/user', { headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' } })
-      .then(function(res) { if (!res.ok) throw new Error('Token inválido ou sem permissão (HTTP ' + res.status + ')'); return res.json(); })
-      .then(function(user) {
-        state.token = token;
-        state.tokenLogin = user.login;
-        saveToken();
-        settingsSaved.classList.add('show');
-        settingsTokenInfo.classList.add('show');
-        settingsTokenInfoText.textContent = 'Autenticado como ' + user.login;
-        showToast('Token salvo e validado');
-      })
-      .catch(function(err) {
-        settingsErrorText.textContent = err.message;
-        settingsError.classList.add('show');
-      })
-      .finally(function() {
-        btnSaveToken.innerHTML = '<i class="fa-solid fa-floppy-disk"></i>Salvar e validar token';
-        btnSaveToken.disabled = false;
-      });
-  });
-
-  btnClearToken.addEventListener('click', function() {
-    state.token = '';
-    state.tokenLogin = '';
-    saveToken();
-    inputToken.value = '';
-    renderConfigScreen();
-    showToast('Token removido');
-  });
-
-  btnClearApps.addEventListener('click', function() {
-    if (state.apps.length === 0) { showToast('Nenhum app para apagar'); return; }
-    state.apps = [];
-    state.activeAppId = null;
-    saveApps();
-    saveActive();
-    configAppsCount.textContent = '0';
-    showToast('Todos os apps foram apagados');
-  });
-
-  btnExportApps.addEventListener('click', function() {
-    if (state.apps.length === 0) { showToast('Nenhum app para exportar'); return; }
-    var payload = { version: 3, exportedAt: new Date().toISOString(), apps: state.apps };
-    downloadText('build-console-apps-' + Date.now() + '.json', JSON.stringify(payload, null, 2));
-    showToast('Apps exportados');
-  });
-
-  btnImportApps.addEventListener('click', function() { fileImportApps.click(); });
-  fileImportApps.addEventListener('change', function() {
-    var file = fileImportApps.files[0];
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = function() {
+    let found = null;
+    for (const f of ymls) {
       try {
-        var parsed = JSON.parse(reader.result);
-        var imported = Array.isArray(parsed) ? parsed : (parsed.apps || []);
-        if (!Array.isArray(imported) || imported.length === 0) throw new Error('Arquivo sem apps válidos.');
-        imported.forEach(function(app) {
-          app.id = uid();
-          app.createdAt = Date.now();
-          state.apps.push(app);
-        });
-        saveApps();
-        renderAppsList();
-        configAppsCount.textContent = state.apps.length;
-        showToast(imported.length + ' app(s) importado(s)');
-      } catch (err) {
-        showToast('Erro ao importar: ' + err.message);
+        const file = await gh(`/repos/${repo.full_name}/contents/${f.path}?ref=${encodeURIComponent(branchName)}`);
+        const content = atob(file.content.replace(/\n/g, ""));
+        if (/workflow_dispatch\s*:/.test(content)) {
+          found = f;
+          break;
+        }
+        if (!found) found = { path: f.path, noDispatch: true };
+      } catch (e) { /* skip unreadable file */ }
+    }
+    if (found && !found.noDispatch) {
+      state.branchWorkflows[branchName] = { hasYml: true, hasDispatch: true, path: found.path };
+    } else {
+      state.branchWorkflows[branchName] = { hasYml: true, hasDispatch: false, path: found ? found.path : ymls[0].path };
+    }
+  } catch (e) {
+    state.branchWorkflows[branchName] = { hasYml: false };
+  }
+  render();
+}
+
+async function startBuild(branchName) {
+  const repo = state.selectedRepo;
+  const wf = state.branchWorkflows[branchName];
+  if (!wf || !wf.hasDispatch) return;
+  setError("");
+  state.selectedBranch = branchName;
+  state.screen = "build";
+  state.run = { status: "queued", conclusion: null };
+  state.artifact = null;
+  persist();
+  render();
+  try {
+    const workflows = await gh(`/repos/${repo.full_name}/actions/workflows`);
+    const match = workflows.workflows.find(w => w.path === wf.path);
+    if (!match) throw new Error("Workflow não encontrado via API de Actions.");
+
+    const beforeTime = new Date().toISOString();
+    await gh(`/repos/${repo.full_name}/actions/workflows/${match.id}/dispatches`, {
+      method: "POST",
+      body: JSON.stringify({ ref: branchName })
+    });
+
+    await new Promise(r => setTimeout(r, 2500));
+    let run = null;
+    for (let i = 0; i < 10 && !run; i++) {
+      const runs = await gh(`/repos/${repo.full_name}/actions/workflows/${match.id}/runs?branch=${encodeURIComponent(branchName)}&per_page=5`);
+      run = runs.workflow_runs.find(r => r.created_at >= beforeTime) || runs.workflow_runs[0];
+      if (!run) await new Promise(r => setTimeout(r, 2000));
+    }
+    if (!run) throw new Error("Build disparado mas não consegui localizar o run. Confere no GitHub.");
+
+    state.run = run;
+    persist();
+    render();
+    pollRun(repo.full_name, run.id);
+  } catch (e) {
+    setError("Falha ao disparar build: " + e.message);
+    state.run = null;
+    persist();
+    render();
+  }
+}
+
+function pollRun(fullName, runId) {
+  if (state.pollTimer) clearInterval(state.pollTimer);
+  state.pollTimer = setInterval(async () => {
+    try {
+      const run = await gh(`/repos/${fullName}/actions/runs/${runId}`);
+      state.run = run;
+      persist();
+      if (run.status === "completed") {
+        clearInterval(state.pollTimer);
+        state.pollTimer = null;
+        if (run.conclusion === "success") {
+          await loadArtifact(fullName, runId);
+        }
       }
-    };
-    reader.readAsText(file);
-    fileImportApps.value = '';
-  });
+      render();
+    } catch (e) {
+      // transient network errors shouldn't kill the poll
+    }
+  }, 6000);
+}
 
-  // =================================================================
-  // INIT
-  // =================================================================
-  loadAll();
-  applyTheme();
-  renderAppsList();
-  renderBuildScreen();
-  maybeResumeLiveBuild();
-})();
+async function loadArtifact(fullName, runId) {
+  try {
+    const data = await gh(`/repos/${fullName}/actions/runs/${runId}/artifacts`);
+    if (data.artifacts && data.artifacts.length > 0) {
+      state.artifact = data.artifacts[0];
+      persist();
+    }
+  } catch (e) {
+    setError("Build terminou mas não consegui buscar o artefacto: " + e.message);
+  }
+  render();
+}
+
+function apkDownloadUrl() {
+  if (!state.artifact) return null;
+  return state.artifact.archive_download_url;
+}
+
+async function downloadArtifact() {
+  const url = apkDownloadUrl();
+  if (!url) return;
+  const btn = document.getElementById("download-btn");
+  btn.disabled = true;
+  btn.textContent = "A transferir…";
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "Authorization": "Bearer " + state.token,
+        "Accept": "application/vnd.github+json"
+      }
+    });
+    if (!res.ok) throw new Error(res.status + " " + res.statusText);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = (state.artifact.name || "build") + ".zip";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+    state.confirmingDelete = true;
+  } catch (e) {
+    setError("Falha ao transferir: " + e.message);
+  }
+  btn.disabled = false;
+  btn.textContent = "Descarregar APK";
+  render();
+}
+
+async function confirmDeleteBuild() {
+  const repo = state.selectedRepo;
+  try {
+    if (state.artifact) {
+      await gh(`/repos/${repo.full_name}/actions/artifacts/${state.artifact.id}`, { method: "DELETE" });
+    }
+    if (state.run) {
+      await gh(`/repos/${repo.full_name}/actions/runs/${state.run.id}`, { method: "DELETE" });
+    }
+    state.run = null;
+    state.artifact = null;
+    state.confirmingDelete = false;
+    state.screen = "branches";
+    persist();
+  } catch (e) {
+    setError("Falha ao apagar: " + e.message);
+  }
+  render();
+}
+
+function goBack() {
+  setError("");
+  if (state.screen === "branches") {
+    state.screen = "repos";
+  } else if (state.screen === "build") {
+    if (state.pollTimer) { clearInterval(state.pollTimer); state.pollTimer = null; }
+    state.screen = "branches";
+    state.run = null;
+    state.artifact = null;
+    state.confirmingDelete = false;
+  }
+  persist();
+  render();
+}
+
+function statusLabel(run) {
+  if (!run) return { text: "A preparar…", dot: "queued" };
+  if (run.status !== "completed") {
+    return { text: run.status === "queued" ? "Na fila" : "A correr…", dot: run.status === "queued" ? "queued" : "running" };
+  }
+  if (run.conclusion === "success") return { text: "Sucesso", dot: "ok" };
+  if (run.conclusion === "failure") return { text: "Falhou", dot: "fail" };
+  if (run.conclusion === "cancelled") return { text: "Cancelado", dot: "fail" };
+  return { text: run.conclusion || "Terminado", dot: "ok" };
+}
+
+function render() {
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+
+  if (state.screen === "token") {
+    app.appendChild(h("div", { class: "card" }, [
+      h("label", { for: "token-input", text: "Token de acesso pessoal do GitHub" }),
+      h("input", { type: "password", id: "token-input", placeholder: "ghp_••••••••••••••••", onkeydown: e => { if (e.key === "Enter") connectToken(); } }),
+      h("p", { class: "hint", text: "Precisa dos scopes 'repo' e 'workflow'. Fica guardado só neste navegador." }),
+      h("div", { class: "btn-row" }, [
+        h("button", { class: "btn-primary", id: "connect-btn", text: "Ligar", onclick: connectToken })
+      ]),
+      state.errorMsg ? h("div", { class: "error-box", text: state.errorMsg }) : null
+    ]));
+    return;
+  }
+
+  if (state.screen === "repos") {
+    if (state.repos.length === 0) loadRepos().then(render);
+    const filtered = state.repos.filter(r => r.full_name.toLowerCase().includes(state.repoFilter.toLowerCase()));
+    app.appendChild(h("div", { class: "card" }, [
+      h("div", { class: "top-row" }, [
+        h("label", { text: state.user ? ("Ligado como " + state.user.login) : "Repositórios" }),
+        h("button", { class: "forget-btn", text: "Esquecer token", onclick: forgetToken })
+      ]),
+      h("input", { type: "text", placeholder: "Filtrar repositórios…", value: state.repoFilter, oninput: e => { state.repoFilter = e.target.value; render(); } }),
+      state.repos.length === 0 && !state.errorMsg
+        ? h("p", { class: "muted", text: "A carregar repositórios…" })
+        : h("div", { class: "repo-list" }, filtered.map(r =>
+            h("button", { class: "repo-item", onclick: () => selectRepo(r) }, [
+              h("span", { text: r.full_name }),
+              r.private ? h("span", { class: "tag tag-warn", text: "privado" }) : null
+            ])
+          )),
+      state.errorMsg ? h("div", { class: "error-box", text: state.errorMsg }) : null
+    ]));
+    return;
+  }
+
+  if (state.screen === "branches") {
+    if (state.branches.length === 0 && state.selectedRepo) {
+      selectRepo(state.selectedRepo);
+      return;
+    }
+    app.appendChild(h("button", { class: "back-link", text: "← repositórios", onclick: goBack }));
+    app.appendChild(h("div", { class: "card" }, [
+      h("label", { text: state.selectedRepo.full_name }),
+      h("div", { class: "branch-list" }, state.branches.map(b => {
+        const wf = state.branchWorkflows[b.name];
+        let tag = h("span", { class: "spin" });
+        let disabled = true;
+        if (wf) {
+          if (wf.hasYml && wf.hasDispatch) {
+            tag = h("span", { class: "tag tag-ok", text: "buildável" });
+            disabled = false;
+          } else if (wf.hasYml && !wf.hasDispatch) {
+            tag = h("span", { class: "tag tag-warn", text: "sem workflow_dispatch" });
+          } else {
+            tag = h("span", { class: "tag tag-warn", text: "sem workflow" });
+          }
+        }
+        return h("button", {
+          class: "branch-item" + (disabled ? " disabled" : ""),
+          onclick: disabled ? null : () => startBuild(b.name)
+        }, [
+          h("span", { text: b.name }),
+          tag
+        ]);
+      })),
+      state.errorMsg ? h("div", { class: "error-box", text: state.errorMsg }) : null
+    ]));
+    return;
+  }
+
+  if (state.screen === "build") {
+    const st = statusLabel(state.run);
+    app.appendChild(h("button", { class: "back-link", text: "← branches", onclick: goBack }));
+    const card = h("div", { class: "card" }, [
+      h("label", { text: state.selectedRepo.full_name + " @ " + state.selectedBranch }),
+      h("div", { class: "status-row" }, [
+        h("span", { class: "dot dot-" + st.dot }),
+        h("span", { text: st.text })
+      ])
+    ]);
+
+    if (state.run && state.run.html_url) {
+      card.appendChild(h("a", { class: "apk-link", href: state.run.html_url, target: "_blank", text: "Ver no GitHub Actions ↗" }));
+    }
+
+    if (state.run && state.run.status === "completed" && state.run.conclusion === "success") {
+      if (state.artifact) {
+        card.appendChild(h("div", { class: "btn-row" }, [
+          h("button", { class: "btn-primary", id: "download-btn", text: "Descarregar APK", onclick: downloadArtifact })
+        ]));
+      } else {
+        card.appendChild(h("p", { class: "muted", text: "Sem artefactos encontrados neste run." }));
+      }
+    }
+
+    if (state.run && state.run.status === "completed" && state.run.conclusion === "failure") {
+      card.appendChild(h("p", { class: "muted", text: "O build falhou. Vê os logs no link acima." }));
+      card.appendChild(h("div", { class: "btn-row" }, [
+        h("button", { class: "btn-danger", text: "Apagar build", onclick: () => { state.confirmingDelete = true; render(); } })
+      ]));
+    }
+
+    if (state.confirmingDelete) {
+      card.appendChild(h("div", { class: "confirm-box" }, [
+        h("p", { text: "Apagar este build (run + artefacto) do GitHub? Não é reversível." }),
+        h("div", { class: "btn-row" }, [
+          h("button", { class: "btn-danger", text: "Confirmar apagar", onclick: confirmDeleteBuild }),
+          h("button", { class: "btn-ghost", text: "Cancelar", onclick: () => { state.confirmingDelete = false; render(); } })
+        ])
+      ]));
+    }
+
+    if (state.errorMsg) card.appendChild(h("div", { class: "error-box", text: state.errorMsg }));
+    app.appendChild(card);
+    return;
+  }
+}
+
+render();
+
+// Resume polling if we reloaded mid-build
+if (state.screen === "build" && state.run && state.run.status !== "completed" && state.selectedRepo) {
+  pollRun(state.selectedRepo.full_name, state.run.id);
+}
 </script>
-
 </body>
 </html>
