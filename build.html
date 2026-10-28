@@ -46,16 +46,8 @@
   }
   .wrap { max-width: 640px; margin: 0 auto; }
 
-  h1 {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0 0 4px;
-  }
-  .sub {
-    color: var(--text-dim);
-    font-size: 13px;
-    margin: 0 0 28px;
-  }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .sub { color: var(--text-dim); font-size: 13px; margin: 0 0 28px; }
 
   .card {
     background: var(--surface);
@@ -65,12 +57,7 @@
     margin-bottom: 16px;
   }
 
-  label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
 
   input[type="password"], input[type="text"], select {
     width: 100%;
@@ -99,13 +86,10 @@
   }
   .btn-primary { background: var(--accent); color: var(--accent-text); }
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-ghost {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border);
-  }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
   .btn-danger { background: var(--fail); color: #fff; }
-  .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+  .btn-row.spread { justify-content: space-between; margin-top: 0; }
 
   .hint { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
   .error-box {
@@ -135,26 +119,11 @@
   }
   .repo-item:hover, .branch-item:hover:not(.disabled) { border-color: var(--accent); }
   .branch-item.disabled { opacity: 0.45; cursor: default; }
-  .branch-item.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--bg)); }
-  .tag {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 999px;
-    white-space: nowrap;
-  }
+  .tag { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
   .tag-ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
   .tag-warn { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
 
-  .back-link {
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    font-size: 13px;
-    padding: 0;
-    cursor: pointer;
-    margin-bottom: 12px;
-  }
+  .back-link { background: none; border: none; color: var(--text-dim); font-size: 13px; padding: 0; cursor: pointer; margin-bottom: 12px; }
 
   .status-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
@@ -162,6 +131,7 @@
   .dot-running { background: var(--warn); animation: pulse 1.2s infinite ease-in-out; }
   .dot-ok { background: var(--ok); }
   .dot-fail { background: var(--fail); }
+  .dot-skipped { background: var(--text-dim); }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
 
   .muted { color: var(--text-dim); font-size: 13px; }
@@ -175,13 +145,7 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  a.apk-link {
-    display: inline-block;
-    margin-top: 10px;
-    color: var(--accent);
-    font-weight: 600;
-    text-decoration: none;
-  }
+  a.apk-link { display: inline-block; margin-top: 10px; color: var(--accent); font-weight: 600; text-decoration: none; }
   a.apk-link:hover { text-decoration: underline; }
 
   .confirm-box {
@@ -191,33 +155,75 @@
     border-radius: 8px;
     padding: 12px;
   }
+
+  .step-list { margin-top: 14px; display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--border); }
+  .step-item { display: flex; align-items: center; gap: 10px; padding: 9px 2px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .step-name { flex: 1; }
+  .step-time { color: var(--text-dim); font-size: 11px; }
+
+  .apk-pick { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  .apk-pick button { text-align: left; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Build Runner</h1>
   <p class="sub">Dispara builds do GitHub Actions direto do branch que já tem o workflow.</p>
-
   <div id="app"></div>
 </div>
 
 <script>
 const API = "https://api.github.com";
+const STORAGE_KEY = "build_runner_state_v1";
+
+function loadPersisted() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+
+function persist() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      token: state.token,
+      user: state.user,
+      screen: state.screen,
+      selectedRepo: state.selectedRepo,
+      selectedBranch: state.selectedBranch,
+      run: state.run,
+      artifact: state.artifact,
+      jobSteps: state.jobSteps
+    }));
+  } catch (e) { /* storage full or blocked, ignore */ }
+}
+
+function clearPersisted() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+}
+
+const persisted = loadPersisted();
+
 let state = {
-  token: "",
-  user: null,
-  screen: "token",   // token | repos | branches | build
+  token: persisted?.token || "",
+  user: persisted?.user || null,
+  screen: persisted?.token ? (persisted.screen || "repos") : "token",
   repos: [],
+  reposLoading: false,
   repoFilter: "",
-  selectedRepo: null,
+  selectedRepo: persisted?.selectedRepo || null,
   branches: [],
-  branchWorkflows: {}, // branchName -> {hasYml, hasDispatch, path, workflowId}
-  selectedBranch: null,
-  run: null,          // {id, status, conclusion, html_url}
-  artifact: null,      // {id, name, archive_download_url}
+  branchesLoading: false,
+  branchWorkflows: {},
+  selectedBranch: persisted?.selectedBranch || null,
+  run: persisted?.run || null,
+  jobSteps: persisted?.jobSteps || [],
+  artifact: persisted?.artifact || null,
+  apkCandidates: null,
   pollTimer: null,
   errorMsg: "",
-  confirmingDelete: false
+  confirmingDelete: false,
+  extracting: false
 };
 
 function h(tag, attrs, children) {
@@ -225,6 +231,7 @@ function h(tag, attrs, children) {
   if (attrs) for (const k in attrs) {
     if (k === "text") el.textContent = attrs[k];
     else if (k.startsWith("on")) el.addEventListener(k.slice(2), attrs[k]);
+    else if (k === "disabled") { if (attrs[k]) el.setAttribute("disabled", ""); }
     else el.setAttribute(k, attrs[k]);
   }
   if (children) children.forEach(c => c && el.appendChild(c));
@@ -268,14 +275,30 @@ async function connectToken() {
     const me = await gh("/user");
     state.user = me;
     state.screen = "repos";
-    await loadRepos();
+    persist();
+    render();
+    await fetchRepos();
   } catch (e) {
     setError("Não consegui autenticar: " + e.message + ". Confirma que o token tem o scope 'repo' e 'workflow'.");
   }
+}
+
+function logout() {
+  if (state.pollTimer) { clearInterval(state.pollTimer); state.pollTimer = null; }
+  clearPersisted();
+  state = {
+    token: "", user: null, screen: "token", repos: [], reposLoading: false, repoFilter: "",
+    selectedRepo: null, branches: [], branchesLoading: false, branchWorkflows: {}, selectedBranch: null,
+    run: null, jobSteps: [], artifact: null, apkCandidates: null, pollTimer: null,
+    errorMsg: "", confirmingDelete: false, extracting: false
+  };
   render();
 }
 
-async function loadRepos() {
+// Fetches repos exactly once per call site. Never call this from inside render().
+async function fetchRepos() {
+  if (state.reposLoading) return;
+  state.reposLoading = true;
   setError("");
   try {
     let page = 1, all = [];
@@ -290,6 +313,8 @@ async function loadRepos() {
   } catch (e) {
     setError("Não consegui carregar repositórios: " + e.message);
   }
+  state.reposLoading = false;
+  render();
 }
 
 async function selectRepo(repo) {
@@ -298,8 +323,18 @@ async function selectRepo(repo) {
   state.branches = [];
   state.branchWorkflows = {};
   state.run = null;
+  state.jobSteps = [];
   state.artifact = null;
+  state.apkCandidates = null;
+  persist();
   render();
+  await fetchBranches(repo);
+}
+
+// Fetches branches exactly once per call site. Never call this from inside render().
+async function fetchBranches(repo) {
+  if (state.branchesLoading) return;
+  state.branchesLoading = true;
   setError("");
   try {
     let page = 1, all = [];
@@ -311,14 +346,17 @@ async function selectRepo(repo) {
       if (page > 10) break;
     }
     state.branches = all;
+    state.branchesLoading = false;
     render();
-    // check workflows per branch, in parallel but capped
     for (const b of all) {
       checkBranchWorkflow(repo, b.name);
     }
+    return;
   } catch (e) {
     setError("Não consegui carregar branches: " + e.message);
   }
+  state.branchesLoading = false;
+  render();
 }
 
 async function checkBranchWorkflow(repo, branchName) {
@@ -330,7 +368,6 @@ async function checkBranchWorkflow(repo, branchName) {
       render();
       return;
     }
-    // inspect each yml for workflow_dispatch
     let found = null;
     for (const f of ymls) {
       try {
@@ -362,10 +399,12 @@ async function startBuild(branchName) {
   state.selectedBranch = branchName;
   state.screen = "build";
   state.run = { status: "queued", conclusion: null };
+  state.jobSteps = [];
   state.artifact = null;
+  state.apkCandidates = null;
+  persist();
   render();
   try {
-    // resolve workflow id from path
     const workflows = await gh(`/repos/${repo.full_name}/actions/workflows`);
     const match = workflows.workflows.find(w => w.path === wf.path);
     if (!match) throw new Error("Workflow não encontrado via API de Actions.");
@@ -376,7 +415,6 @@ async function startBuild(branchName) {
       body: JSON.stringify({ ref: branchName })
     });
 
-    // poll for the new run
     await new Promise(r => setTimeout(r, 2500));
     let run = null;
     for (let i = 0; i < 10 && !run; i++) {
@@ -387,21 +425,35 @@ async function startBuild(branchName) {
     if (!run) throw new Error("Build disparado mas não consegui localizar o run. Confere no GitHub.");
 
     state.run = run;
+    persist();
     render();
     pollRun(repo.full_name, run.id);
   } catch (e) {
     setError("Falha ao disparar build: " + e.message);
     state.run = null;
+    persist();
     render();
+  }
+}
+
+async function loadJobSteps(fullName, runId) {
+  try {
+    const data = await gh(`/repos/${fullName}/actions/runs/${runId}/jobs`);
+    const job = data.jobs && data.jobs[0];
+    state.jobSteps = job ? (job.steps || []) : [];
+  } catch (e) {
+    // keep previous steps if this poll fails
   }
 }
 
 function pollRun(fullName, runId) {
   if (state.pollTimer) clearInterval(state.pollTimer);
-  state.pollTimer = setInterval(async () => {
+  const tick = async () => {
     try {
       const run = await gh(`/repos/${fullName}/actions/runs/${runId}`);
       state.run = run;
+      await loadJobSteps(fullName, runId);
+      persist();
       if (run.status === "completed") {
         clearInterval(state.pollTimer);
         state.pollTimer = null;
@@ -411,9 +463,11 @@ function pollRun(fullName, runId) {
       }
       render();
     } catch (e) {
-      // keep trying silently; transient network errors shouldn't kill the poll
+      // transient network errors shouldn't kill the poll
     }
-  }, 6000);
+  };
+  tick();
+  state.pollTimer = setInterval(tick, 6000);
 }
 
 async function loadArtifact(fullName, runId) {
@@ -425,21 +479,73 @@ async function loadArtifact(fullName, runId) {
   } catch (e) {
     setError("Build terminou mas não consegui buscar o artefacto: " + e.message);
   }
+  persist();
   render();
 }
 
-function apkDownloadUrl() {
-  if (!state.artifact) return null;
-  // GitHub requires auth for artifact download; we proxy via a direct authenticated fetch+blob
-  return state.artifact.archive_download_url;
+// ---- minimal ZIP reader (store + deflate via DecompressionStream) ----
+async function readZipEntries(blob) {
+  const buf = new Uint8Array(await blob.arrayBuffer());
+  const dv = new DataView(buf.buffer);
+  let eocdOffset = -1;
+  for (let i = buf.length - 22; i >= 0 && i >= buf.length - 22 - 65557; i--) {
+    if (dv.getUint32(i, true) === 0x06054b50) { eocdOffset = i; break; }
+  }
+  if (eocdOffset === -1) throw new Error("ZIP inválido: EOCD não encontrado.");
+  const entryCount = dv.getUint16(eocdOffset + 10, true);
+  let cdOffset = dv.getUint32(eocdOffset + 16, true);
+
+  const entries = [];
+  for (let i = 0; i < entryCount; i++) {
+    if (dv.getUint32(cdOffset, true) !== 0x02014b50) break;
+    const method = dv.getUint16(cdOffset + 10, true);
+    const compSize = dv.getUint32(cdOffset + 20, true);
+    const uncompSize = dv.getUint32(cdOffset + 24, true);
+    const nameLen = dv.getUint16(cdOffset + 28, true);
+    const extraLen = dv.getUint16(cdOffset + 30, true);
+    const commentLen = dv.getUint16(cdOffset + 32, true);
+    const localHeaderOffset = dv.getUint32(cdOffset + 42, true);
+    const nameBytes = buf.slice(cdOffset + 46, cdOffset + 46 + nameLen);
+    const name = new TextDecoder().decode(nameBytes);
+    entries.push({ name, method, compSize, uncompSize, localHeaderOffset });
+    cdOffset += 46 + nameLen + extraLen + commentLen;
+  }
+
+  async function extract(entry) {
+    const lh = entry.localHeaderOffset;
+    if (dv.getUint32(lh, true) !== 0x04034b50) throw new Error("ZIP inválido: local header não encontrado.");
+    const nameLen = dv.getUint16(lh + 26, true);
+    const extraLen = dv.getUint16(lh + 28, true);
+    const dataStart = lh + 30 + nameLen + extraLen;
+    const compData = buf.slice(dataStart, dataStart + entry.compSize);
+    if (entry.method === 0) return compData;
+    if (entry.method === 8) {
+      const ds = new DecompressionStream("deflate-raw");
+      const stream = new Blob([compData]).stream().pipeThrough(ds);
+      const outBuf = await new Response(stream).arrayBuffer();
+      return new Uint8Array(outBuf);
+    }
+    throw new Error("Método de compressão ZIP não suportado: " + entry.method);
+  }
+
+  return { entries, extract };
+}
+
+function pickBestApk(names) {
+  const priority = ["arm64-v8a", "armeabi-v7a", "x86_64", "universal"];
+  for (const p of priority) {
+    const match = names.find(n => n.toLowerCase().includes(p));
+    if (match) return match;
+  }
+  return names[0] || null;
 }
 
 async function downloadArtifact() {
-  const url = apkDownloadUrl();
+  const url = state.artifact ? state.artifact.archive_download_url : null;
   if (!url) return;
   const btn = document.getElementById("download-btn");
-  btn.disabled = true;
-  btn.textContent = "A transferir…";
+  if (btn) { btn.disabled = true; btn.textContent = "A transferir…"; }
+  state.errorMsg = "";
   try {
     const res = await fetch(url, {
       headers: {
@@ -448,21 +554,62 @@ async function downloadArtifact() {
       }
     });
     if (!res.ok) throw new Error(res.status + " " + res.statusText);
-    const blob = await res.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = blobUrl;
-    a.download = (state.artifact.name || "build") + ".zip";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+    const zipBlob = await res.blob();
+
+    state.extracting = true;
+    render();
+
+    const { entries, extract } = await readZipEntries(zipBlob);
+    const apkEntries = entries.filter(e => /\.apk$/i.test(e.name));
+
+    if (apkEntries.length === 0) {
+      throw new Error("Nenhum .apk encontrado dentro do artefacto.");
+    }
+
+    if (apkEntries.length === 1) {
+      await extractAndSave(extract, apkEntries[0]);
+      state.extracting = false;
+      state.confirmingDelete = true;
+    } else {
+      const names = apkEntries.map(e => e.name);
+      const bestName = pickBestApk(names);
+      state.apkCandidates = { entries: apkEntries, extract, suggested: bestName };
+      state.extracting = false;
+    }
+  } catch (e) {
+    setError("Falha ao transferir/extrair: " + e.message);
+    state.extracting = false;
+  }
+  render();
+}
+
+async function extractAndSave(extract, entry) {
+  const data = await extract(entry);
+  const apkBlob = new Blob([data], { type: "application/vnd.android.package-archive" });
+  const blobUrl = URL.createObjectURL(apkBlob);
+  const filename = entry.name.split("/").pop();
+  const a = document.createElement("a");
+  a.href = blobUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+}
+
+async function chooseApk(entry) {
+  const cand = state.apkCandidates;
+  if (!cand) return;
+  state.extracting = true;
+  render();
+  try {
+    await extractAndSave(cand.extract, entry);
+    state.apkCandidates = null;
     state.confirmingDelete = true;
   } catch (e) {
-    setError("Falha ao transferir: " + e.message);
+    setError("Falha ao extrair APK: " + e.message);
   }
-  btn.disabled = false;
-  btn.textContent = "Descarregar APK";
+  state.extracting = false;
   render();
 }
 
@@ -476,12 +623,15 @@ async function confirmDeleteBuild() {
       await gh(`/repos/${repo.full_name}/actions/runs/${state.run.id}`, { method: "DELETE" });
     }
     state.run = null;
+    state.jobSteps = [];
     state.artifact = null;
+    state.apkCandidates = null;
     state.confirmingDelete = false;
     state.screen = "branches";
   } catch (e) {
     setError("Falha ao apagar: " + e.message);
   }
+  persist();
   render();
 }
 
@@ -489,12 +639,16 @@ function goBack() {
   setError("");
   if (state.screen === "branches") {
     state.screen = "repos";
+    persist();
   } else if (state.screen === "build") {
     if (state.pollTimer) { clearInterval(state.pollTimer); state.pollTimer = null; }
     state.screen = "branches";
     state.run = null;
+    state.jobSteps = [];
     state.artifact = null;
+    state.apkCandidates = null;
     state.confirmingDelete = false;
+    persist();
   }
   render();
 }
@@ -510,6 +664,24 @@ function statusLabel(run) {
   return { text: run.conclusion || "Terminado", dot: "ok" };
 }
 
+function stepDot(step) {
+  if (step.status !== "completed") return step.status === "in_progress" ? "running" : "queued";
+  if (step.conclusion === "success") return "ok";
+  if (step.conclusion === "skipped") return "skipped";
+  return "fail";
+}
+
+function stepDuration(step) {
+  if (!step.started_at) return "";
+  const end = step.completed_at ? new Date(step.completed_at) : new Date();
+  const start = new Date(step.started_at);
+  const secs = Math.max(0, Math.round((end - start) / 1000));
+  return secs + "s";
+}
+
+// render() only ever reads state and draws DOM. It NEVER fetches data
+// and NEVER calls itself — that was the freeze bug. All fetching happens
+// in the functions above, each of which calls render() once when done.
 function render() {
   const app = document.getElementById("app");
   app.innerHTML = "";
@@ -518,7 +690,7 @@ function render() {
     app.appendChild(h("div", { class: "card" }, [
       h("label", { for: "token-input", text: "Token de acesso pessoal do GitHub" }),
       h("input", { type: "password", id: "token-input", placeholder: "ghp_••••••••••••••••", onkeydown: e => { if (e.key === "Enter") connectToken(); } }),
-      h("p", { class: "hint", text: "Precisa dos scopes 'repo' e 'workflow'. O token fica só nesta página, não é guardado." }),
+      h("p", { class: "hint", text: "Precisa dos scopes 'repo' e 'workflow'. Fica guardado neste navegador (localStorage) até saíres." }),
       h("div", { class: "btn-row" }, [
         h("button", { class: "btn-primary", id: "connect-btn", text: "Ligar", onclick: connectToken })
       ]),
@@ -530,9 +702,12 @@ function render() {
   if (state.screen === "repos") {
     const filtered = state.repos.filter(r => r.full_name.toLowerCase().includes(state.repoFilter.toLowerCase()));
     app.appendChild(h("div", { class: "card" }, [
-      h("label", { text: state.user ? ("Ligado como " + state.user.login) : "Repositórios" }),
+      h("div", { class: "btn-row spread" }, [
+        h("label", { text: state.user ? ("Ligado como " + state.user.login) : "Repositórios" }),
+        h("button", { class: "btn-ghost", text: "Sair", onclick: logout })
+      ]),
       h("input", { type: "text", placeholder: "Filtrar repositórios…", value: state.repoFilter, oninput: e => { state.repoFilter = e.target.value; render(); } }),
-      state.repos.length === 0 && !state.errorMsg
+      state.reposLoading
         ? h("p", { class: "muted", text: "A carregar repositórios…" })
         : h("div", { class: "repo-list" }, filtered.map(r =>
             h("button", { class: "repo-item", onclick: () => selectRepo(r) }, [
@@ -549,28 +724,30 @@ function render() {
     app.appendChild(h("button", { class: "back-link", text: "← repositórios", onclick: goBack }));
     app.appendChild(h("div", { class: "card" }, [
       h("label", { text: state.selectedRepo.full_name }),
-      h("div", { class: "branch-list" }, state.branches.map(b => {
-        const wf = state.branchWorkflows[b.name];
-        let tag = h("span", { class: "spin" });
-        let disabled = true;
-        if (wf) {
-          if (wf.hasYml && wf.hasDispatch) {
-            tag = h("span", { class: "tag tag-ok", text: "buildável" });
-            disabled = false;
-          } else if (wf.hasYml && !wf.hasDispatch) {
-            tag = h("span", { class: "tag tag-warn", text: "sem workflow_dispatch" });
-          } else {
-            tag = h("span", { class: "tag tag-warn", text: "sem workflow" });
-          }
-        }
-        return h("button", {
-          class: "branch-item" + (disabled ? " disabled" : ""),
-          onclick: disabled ? null : () => startBuild(b.name)
-        }, [
-          h("span", { text: b.name }),
-          tag
-        ]);
-      })),
+      state.branchesLoading
+        ? h("p", { class: "muted", text: "A carregar branches…" })
+        : h("div", { class: "branch-list" }, state.branches.map(b => {
+            const wf = state.branchWorkflows[b.name];
+            let tag = h("span", { class: "spin" });
+            let disabled = true;
+            if (wf) {
+              if (wf.hasYml && wf.hasDispatch) {
+                tag = h("span", { class: "tag tag-ok", text: "buildável" });
+                disabled = false;
+              } else if (wf.hasYml && !wf.hasDispatch) {
+                tag = h("span", { class: "tag tag-warn", text: "sem workflow_dispatch" });
+              } else {
+                tag = h("span", { class: "tag tag-warn", text: "sem workflow" });
+              }
+            }
+            return h("button", {
+              class: "branch-item" + (disabled ? " disabled" : ""),
+              onclick: disabled ? null : () => startBuild(b.name)
+            }, [
+              h("span", { text: b.name }),
+              tag
+            ]);
+          })),
       state.errorMsg ? h("div", { class: "error-box", text: state.errorMsg }) : null
     ]));
     return;
@@ -591,10 +768,36 @@ function render() {
       card.appendChild(h("a", { class: "apk-link", href: state.run.html_url, target: "_blank", text: "Ver no GitHub Actions ↗" }));
     }
 
-    if (state.run && state.run.status === "completed" && state.run.conclusion === "success") {
+    if (state.jobSteps && state.jobSteps.length > 0) {
+      card.appendChild(h("div", { class: "step-list" }, state.jobSteps.map(step =>
+        h("div", { class: "step-item" }, [
+          h("span", { class: "dot dot-" + stepDot(step) }),
+          h("span", { class: "step-name", text: step.name }),
+          h("span", { class: "step-time", text: stepDuration(step) })
+        ])
+      )));
+    }
+
+    if (state.extracting) {
+      card.appendChild(h("div", { class: "btn-row" }, [
+        h("span", { class: "spin" }),
+        h("span", { class: "muted", text: "A extrair o APK do artefacto…" })
+      ]));
+    }
+
+    if (state.apkCandidates) {
+      card.appendChild(h("p", { class: "hint", text: "Mais do que um APK encontrado. Escolhe o que combina com o teu telemóvel (arm64-v8a cobre praticamente todos os Android modernos):" }));
+      card.appendChild(h("div", { class: "apk-pick" }, state.apkCandidates.entries.map(entry =>
+        h("button", { class: "btn-ghost", onclick: () => chooseApk(entry) }, [
+          h("span", { text: entry.name.split("/").pop() + (entry.name === state.apkCandidates.suggested ? "  (recomendado)" : "") })
+        ])
+      )));
+    }
+
+    if (state.run && state.run.status === "completed" && state.run.conclusion === "success" && !state.apkCandidates) {
       if (state.artifact) {
         card.appendChild(h("div", { class: "btn-row" }, [
-          h("button", { class: "btn-primary", id: "download-btn", text: "Descarregar APK", onclick: downloadArtifact })
+          h("button", { class: "btn-primary", id: "download-btn", text: "Descarregar APK", onclick: downloadArtifact, disabled: state.extracting })
         ]));
       } else {
         card.appendChild(h("p", { class: "muted", text: "Sem artefactos encontrados neste run." }));
@@ -624,7 +827,33 @@ function render() {
   }
 }
 
-render();
+// Runs exactly once on page load. Fetches whatever is needed to resume
+// state after a reload, then calls render() — render() itself never fetches.
+async function resumeIfNeeded() {
+  render();
+
+  if (!state.token) return;
+
+  if (state.screen === "repos" && state.repos.length === 0) {
+    await fetchRepos();
+  }
+
+  if (state.screen === "branches" && state.selectedRepo && state.branches.length === 0) {
+    await fetchBranches(state.selectedRepo);
+  }
+
+  if (state.screen === "build" && state.selectedRepo && state.run && state.run.id) {
+    if (state.run.status !== "completed") {
+      pollRun(state.selectedRepo.full_name, state.run.id);
+    } else {
+      await loadJobSteps(state.selectedRepo.full_name, state.run.id);
+      persist();
+      render();
+    }
+  }
+}
+
+resumeIfNeeded();
 </script>
 </body>
 </html>
