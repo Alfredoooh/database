@@ -168,8 +168,6 @@
 
   .apk-pick { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
   .apk-pick button { text-align: left; }
-
-  .section-title { font-size: 13px; font-weight: 600; margin: 20px 0 6px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.03em; }
 </style>
 </head>
 <body>
@@ -224,9 +222,6 @@ function clearPersisted() {
   try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
 }
 
-// Adds or updates a history entry keyed by run id. Called every time we
-// learn a run's status, so the list always reflects the latest known state
-// even if the run finished while the tab was closed.
 function upsertHistory(entry) {
   const idx = state.history.findIndex(e => e.runId === entry.runId);
   if (idx === -1) {
@@ -276,6 +271,12 @@ function h(tag, attrs, children) {
   return el;
 }
 
+// IMPORTANT: only "simple" CORS headers here. Authorization and Accept are
+// fine. Do NOT add Cache-Control / Pragma / custom headers — those force a
+// CORS preflight (OPTIONS) that can make the whole request fail with
+// "Failed to fetch" with zero HTTP detail. cache:"no-store" alone (a fetch
+// option, not a header) already prevents stale browser-cache reads without
+// triggering preflight.
 async function gh(path, opts = {}) {
   const res = await fetch(API + path, {
     ...opts,
@@ -284,7 +285,6 @@ async function gh(path, opts = {}) {
       "Authorization": "Bearer " + state.token,
       "Accept": "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
-      "Cache-Control": "no-cache",
       ...(opts.headers || {})
     }
   });
@@ -319,7 +319,10 @@ async function connectToken() {
     render();
     await fetchRepos();
   } catch (e) {
-    setError("Não consegui autenticar: " + e.message + ". Confirma que o token tem o scope 'repo' e 'workflow'.");
+    const extra = (location.protocol === "file:")
+      ? " (esta página está a ser aberta como ficheiro local — abre-a via http://, não file://, senão o navegador bloqueia pedidos à API do GitHub)"
+      : "";
+    setError("Não consegui autenticar: " + e.message + extra);
   }
 }
 
@@ -494,15 +497,12 @@ async function loadJobSteps(fullName, runId) {
   }
 }
 
-// Only one poll loop may run at a time. pollRunId identifies which run the
-// active timer belongs to, so a stale timer can never overwrite a newer
-// run's state even if it fires late.
 function pollRun(fullName, runId) {
   if (state.pollTimer) clearInterval(state.pollTimer);
   state.pollRunId = runId;
 
   const tick = async () => {
-    if (state.pollRunId !== runId) return; // a newer run took over; stop acting
+    if (state.pollRunId !== runId) return;
     try {
       const run = await gh(`/repos/${fullName}/actions/runs/${runId}`);
       if (state.pollRunId !== runId) return;
@@ -550,7 +550,6 @@ async function loadArtifact(fullName, runId) {
   render();
 }
 
-// ---- minimal ZIP reader (store + deflate via DecompressionStream) ----
 async function readZipEntries(blob) {
   const buf = new Uint8Array(await blob.arrayBuffer());
   const dv = new DataView(buf.buffer);
@@ -766,8 +765,6 @@ function stepDuration(step) {
   return secs + "s";
 }
 
-// render() only ever reads state and draws DOM. It never fetches and
-// never calls itself.
 function render() {
   const app = document.getElementById("app");
   app.innerHTML = "";
@@ -777,6 +774,7 @@ function render() {
       h("label", { for: "token-input", text: "Token de acesso pessoal do GitHub" }),
       h("input", { type: "password", id: "token-input", placeholder: "ghp_••••••••••••••••", onkeydown: e => { if (e.key === "Enter") connectToken(); } }),
       h("p", { class: "hint", text: "Precisa dos scopes 'repo' e 'workflow'. Fica guardado neste navegador (localStorage) até saíres." }),
+      location.protocol === "file:" ? h("p", { class: "hint", text: "Aviso: esta página está aberta como ficheiro local (file://). A API do GitHub pode ser bloqueada nesse contexto — se 'Ligar' falhar, serve este ficheiro via http:// (ex: um servidor local) em vez de abrir por duplo clique." }) : null,
       h("div", { class: "btn-row" }, [
         h("button", { class: "btn-primary", id: "connect-btn", text: "Ligar", onclick: connectToken })
       ]),
