@@ -102,8 +102,8 @@
     margin-top: 12px;
   }
 
-  .repo-list, .branch-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
-  .repo-item, .branch-item {
+  .repo-list, .branch-list, .history-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
+  .repo-item, .branch-item, .history-item {
     text-align: left;
     background: var(--bg);
     border: 1px solid var(--border);
@@ -117,11 +117,16 @@
     align-items: center;
     gap: 8px;
   }
-  .repo-item:hover, .branch-item:hover:not(.disabled) { border-color: var(--accent); }
+  .repo-item:hover, .branch-item:hover:not(.disabled), .history-item:hover { border-color: var(--accent); }
   .branch-item.disabled { opacity: 0.45; cursor: default; }
   .tag { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
   .tag-ok { background: color-mix(in srgb, var(--ok) 18%, transparent); color: var(--ok); }
   .tag-warn { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+  .tag-fail { background: color-mix(in srgb, var(--fail) 18%, transparent); color: var(--fail); }
+
+  .history-item-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .history-item-repo { font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .history-item-meta { font-size: 11px; color: var(--text-dim); }
 
   .back-link { background: none; border: none; color: var(--text-dim); font-size: 13px; padding: 0; cursor: pointer; margin-bottom: 12px; }
 
@@ -163,6 +168,8 @@
 
   .apk-pick { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
   .apk-pick button { text-align: left; }
+
+  .section-title { font-size: 13px; font-weight: 600; margin: 20px 0 6px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.03em; }
 </style>
 </head>
 <body>
@@ -175,12 +182,21 @@
 <script>
 const API = "https://api.github.com";
 const STORAGE_KEY = "build_runner_state_v1";
+const HISTORY_KEY = "build_runner_history_v1";
+const HISTORY_LIMIT = 50;
 
 function loadPersisted() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch (e) { return null; }
+}
+
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { return []; }
 }
 
 function persist() {
@@ -198,8 +214,28 @@ function persist() {
   } catch (e) { /* storage full or blocked, ignore */ }
 }
 
+function persistHistory() {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(state.history.slice(0, HISTORY_LIMIT)));
+  } catch (e) { /* ignore */ }
+}
+
 function clearPersisted() {
   try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+}
+
+// Adds or updates a history entry keyed by run id. Called every time we
+// learn a run's status, so the list always reflects the latest known state
+// even if the run finished while the tab was closed.
+function upsertHistory(entry) {
+  const idx = state.history.findIndex(e => e.runId === entry.runId);
+  if (idx === -1) {
+    state.history.unshift(entry);
+  } else {
+    state.history[idx] = { ...state.history[idx], ...entry };
+  }
+  state.history = state.history.slice(0, HISTORY_LIMIT);
+  persistHistory();
 }
 
 const persisted = loadPersisted();
@@ -221,9 +257,11 @@ let state = {
   artifact: persisted?.artifact || null,
   apkCandidates: null,
   pollTimer: null,
+  pollRunId: null,
   errorMsg: "",
   confirmingDelete: false,
-  extracting: false
+  extracting: false,
+  history: loadHistory()
 };
 
 function h(tag, attrs, children) {
@@ -241,10 +279,12 @@ function h(tag, attrs, children) {
 async function gh(path, opts = {}) {
   const res = await fetch(API + path, {
     ...opts,
+    cache: "no-store",
     headers: {
       "Authorization": "Bearer " + state.token,
       "Accept": "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
+      "Cache-Control": "no-cache",
       ...(opts.headers || {})
     }
   });
@@ -286,16 +326,16 @@ async function connectToken() {
 function logout() {
   if (state.pollTimer) { clearInterval(state.pollTimer); state.pollTimer = null; }
   clearPersisted();
+  const keepHistory = state.history;
   state = {
     token: "", user: null, screen: "token", repos: [], reposLoading: false, repoFilter: "",
     selectedRepo: null, branches: [], branchesLoading: false, branchWorkflows: {}, selectedBranch: null,
-    run: null, jobSteps: [], artifact: null, apkCandidates: null, pollTimer: null,
-    errorMsg: "", confirmingDelete: false, extracting: false
+    run: null, jobSteps: [], artifact: null, apkCandidates: null, pollTimer: null, pollRunId: null,
+    errorMsg: "", confirmingDelete: false, extracting: false, history: keepHistory
   };
   render();
 }
 
-// Fetches repos exactly once per call site. Never call this from inside render().
 async function fetchRepos() {
   if (state.reposLoading) return;
   state.reposLoading = true;
@@ -331,7 +371,6 @@ async function selectRepo(repo) {
   await fetchBranches(repo);
 }
 
-// Fetches branches exactly once per call site. Never call this from inside render().
 async function fetchBranches(repo) {
   if (state.branchesLoading) return;
   state.branchesLoading = true;
@@ -426,6 +465,15 @@ async function startBuild(branchName) {
 
     state.run = run;
     persist();
+    upsertHistory({
+      runId: run.id,
+      repoFullName: repo.full_name,
+      branch: branchName,
+      status: run.status,
+      conclusion: run.conclusion,
+      htmlUrl: run.html_url,
+      createdAt: run.created_at
+    });
     render();
     pollRun(repo.full_name, run.id);
   } catch (e) {
@@ -446,14 +494,33 @@ async function loadJobSteps(fullName, runId) {
   }
 }
 
+// Only one poll loop may run at a time. pollRunId identifies which run the
+// active timer belongs to, so a stale timer can never overwrite a newer
+// run's state even if it fires late.
 function pollRun(fullName, runId) {
   if (state.pollTimer) clearInterval(state.pollTimer);
+  state.pollRunId = runId;
+
   const tick = async () => {
+    if (state.pollRunId !== runId) return; // a newer run took over; stop acting
     try {
       const run = await gh(`/repos/${fullName}/actions/runs/${runId}`);
+      if (state.pollRunId !== runId) return;
       state.run = run;
       await loadJobSteps(fullName, runId);
+      if (state.pollRunId !== runId) return;
+
+      upsertHistory({
+        runId: run.id,
+        repoFullName: fullName,
+        branch: state.selectedBranch,
+        status: run.status,
+        conclusion: run.conclusion,
+        htmlUrl: run.html_url,
+        createdAt: run.created_at
+      });
       persist();
+
       if (run.status === "completed") {
         clearInterval(state.pollTimer);
         state.pollTimer = null;
@@ -548,6 +615,7 @@ async function downloadArtifact() {
   state.errorMsg = "";
   try {
     const res = await fetch(url, {
+      cache: "no-store",
       headers: {
         "Authorization": "Bearer " + state.token,
         "Accept": "application/vnd.github+json"
@@ -621,6 +689,8 @@ async function confirmDeleteBuild() {
     }
     if (state.run) {
       await gh(`/repos/${repo.full_name}/actions/runs/${state.run.id}`, { method: "DELETE" });
+      state.history = state.history.filter(e => e.runId !== state.run.id);
+      persistHistory();
     }
     state.run = null;
     state.jobSteps = [];
@@ -642,6 +712,7 @@ function goBack() {
     persist();
   } else if (state.screen === "build") {
     if (state.pollTimer) { clearInterval(state.pollTimer); state.pollTimer = null; }
+    state.pollRunId = null;
     state.screen = "branches";
     state.run = null;
     state.jobSteps = [];
@@ -649,6 +720,8 @@ function goBack() {
     state.apkCandidates = null;
     state.confirmingDelete = false;
     persist();
+  } else if (state.screen === "history") {
+    state.screen = "repos";
   }
   render();
 }
@@ -662,6 +735,20 @@ function statusLabel(run) {
   if (run.conclusion === "failure") return { text: "Falhou", dot: "fail" };
   if (run.conclusion === "cancelled") return { text: "Cancelado", dot: "fail" };
   return { text: run.conclusion || "Terminado", dot: "ok" };
+}
+
+function historyTag(entry) {
+  if (entry.status !== "completed") return h("span", { class: "tag tag-warn", text: entry.status === "queued" ? "na fila" : "a correr" });
+  if (entry.conclusion === "success") return h("span", { class: "tag tag-ok", text: "sucesso" });
+  if (entry.conclusion === "failure") return h("span", { class: "tag tag-fail", text: "falhou" });
+  if (entry.conclusion === "cancelled") return h("span", { class: "tag tag-fail", text: "cancelado" });
+  return h("span", { class: "tag tag-warn", text: entry.conclusion || "terminado" });
+}
+
+function formatWhen(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return d.toLocaleString();
 }
 
 function stepDot(step) {
@@ -679,9 +766,8 @@ function stepDuration(step) {
   return secs + "s";
 }
 
-// render() only ever reads state and draws DOM. It NEVER fetches data
-// and NEVER calls itself — that was the freeze bug. All fetching happens
-// in the functions above, each of which calls render() once when done.
+// render() only ever reads state and draws DOM. It never fetches and
+// never calls itself.
 function render() {
   const app = document.getElementById("app");
   app.innerHTML = "";
@@ -701,11 +787,14 @@ function render() {
 
   if (state.screen === "repos") {
     const filtered = state.repos.filter(r => r.full_name.toLowerCase().includes(state.repoFilter.toLowerCase()));
-    app.appendChild(h("div", { class: "card" }, [
-      h("div", { class: "btn-row spread" }, [
-        h("label", { text: state.user ? ("Ligado como " + state.user.login) : "Repositórios" }),
+    app.appendChild(h("div", { class: "btn-row spread" }, [
+      h("label", { text: state.user ? ("Ligado como " + state.user.login) : "Repositórios" }),
+      h("div", { class: "btn-row", style: "margin-top:0;" }, [
+        h("button", { class: "btn-ghost", text: "Histórico", onclick: () => { state.screen = "history"; render(); } }),
         h("button", { class: "btn-ghost", text: "Sair", onclick: logout })
-      ]),
+      ])
+    ]));
+    app.appendChild(h("div", { class: "card" }, [
       h("input", { type: "text", placeholder: "Filtrar repositórios…", value: state.repoFilter, oninput: e => { state.repoFilter = e.target.value; render(); } }),
       state.reposLoading
         ? h("p", { class: "muted", text: "A carregar repositórios…" })
@@ -716,6 +805,25 @@ function render() {
             ])
           )),
       state.errorMsg ? h("div", { class: "error-box", text: state.errorMsg }) : null
+    ]));
+    return;
+  }
+
+  if (state.screen === "history") {
+    app.appendChild(h("button", { class: "back-link", text: "← repositórios", onclick: goBack }));
+    app.appendChild(h("div", { class: "card" }, [
+      h("label", { text: "Histórico de builds" }),
+      state.history.length === 0
+        ? h("p", { class: "muted", text: "Ainda não há builds registados neste navegador." })
+        : h("div", { class: "history-list" }, state.history.map(entry =>
+            h("a", { class: "history-item", href: entry.htmlUrl || "#", target: "_blank" }, [
+              h("div", { class: "history-item-main" }, [
+                h("span", { class: "history-item-repo", text: entry.repoFullName + " @ " + entry.branch }),
+                h("span", { class: "history-item-meta", text: formatWhen(entry.createdAt) })
+              ]),
+              historyTag(entry)
+            ])
+          ))
     ]));
     return;
   }
@@ -804,8 +912,8 @@ function render() {
       }
     }
 
-    if (state.run && state.run.status === "completed" && state.run.conclusion === "failure") {
-      card.appendChild(h("p", { class: "muted", text: "O build falhou. Vê os logs no link acima." }));
+    if (state.run && state.run.status === "completed" && (state.run.conclusion === "failure" || state.run.conclusion === "cancelled")) {
+      card.appendChild(h("p", { class: "muted", text: state.run.conclusion === "cancelled" ? "O build foi cancelado. Vê os detalhes no link acima." : "O build falhou. Vê os logs no link acima — o step que falhou aparece marcado a vermelho na lista." }));
       card.appendChild(h("div", { class: "btn-row" }, [
         h("button", { class: "btn-danger", text: "Apagar build", onclick: () => { state.confirmingDelete = true; render(); } })
       ]));
@@ -827,8 +935,6 @@ function render() {
   }
 }
 
-// Runs exactly once on page load. Fetches whatever is needed to resume
-// state after a reload, then calls render() — render() itself never fetches.
 async function resumeIfNeeded() {
   render();
 
